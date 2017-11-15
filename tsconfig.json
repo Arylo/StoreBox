@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "types": [
+      "mongoose",
+      "node",
+      "mocha",
+      "should"
+    ],
+    "importHelpers": true,
+    "pretty": true,
+    "sourceMap": true,
+    "newLine": "LF",
+    "rootDirs": [
+      "src", "test"
+    ],
+    "outDir": "dist",
+    "baseUrl": ".",
+    "paths": {
+      "@utils/*": [ "./src/utils/*", "./dist/src/utils/*" ],
+      "@models/*": [ "./src/app/models/*", "./dist/src/app/models/*" ],
+      "@ctrls/*": [ "./src/app/controllers/*", "./dist/src/app/controllers/*" ]
+    }
+  },
+  "include": [
+    "src/**/*",
+    "test/**/*",
+    "config"
+  ],
+  "exclude": [
+    "dist"
+  ]
+}

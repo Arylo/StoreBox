@@ -1,0 +1,9 @@
+--require should
+--require tsconfig-paths/register
+--require source-map-support/register
+--reporter mochawesome
+--reporter-options reportDir=./coverage/mochawesome
+--recursive
+--slow 2000
+./dist/test/**/*.spec.js
+./dist/test/**/*.e2e.js

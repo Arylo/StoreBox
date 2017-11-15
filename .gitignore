@@ -1,0 +1,19 @@
+# System Cache Files
+.DS_Store
+Thumbs.db
+
+# App Config File
+/config/*
+!/config/*.default.*
+
+# App Cache Folder
+/node_modules
+/dist
+/log
+/upload
+/backup
+/tmp
+
+# Test Export
+/.nyc_output
+/coverage
