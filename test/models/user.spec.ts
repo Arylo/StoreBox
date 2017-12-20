@@ -1,14 +1,13 @@
-import * as db from "../../src/db";
+import * as db from "../helpers/database";
 import * as md5 from "md5";
-import * as Rx from "rxjs";
 import { Model as UsersModel } from "@models/User";
-import { Observer, Observable } from "rxjs";
+import { Observer, Observable, Subject } from "rxjs";
 
 describe("User Model", () => {
 
     const user = {
-        username: md5(Date.now() + ""),
-        password: md5(Date.now() + ""),
+        username: "",
+        password: "",
         id: ""
     };
 
@@ -16,64 +15,57 @@ describe("User Model", () => {
         db.connect();
     });
 
-    after(() => {
-        db.disconnect();
+    after(async () => {
+        await UsersModel.remove({}).exec();
     });
 
     beforeEach(() => {
+        user.username = md5(Date.now() + "");
+        user.password = md5(Date.now() + "");
         return UsersModel.addUser(user.username, user.password)
             .then((result) => {
                 user.id = result._id.toString();
-            });
+            }).catch(console.log);
     });
 
     afterEach(() => {
-        return UsersModel.removeUser(user.id);
-    });
-
-    it("User List", () => {
-        return UsersModel.list().then((results) => {
-            results.should.be.an.Array();
+        return UsersModel.removeUser(user.id).then(() => {
+            user.id = "";
         });
     });
 
-    it("Add User and use same username", () => {
-        return UsersModel.addUser(user.username, "test")
-            .then(null, (result: object) => {
-                result.should.have.property("code", 11000);
-            });
-    });
-
-    it("Add User", (done) => {
+    it("Add User", async () => {
         const user = {
             username: md5(Date.now() + ""),
             password: md5(Date.now() + ""),
-            id: ""
         };
-        const noticer = new Rx.Subject();
-        UsersModel.addUser(user.username, user.password)
-            .then((result) => {
-                user.id = result._id;
-                noticer.next(result);
-            });
-        noticer.subscribe({
-            next: () => {
-                UsersModel.findOne({ username: user.username }).exec()
-                    .then((result) => {
-                        should(result).be.not.empty();
-                        const obj = result.toObject();
-                        obj.should.have
-                            .property("username", user.username);
-                        obj.should.have.not
-                            .property("password", user.password);
-                        noticer.complete();
-                    });
-            },
-            complete: () => {
-                UsersModel.removeUser(user.id);
-                done();
-            }
-        });
+        let result;
+        // 添加测试用户
+        result = await UsersModel.addUser(user.username, user.password);
+        const id = result._id;
+        // 测试
+        result = await UsersModel.findOne({ username: user.username }).exec();
+        should(result).be.not.empty();
+        const obj = result.toObject();
+        obj.should.have.property("username", user.username);
+        obj.should.have.not.property("password", user.password);
+        // 删除测试用户
+        UsersModel.removeUser(id);
+    });
+
+    it("User List", async () => {
+        const results = await UsersModel.list();
+        results.should.be.an.Array();
+        const users = results.map((item) => item.toObject());
+        users.should.be.matchAny({ username: user.username });
+    });
+
+    it("Add User and use same username", async () => {
+        try {
+            await UsersModel.addUser(user.username, "test");
+        } catch (error) {
+            error.toString().should.be.not.an.empty();
+        }
     });
 
     it("Change Password", () => {

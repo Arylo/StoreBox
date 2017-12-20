@@ -4,10 +4,12 @@ import { Base, IDoc, IDocRaw } from "./common";
 import { config } from "@utils/config";
 import { ObjectId } from "@models/common";
 
+export const Flag = "users";
+
 const Definition: SchemaDefinition = {
-    username: { type: String, required: true, unique: true },
+    username: { type: String, required: true, trim: true },
     password: { type: String, required: true },
-    nickname: { type: String, unique: true },
+    nickname: { type: String },
     active: { type: Boolean, default: true }
 };
 
@@ -21,15 +23,27 @@ export type UserDoc = IDoc<IUser>;
 
 const UsersSchema = new Base(Definition).createSchema();
 
+UsersSchema.path("username").validate({
+    isAsync: true,
+    validator: (val, respond) => {
+        Model.findOne({ username: val }).exec().then((result) => {
+            respond(result ? false : true);
+        });
+    },
+    message: "The username is existed"
+});
+
 const encryptStr = (pwd: string) => {
     return md5(md5(pwd) + config.db.salt);
 };
 
 UsersSchema.static("addUser", (username: string, password: string) => {
-    return Model.create({
+    const newObj = {
         username: username,
-        password: encryptStr(password)
-    });
+        password: encryptStr(password),
+        nickname: username
+    };
+    return Model.create(newObj);
 });
 
 UsersSchema.static("removeUser", (id: ObjectId) => {
@@ -126,7 +140,7 @@ interface IUserModel<T extends UserDoc> extends M<T> {
      *
      * @return {Promise}
      */
-    list(): Promise<T>;
+    list(): Promise<T[]>;
     /**
      * 修改用户密码
      *
@@ -160,4 +174,4 @@ interface IUserModel<T extends UserDoc> extends M<T> {
     isVaild(username: string, password: string): Promise<T>;
 }
 
-export const Model = model("users", UsersSchema) as IUserModel<UserDoc>;
+export const Model = model(Flag, UsersSchema) as IUserModel<UserDoc>;

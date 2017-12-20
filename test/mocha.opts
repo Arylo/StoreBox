@@ -4,6 +4,7 @@
 --reporter mochawesome
 --reporter-options reportDir=./coverage/mochawesome
 --recursive
---slow 2000
+--slow 5000
+--timeout 10000
 ./dist/test/**/*.spec.js
 ./dist/test/**/*.e2e.js

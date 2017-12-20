@@ -8,6 +8,8 @@
       "mocha",
       "should"
     ],
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
     "importHelpers": true,
     "pretty": true,
     "sourceMap": true,
@@ -19,8 +21,7 @@
     "baseUrl": ".",
     "paths": {
       "@utils/*": [ "./src/utils/*", "./dist/src/utils/*" ],
-      "@models/*": [ "./src/app/models/*", "./dist/src/app/models/*" ],
-      "@ctrls/*": [ "./src/app/controllers/*", "./dist/src/app/controllers/*" ]
+      "@models/*": [ "./src/models/*", "./dist/src/models/*" ]
     }
   },
   "include": [

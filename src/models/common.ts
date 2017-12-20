@@ -4,10 +4,10 @@ import { Schema, Document as Doc } from "mongoose";
 export type ObjectId = Schema.Types.ObjectId | string;
 
 export interface IDocRaw {
-    createdAt: Date;
-    updatedAt: Date;
-    __v?: string;
-    _id?: ObjectId;
+    readonly createdAt: Date;
+    readonly updatedAt: Date;
+    readonly __v?: string;
+    readonly _id?: ObjectId;
     [key: string]: any;
 }
 
