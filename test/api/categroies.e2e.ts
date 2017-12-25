@@ -12,7 +12,7 @@ describe("Categroies Api", () => {
     const server = initExpress();
 
     before(() => {
-        connect();
+        return connect();
     });
 
     before(async () => {

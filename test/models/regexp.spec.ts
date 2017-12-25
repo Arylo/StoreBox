@@ -13,7 +13,7 @@ describe("RegExp Model", () => {
     };
 
     before(() => {
-        db.connect();
+        return db.connect();
     });
 
     before(() => {

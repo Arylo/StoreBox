@@ -12,7 +12,7 @@ describe("User Model", () => {
     };
 
     before(() => {
-        db.connect();
+        return db.connect();
     });
 
     after(async () => {

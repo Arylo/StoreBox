@@ -15,17 +15,23 @@ const getDatabaseUrl = () => {
     return `mongodb://${dbHost}/${config.db.database}`;
 };
 
-export const connectDatabase = async (): Promise<mongoose.Connection> => {
+export const connectDatabase = () => {
     (mongoose as any).Promise = global.Promise;
-    const connection = await mongoose.connect(getDatabaseUrl(), {
-        useMongoClient: true,
+    return new Promise((resolve, reject) => {
+        const connection = mongoose.connect(getDatabaseUrl(), {
+            useMongoClient: true,
+        }, (err) => {
+            if (err) {
+                return reject(err);
+            }
+            UsersModel.count({ }).exec().then((num) => {
+                if (num === 0) {
+                    return UsersModel.addUser("root", "admin");
+                }
+            });
+            return resolve(connection);
+        });
     });
-    UsersModel.count({ }).exec().then((num) => {
-        if (num === 0) {
-            return UsersModel.addUser("root", "admin");
-        }
-    });
-    return connection;
 };
 
 export const databaseProviders = [
