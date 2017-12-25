@@ -13,7 +13,8 @@
     "pretest": "npm run build",
     "test-spec": "mocha",
     "test-cov": "nyc npm run test-spec && nyc report",
-    "test": "npm run test-cov"
+    "test": "npm run test-cov",
+    "report-coverage": "cat ./coverage/lcov.info | coveralls"
   },
   "keywords": [
     "PandoraBox",
