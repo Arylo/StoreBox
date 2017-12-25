@@ -3,7 +3,7 @@ import { Model as ValuesModel } from "@models/Value";
 import db = require("../helpers/database");
 import faker = require("faker");
 
-describe.only("Category Model", () => {
+describe("Category Model", () => {
 
     before(() => {
         return db.connect();
@@ -26,7 +26,7 @@ describe.only("Category Model", () => {
         });
     });
 
-    describe.only("Loop Parent ID Checker", () => {
+    describe("Loop Parent ID Checker", () => {
 
         let ids = [ ];
         before(async () => {
