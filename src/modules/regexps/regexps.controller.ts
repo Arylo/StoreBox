@@ -16,7 +16,7 @@ export class RegexpsController {
     @Post()
     public async add(@Res() res, @Body() ctx: NewRegexp) {
         try {
-            await RegexpModel.create(ctx);
+            await RegexpModel.addRegexp(ctx.name, ctx.value);
         } catch (error) {
             res.status(HttpStatus.BAD_REQUEST).send(error.toString());
             return;
@@ -40,7 +40,7 @@ export class RegexpsController {
     @Post("/:id/delete")
     public async delete(@Res() res, @Body() ctx: CommonRegexpDot) {
         try {
-            await RegexpModel.findByIdAndRemove(ctx.id).exec();
+            await RegexpModel.removeRegexp(ctx.id);
         } catch (error) {
             res.status(HttpStatus.BAD_REQUEST).send(error.toString());
             return;

@@ -1,24 +1,22 @@
-import { Module, MiddlewaresConsumer } from "@nestjs/common";
+import { Module, MiddlewaresConsumer, RequestMethod } from "@nestjs/common";
+// Modules
 import { DatabaseModule } from "./database/database.module";
-import { UsersController } from "./users/users.controller";
-import { AuthController } from "./users/auth.controller";
+import { ControllersModule, controllers } from "./controllers.module";
+// Middlewares
 import { AuthenticationMiddleware } from "./authentication.middleware";
-import { RegexpsController } from "./regexps/regexps.controller";
-import { CategroiesController } from "./categroies/categroies.controller";
-import { GoodsController } from "./goods/goods.controller";
-
-const controllers = [
-    UsersController, AuthController,
-    RegexpsController, CategroiesController, GoodsController
-];
+import { UploadMiddleware } from "./upload.middleware";
 
 @Module({
-    modules: [DatabaseModule],
+    modules: [DatabaseModule, ControllersModule],
     controllers
 })
 export class ApplicationModule {
     public configure(consumer: MiddlewaresConsumer) {
         consumer.apply(AuthenticationMiddleware)
             .forRoutes(...controllers);
+        consumer.apply(UploadMiddleware)
+            .forRoutes(
+                { path: "/goods", method: RequestMethod.POST }
+            );
     }
 }

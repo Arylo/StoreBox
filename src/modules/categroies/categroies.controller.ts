@@ -32,17 +32,33 @@ export class CategroiesController {
         let attrsIds = [ ];
         if (ctx.attributes) {
             const attributes = ctx.attributes.map((str) => {
-                const obj = JSON.parse(str);
-                const { key, value } = obj;
+                let key, value;
+                try {
+                    const obj = JSON.parse(str);
+                    key = obj.key;
+                    value = obj.value;
+                } catch (error) {
+                    throw new HttpException(
+                        error.toString(), HttpStatus.BAD_REQUEST
+                    );
+                }
                 return { key, value };
             });
-            const attrs = await ValuesModel.create(attributes);
+            let attrs = [ ];
+            try {
+                attrs = await ValuesModel.create(attributes);
+            } catch (error) {
+                throw new HttpException(
+                    error.toString(), HttpStatus.BAD_REQUEST
+                );
+            }
             attrsIds = attrsIds.concat(
                 attrs.map((item) => item.toObject()._id)
             );
         }
+        let result;
         try {
-            await CategroiesModel.create({
+            result = await CategroiesModel.create({
                 name: ctx.name,
                 tags: ctx.tags,
                 attributes: attrsIds,
@@ -54,7 +70,7 @@ export class CategroiesController {
             });
             throw new HttpException(error.toString(), HttpStatus.BAD_REQUEST);
         }
-        res.status(HttpStatus.CREATED).send({ });
+        res.status(HttpStatus.CREATED).send(result);
     }
 
     @Get("/:id")

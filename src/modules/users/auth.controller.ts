@@ -1,4 +1,6 @@
-import { Controller, Post, Res, Body, HttpStatus, Session, Get } from "@nestjs/common";
+import {
+    Controller, Post, Res, Body, HttpStatus, Session, Get, HttpException
+} from "@nestjs/common";
 import { LoginDto } from "./auth.dto";
 import { Model as UserModel, UserDoc  } from "@models/User";
 
@@ -6,29 +8,31 @@ import { Model as UserModel, UserDoc  } from "@models/User";
 export class AuthController {
 
     @Post("login")
-    public async login(@Res() res, @Body() user: LoginDto, @Session() session) {
-        let userInfo: UserDoc = null;
+    public async login(@Res() res, @Body() ctx: LoginDto, @Session() session) {
+        let user: UserDoc = null;
         try {
-            userInfo = await UserModel.isVaild(user.username, user.password);
-        } catch (error) {
-            res.status(HttpStatus.NOT_FOUND).send(error.toString());
+            user = await UserModel.isVaild(ctx.username, ctx.password);
+        } catch (err) {
+            throw new HttpException(err.toString(), HttpStatus.NOT_FOUND);
         }
         session.regenerate((err) => {
             if (err) {
-                res.status(HttpStatus.GATEWAY_TIMEOUT).send(err.toString());
-                return;
+                throw new HttpException(
+                    err.toString(), HttpStatus.GATEWAY_TIMEOUT
+                );
             }
-            session.loginUser = userInfo.toObject().username;
+            session.loginUser = user.toObject().username;
+            res.status(HttpStatus.OK).json({ });
         });
-        res.status(HttpStatus.OK).json({ });
     }
 
     @Get("logout")
     public logout(@Res() res, @Session() session) {
         session.destroy((err) => {
             if (err) {
-                res.status(HttpStatus.GATEWAY_TIMEOUT).send(err.toString());
-                return;
+                throw new HttpException(
+                    err.toString(), HttpStatus.GATEWAY_TIMEOUT
+                );
             }
             res.status(HttpStatus.OK).json({ });
         });

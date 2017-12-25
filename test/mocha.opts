@@ -6,5 +6,6 @@
 --recursive
 --slow 5000
 --timeout 10000
+--exit
 ./dist/test/**/*.spec.js
 ./dist/test/**/*.e2e.js

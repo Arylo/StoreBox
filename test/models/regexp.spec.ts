@@ -1,7 +1,7 @@
 import * as db from "../helpers/database";
 import * as md5 from "md5";
 import * as Rx from "rxjs";
-import { Model as RegExpModel } from "@models/RegExp";
+import { Model as RegExpModel } from "@models/Regexp";
 import { Model as CategroyModel } from "@models/Categroy";
 import { Subject } from "rxjs";
 

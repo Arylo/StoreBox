@@ -1,5 +1,6 @@
 import {
-    Controller, Post, Res, Body, Get, HttpStatus, HttpCode, HttpException, Param
+    Controller, Req, Res, Body, Get, Post, Param, Session,
+    HttpStatus, HttpCode, HttpException
 } from "@nestjs/common";
 import { Model as GoodsModels } from "@models/Good";
 import { IValues, Model as ValuesModel } from "@models/Value";
@@ -7,6 +8,11 @@ import { CreateValueDto, EditValueDto } from "../values/values.dto";
 
 @Controller("goods")
 export class GoodsController {
+
+    @Post()
+    public async add(@Req() req, @Res() res, @Session() session) {
+        res.status(HttpStatus.OK).json();
+    }
 
     @Get("/:id")
     public async get(@Res() res, @Param("id") id) {

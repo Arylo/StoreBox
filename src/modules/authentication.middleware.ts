@@ -1,4 +1,6 @@
-import { Middleware, NestMiddleware, ExpressMiddleware, HttpException, HttpStatus } from "@nestjs/common";
+import {
+    Middleware, NestMiddleware, ExpressMiddleware, HttpException, HttpStatus
+} from "@nestjs/common";
 
 @Middleware()
 export class AuthenticationMiddleware implements NestMiddleware {
