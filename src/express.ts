@@ -16,9 +16,9 @@ export const initExpress = () => {
 
     mServer.use(bodyParser.json());
     mServer.use(bodyParser.urlencoded({ extended: false }));
-    mServer.use(cookieParser());
+    mServer.use(cookieParser("storebox"));
     mServer.use(session({
-        secret: "packagebox",
+        secret: "storebox",
         resave: false,
         saveUninitialized: true,
         cookie: { secure: false, maxAge: 1800 * 1000 }

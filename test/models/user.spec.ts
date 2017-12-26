@@ -15,8 +15,8 @@ describe("User Model", () => {
         return db.connect();
     });
 
-    after(async () => {
-        await UsersModel.remove({}).exec();
+    after(() => {
+        return db.drop();
     });
 
     beforeEach(() => {

@@ -9,9 +9,8 @@ describe("Category Model", () => {
         return db.connect();
     });
 
-    afterEach(async () => {
-        await CategroiesModel.remove({ }).exec();
-        await ValuesModel.remove({ }).exec();
+    after(() => {
+        return db.drop();
     });
 
     it("Add Category", async () => {

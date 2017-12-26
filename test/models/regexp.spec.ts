@@ -4,7 +4,7 @@ import * as faker from "faker";
 import { Model as RegexpsModel, RegexpDoc } from "@models/Regexp";
 import { Model as CategroyModel, ICategroyRaw } from "@models/Categroy";
 
-describe.only("RegExp Model", () => {
+describe("RegExp Model", () => {
 
     let Categroy: ICategroyRaw;
 
@@ -20,47 +20,35 @@ describe.only("RegExp Model", () => {
     });
 
     afterEach(() => {
-        CategroyModel.remove({ }).exec();
-        RegexpsModel.remove({ }).exec();
+        return db.drop();
     });
 
     it("Add Regexp", async () => {
         const md5sum = md5(Date.now() + "");
-        let reg, err;
-        try {
-            reg = await RegexpsModel.addRegexp(md5sum, /[\da-fA-F]/.source);
-        } catch (error) {
-            err = error;
-        }
-        should(err).be.an.undefined();
+        const reg = await RegexpsModel.addRegexp(md5sum, /[\da-fA-F]/.source);
+        reg.should.be.not.an.empty();
     });
 
     it("Add/Remove Regexp", async () => {
         const md5sum = md5(Date.now() + "");
-        let reg: RegexpDoc, err;
-        try {
-            reg = await RegexpsModel.addRegexp(md5sum, /[\da-fA-F]/.source);
-            reg = await RegexpsModel.removeRegexp(reg._id);
-        } catch (error) {
-            err = error;
-        }
-        should(err).be.an.undefined();
+        let reg: RegexpDoc;
+
+        reg = await RegexpsModel.addRegexp(md5sum, /[\da-fA-F]/.source);
+        reg = await RegexpsModel.removeRegexp(reg._id);
         reg = await RegexpsModel.findById(reg._id).exec();
+
         should(reg).be.a.null();
     });
 
     it("Link One Category And Undo", async () => {
         const md5sum = md5(Date.now() + "");
-        let reg: RegexpDoc, err;
-        try {
-            reg = await RegexpsModel.addRegexp(md5sum, /[\da-fA-F]/.source);
-            reg = await RegexpsModel.link(reg._id, Categroy._id);
-            reg = await RegexpsModel.link(reg._id, false);
-        } catch (error) {
-            err = error;
-        }
-        should(err).be.an.undefined();
+        let reg: RegexpDoc;
+
+        reg = await RegexpsModel.addRegexp(md5sum, /[\da-fA-F]/.source);
+        reg = await RegexpsModel.link(reg._id, Categroy._id);
+        reg = await RegexpsModel.link(reg._id, false);
         reg = await RegexpsModel.findById(reg._id).exec();
+
         should(reg.toObject().link).be.a.undefined();
     });
 
