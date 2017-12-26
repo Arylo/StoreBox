@@ -15,15 +15,16 @@ export class AuthController {
         } catch (err) {
             throw new HttpException(err.toString(), HttpStatus.NOT_FOUND);
         }
-        session.regenerate((err) => {
-            if (err) {
-                throw new HttpException(
-                    err.toString(), HttpStatus.GATEWAY_TIMEOUT
-                );
-            }
-            session.loginUser = user.toObject().username;
-            res.status(HttpStatus.OK).json({ });
-        });
+        session.loginUser = user.toObject().username;
+        session.loginUserId = user.toObject()._id;
+        // session.regenerate((err) => {
+        //     if (err) {
+        //         throw new HttpException(
+        //             err.toString(), HttpStatus.GATEWAY_TIMEOUT
+        //         );
+        //     }
+        // });
+        res.status(HttpStatus.OK).json({ });
     }
 
     @Get("logout")

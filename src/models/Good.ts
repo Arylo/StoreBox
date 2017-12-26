@@ -11,13 +11,13 @@ const Definition: SchemaDefinition = {
     hidden: { type: Boolean, default: true },
     active: { type: Boolean, default: false },
     md5sum: String, sha256sum: String,
-    filename: String,
+    filename: { type: String, required: true },
     originname: { type: String, required: true },
     categroy: {
         type: SchemaTypes.ObjectId,
-        ref: CategroyFlag
+        ref: CategroyFlag,
+        required: true
     },
-    version: { type: String, required: true },
     uploader: {
         type: SchemaTypes.ObjectId,
         ref: UserFlag,

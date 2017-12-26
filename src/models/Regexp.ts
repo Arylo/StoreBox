@@ -1,6 +1,6 @@
 import { model, SchemaDefinition, Model as M, SchemaTypes } from "mongoose";
 import { Base, IDoc, IDocRaw, ObjectId } from "@models/common";
-import { ICategroy, Flag as GTF, Model as GTM } from "@models/Categroy";
+import { ICategroy, Flag as CF, Model as CM } from "@models/Categroy";
 import Cache =  require("schedule-cache");
 const cache = Cache.create();
 
@@ -9,7 +9,7 @@ const Definition: SchemaDefinition = {
     value: { type: String, required: true, unique: true },
     link: {
         type: SchemaTypes.ObjectId,
-        ref: GTF
+        ref: CF
     }
 };
 
@@ -38,20 +38,23 @@ RegexpSchema.static("addRegexp", (name: string, value: string) => {
 });
 
 RegexpSchema.static("removeRegexp", (id: ObjectId) => {
+    cache.clear();
     return Model.findByIdAndRemove(id).exec();
 });
 
 RegexpSchema.static("link", (id: ObjectId, linkId: ObjectId | false) => {
     let p: Promise<RegexpDoc>;
     if (!linkId) {
+        cache.clear();
         p = Model.findByIdAndUpdate(id, {
             "$unset": { link: 0 }
         }).exec();
     } else {
-        p = GTM.findById(linkId).exec().then((categroy) => {
+        p = CM.findById(linkId).exec().then((categroy) => {
             if (!categroy) {
                 return Promise.reject("The Categroy ID is not exist");
             }
+            cache.clear();
             return Model.findByIdAndUpdate(id, { link: linkId }).exec();
         });
     }
@@ -59,29 +62,36 @@ RegexpSchema.static("link", (id: ObjectId, linkId: ObjectId | false) => {
 });
 
 RegexpSchema.static("list", () => {
-    const flag = "list";
-    if (cache.get(flag)) {
-        return cache.get(flag);
+    const FLAG_LIST = "list";
+    if (cache.get(FLAG_LIST)) {
+        return cache.get(FLAG_LIST);
     }
-    cache.put(flag, Model.find().populate("link").exec());
-    return cache.get(flag);
+    cache.put(FLAG_LIST, Model.find().populate("link").exec());
+    return cache.get(FLAG_LIST);
 });
 
 RegexpSchema.static("discern", (name: string) => {
-    return Model.find({ link: { $exists: true } })
-        .populate("link")
-        .exec()
-        .then((result) => {
-            const list = [ ];
-            result.forEach((item) => {
-                const obj = item.toObject();
-                const reg = new RegExp(obj.value);
-                if (reg.test(name)) {
-                    list.push(obj.link);
-                }
-            });
-            return list;
+    const FLAG_DISCER_LIST = "discern";
+    let p: Promise<RegexpDoc[]>;
+    if (cache.get(FLAG_DISCER_LIST)) {
+        p = cache.get(FLAG_DISCER_LIST);
+    } else {
+        p = Model.find({ link: { $exists: true } })
+            .populate("link")
+            .exec();
+        cache.put(FLAG_DISCER_LIST, p);
+    }
+    return p.then((result) => {
+        const list = [ ];
+        result.forEach((item) => {
+            const obj = item.toObject();
+            const reg = new RegExp(obj.value);
+            if (reg.test(name)) {
+                list.push(obj.link);
+            }
         });
+        return list;
+    });
 });
 
 export const Flag = "regexps";
@@ -102,7 +112,7 @@ interface IRegexpModel<T extends RegexpDoc> extends M<T> {
     /**
      * 规则列表
      */
-    list(): Promise<T>;
+    list(): Promise<T[]>;
     /**
      * 根据规则进行识别
      */

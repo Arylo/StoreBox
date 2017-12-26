@@ -3,7 +3,7 @@ import supertest = require("supertest");
 import { Test } from "@nestjs/testing";
 import { initExpress } from "../../src/express";
 import { ControllersModule } from "../../src/modules/controllers.module";
-import { connect } from "../helpers/database";
+import { connect, drop } from "../helpers/database";
 import faker = require("faker");
 
 describe("Categroies Api", () => {
@@ -13,6 +13,10 @@ describe("Categroies Api", () => {
 
     before(() => {
         return connect();
+    });
+
+    after(() => {
+        return drop();
     });
 
     before(async () => {

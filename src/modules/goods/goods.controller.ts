@@ -2,16 +2,56 @@ import {
     Controller, Req, Res, Body, Get, Post, Param, Session,
     HttpStatus, HttpCode, HttpException
 } from "@nestjs/common";
-import { Model as GoodsModels } from "@models/Good";
-import { IValues, Model as ValuesModel } from "@models/Value";
 import { CreateValueDto, EditValueDto } from "../values/values.dto";
+import { IValues, Model as ValuesModel } from "@models/Value";
+import { Model as GoodsModels } from "@models/Good";
+import { Model as RegexpModel } from "@models/Regexp";
+import { config } from "@utils/config";
+
+import fs = require("fs-extra");
+import multer  = require("multer");
 
 @Controller("goods")
 export class GoodsController {
 
     @Post()
     public async add(@Req() req, @Res() res, @Session() session) {
-        res.status(HttpStatus.OK).json();
+        const file: Express.Multer.File = req.file;
+        const regexpCount = (await RegexpModel.list()).length;
+        if (regexpCount === 0) {
+            fs.remove(file.path);
+            throw new HttpException(
+                "Lost The Good Role", HttpStatus.BAD_GATEWAY
+            );
+        }
+        const catgroies = await RegexpModel.discern(req.file.originalname);
+        if (catgroies.length !== 1) {
+            fs.remove(file.path);
+            if (catgroies.length === 0) {
+                throw new HttpException(
+                    "Lost Role for the file", HttpStatus.BAD_REQUEST
+                );
+            } else {
+                throw new HttpException(
+                    "Much Role for the file", HttpStatus.BAD_REQUEST
+                );
+            }
+        }
+        let goodObj;
+        try {
+            goodObj = await GoodsModels.create({
+                filename: file.filename,
+                originname: file.originalname,
+                categroy: catgroies[0]._id,
+                uploader: session.loginUserId
+            });
+        } catch (error) {
+            throw new HttpException(error.toString(), HttpStatus.BAD_GATEWAY);
+        }
+        const newFilePath =
+            `${config.paths.upload}/${catgroies[0]._id}/${file.filename}`;
+        fs.move(file.path, newFilePath);
+        res.status(HttpStatus.CREATED).json(goodObj);
     }
 
     @Get("/:id")
@@ -19,9 +59,9 @@ export class GoodsController {
         let obj;
         try {
             obj = await GoodsModels.findById(id)
-                .populate("uploader")
+                .populate("uploader", "username nickname")
                 .populate("attributes")
-                .populate("categroy")
+                .populate("categroy", "name attributes tags")
                 .exec();
         } catch (error) {
             throw new HttpException(error.toString(), HttpStatus.BAD_REQUEST);

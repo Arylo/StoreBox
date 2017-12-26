@@ -1,56 +1,80 @@
 import * as db from "../helpers/database";
 import * as md5 from "md5";
-import * as Rx from "rxjs";
-import { Model as RegExpModel } from "@models/Regexp";
-import { Model as CategroyModel } from "@models/Categroy";
-import { Subject } from "rxjs";
+import * as faker from "faker";
+import { Model as RegexpsModel, RegexpDoc } from "@models/Regexp";
+import { Model as CategroyModel, ICategroyRaw } from "@models/Categroy";
 
 describe("RegExp Model", () => {
 
-    const Categroy = {
-        name: `cate_${Date.now()}`,
-        id: ""
-    };
+    let Categroy: ICategroyRaw;
 
     before(() => {
         return db.connect();
     });
 
-    before(() => {
-        return CategroyModel.create({ name: Categroy.name}).then((result) => {
-            Categroy.id = result._id;
+    beforeEach(async () => {
+        const result = await CategroyModel.create({
+            name: faker.name.findName()
         });
+        Categroy = result.toObject() as ICategroyRaw;
     });
 
-    after(() => {
-        CategroyModel.findByIdAndRemove(Categroy.id).exec();
+    afterEach(() => {
+        return db.drop();
     });
 
-    it("No link Regexp", (done) => {
-        const noticer = new Subject();
-        noticer.subscribe({
-            next: (ids: any[]) => {
-                ids.forEach((id) => {
-                    RegExpModel.findByIdAndRemove(id).exec();
-                });
-            },
-            complete: done
-        });
+    it("Add Regexp", async () => {
         const md5sum = md5(Date.now() + "");
-        Promise.all([
-            RegExpModel.addRegexp(`${md5sum}1`, /[\da-fA-F]/.source),
-            RegExpModel.addRegexp(`${md5sum}2`, /[\da-fA-F]{16}/.source),
-            RegExpModel.addRegexp(`${md5sum}3`, /[\da-fA-F]{8}/.source)
-        ]).then((regs) => {
-            return RegExpModel.discern(md5sum).then((results) => {
-                results.should.be.length(0);
-                const ids = regs.map((item) => {
-                    return item.toObject()._id;
-                });
-                noticer.next(ids);
-                noticer.complete();
-            });
-        });
+        const reg = await RegexpsModel.addRegexp(md5sum, /[\da-fA-F]/.source);
+        reg.should.be.not.an.empty();
+    });
+
+    it("Add/Remove Regexp", async () => {
+        const md5sum = md5(Date.now() + "");
+        let reg: RegexpDoc;
+
+        reg = await RegexpsModel.addRegexp(md5sum, /[\da-fA-F]/.source);
+        reg = await RegexpsModel.removeRegexp(reg._id);
+        reg = await RegexpsModel.findById(reg._id).exec();
+
+        should(reg).be.a.null();
+    });
+
+    it("Link One Category And Undo", async () => {
+        const md5sum = md5(Date.now() + "");
+        let reg: RegexpDoc;
+
+        reg = await RegexpsModel.addRegexp(md5sum, /[\da-fA-F]/.source);
+        reg = await RegexpsModel.link(reg._id, Categroy._id);
+        reg = await RegexpsModel.link(reg._id, false);
+        reg = await RegexpsModel.findById(reg._id).exec();
+
+        should(reg.toObject().link).be.a.undefined();
+    });
+
+    it("Discern from No link Regexp", async () => {
+        const md5sum = md5(Date.now() + "");
+        const regs = [
+            await RegexpsModel.addRegexp(`${md5sum}1`, /[\da-fA-F]/.source),
+            await RegexpsModel.addRegexp(`${md5sum}2`, /[\da-fA-F]{16}/.source),
+            await RegexpsModel.addRegexp(`${md5sum}3`, /[\da-fA-F]{8}/.source)
+        ];
+        const list = await RegexpsModel.discern(md5sum);
+        list.should.be.length(0);
+    });
+
+    it("Discern from linked Regexps", async () => {
+        const md5sum = md5(Date.now() + "");
+        const regs = [
+            await RegexpsModel.addRegexp(`${md5sum}1`, /[\da-fA-F]/.source),
+            await RegexpsModel.addRegexp(`${md5sum}2`, /[\da-fA-F]{16}/.source),
+            await RegexpsModel.addRegexp(`${md5sum}3`, /[\da-fA-F]{8}/.source)
+        ];
+        for (const reg of regs) {
+            await RegexpsModel.link(reg._id, Categroy._id);
+        }
+        const list = await RegexpsModel.discern(md5sum);
+        list.should.be.length(3);
     });
 
 });

@@ -3,13 +3,19 @@ import {
 } from "@nestjs/common";
 import multer  = require("multer");
 import { config } from "@utils/config";
-const upload = multer({
-    dest: `${config.paths.tmp}/files`
-});
 
 @Middleware()
-export class UploadMiddleware implements NestMiddleware {
-    public resolve(): ExpressMiddleware {
+export class UploadFileMiddleware implements NestMiddleware {
+    public resolve(): (req, res, next) => void {
+        const upload = multer({ dest: `${config.paths.tmp}/files` });
+        return upload.single("file");
+    }
+}
+
+@Middleware()
+export class UploadFilesMiddleware implements NestMiddleware {
+    public resolve(): (req, res, next) => void {
+        const upload = multer({ dest: `${config.paths.tmp}/files` });
         return upload.array("files");
     }
 }
