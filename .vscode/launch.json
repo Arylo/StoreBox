@@ -15,7 +15,7 @@
                 "-r", "tsconfig-paths/register"
             ],
             "program": "${workspaceFolder}\\index.js",
-            "preLaunchTask": "tsc",
+            "preLaunchTask": "build",
             "outFiles": [
                 "${workspaceFolder}/dist/**/*.js"
             ]

@@ -3,7 +3,7 @@ import * as session from "express-session";
 import * as bodyParser from "body-parser";
 import * as cookieParser from "cookie-parser";
 
-let server;
+let server: express.Express;
 
 export const initExpress = () => {
     if (server) {

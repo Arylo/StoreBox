@@ -22,6 +22,7 @@ export class AuthController {
                 );
             }
             session.loginUser = user.toObject().username;
+            session.loginUserId = user.toObject()._id;
             res.status(HttpStatus.OK).json({ });
         });
     }
