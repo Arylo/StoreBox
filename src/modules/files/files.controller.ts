@@ -1,5 +1,6 @@
 import {
-    Controller, Get, Param, HttpException, HttpStatus, Req, Res
+    Controller, Get, Param, Req, Res, BadRequestException,
+    NotFoundException
 } from "@nestjs/common";
 import { Model as GoodsModels, GoodDoc } from "@models/Good";
 import { config } from "@utils/config";
@@ -9,7 +10,7 @@ import { DownlaodDto } from "./files.dto";
 @Controller("files")
 export class FilesController {
 
-    @Get("/:cid/:id")
+    @Get("/categories/:cid/goods/:id")
     public async downloadFile(
         @Req() req, @Res() res: Response, @Param() params: DownlaodDto
     ) {
@@ -19,19 +20,17 @@ export class FilesController {
                 .findOne({_id: params.id, categroy: params.cid})
                 .exec();
         } catch (error) {
-            throw new HttpException(error.toString(), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(error.toString());
         }
         if (!obj) {
-            return res.status(HttpStatus.NOT_FOUND).end();
+            throw new NotFoundException();
         }
 
         const good = obj.toObject();
         const filepath =
             `${config.paths.upload}/${params.cid}/${good.filename}`;
         if (!good.active) {
-            throw new HttpException(
-                "The File disallow download", HttpStatus.BAD_REQUEST
-            );
+            throw new BadRequestException("Disallow download the File");
         }
         res.download(filepath, good.originname);
     }

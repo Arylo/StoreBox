@@ -1,4 +1,6 @@
-import { Controller, Get, Post, Body, Res, HttpStatus, Req } from "@nestjs/common";
+import {
+    Controller, Get, Post, Body, Res, HttpStatus, Req, BadRequestException
+} from "@nestjs/common";
 import { Model as UserModel, IUser } from "@models/User";
 import { CreateUserDto, ModifyPasswordDto, CommonUserDot } from "./users.dto";
 
@@ -17,7 +19,7 @@ export class UsersController {
         try {
             await UserModel.addUser(user.username, user.password);
         } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error.toString());
+            throw new BadRequestException(error.toString());
         }
         res.status(HttpStatus.CREATED).json({ });
     }
@@ -27,7 +29,7 @@ export class UsersController {
         try {
             await UserModel.passwd(user.id, user.oldPassword, user.newPassword);
         } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error.toString());
+            throw new BadRequestException(error.toString());
         }
         res.status(HttpStatus.OK).send();
     }
@@ -37,7 +39,7 @@ export class UsersController {
         try {
             await UserModel.removeUser(user.id);
         } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error.toString());
+            throw new BadRequestException(error.toString());
         }
         res.status(HttpStatus.OK).json({ });
     }
@@ -47,7 +49,7 @@ export class UsersController {
         try {
             await UserModel.ban(user.id);
         } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error.toString());
+            throw new BadRequestException(error.toString());
         }
         res.status(HttpStatus.OK).json({ });
     }
@@ -57,7 +59,7 @@ export class UsersController {
         try {
             await UserModel.allow(user.id);
         } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error.toString());
+            throw new BadRequestException(error.toString());
         }
         res.status(HttpStatus.OK).json({ });
     }

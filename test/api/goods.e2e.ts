@@ -1,20 +1,16 @@
-import supertest = require("supertest-session");
-import ST = require("supertest");
-import { Test } from "@nestjs/testing";
+import supertest = require("supertest");
 import path = require("path");
 import faker = require("faker");
 import { Model as UsersModel } from "@models/User";
 
-import { initExpress } from "../../src/express";
-import { ApplicationModule } from "../../src/modules/app.module";
 import { connect, drop } from "../helpers/database";
 import { uploadFile } from "../helpers/files";
 import { addCategroyAndRegexp } from "../helpers/categroies";
+import { init } from "../helpers/server";
 
 describe("Goods Api", () => {
 
-    let request: ST.SuperTest<ST.Test>;
-    const server = initExpress();
+    let request: supertest.SuperTest<supertest.Test>;
 
     const user = {
         name: faker.name.firstName(),
@@ -30,13 +26,7 @@ describe("Goods Api", () => {
     });
 
     before(async () => {
-        const module = await Test.createTestingModule({
-            modules: [ApplicationModule]
-        })
-        .compile();
-        const app = module.createNestApplication(server);
-        await app.init();
-        request = supertest(server);
+        request = await init();
     });
 
     before(async () => {
@@ -75,8 +65,9 @@ describe("Goods Api", () => {
             "_id", "name", "attributes", "tags"
         ]);
         result.uploader.should.have.properties([
-            "_id", "username", "nickname"
+            "_id", "nickname"
         ]);
+        result.uploader.should.have.property("nickname", user.name);
     });
 
 });

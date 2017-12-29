@@ -1,5 +1,5 @@
 import {
-    Middleware, NestMiddleware, ExpressMiddleware, HttpException, HttpStatus
+    Middleware, NestMiddleware, ExpressMiddleware, HttpStatus
 } from "@nestjs/common";
 import multer  = require("multer");
 import { config } from "@utils/config";

@@ -1,15 +1,12 @@
-import("should");
 import supertest = require("supertest");
-import { Test } from "@nestjs/testing";
-import { initExpress } from "../../src/express";
-import { ControllersModule } from "../../src/modules/controllers.module";
 import { connect, drop } from "../helpers/database";
 import faker = require("faker");
+
+import { init } from "../helpers/server";
 
 describe("Categroies Api", () => {
 
     let request: supertest.SuperTest<supertest.Test>;
-    const server = initExpress();
 
     before(() => {
         return connect();
@@ -20,13 +17,7 @@ describe("Categroies Api", () => {
     });
 
     before(async () => {
-        const module = await Test.createTestingModule({
-            modules: [ControllersModule]
-        })
-        .compile();
-        const app = module.createNestApplication(server);
-        await app.init();
-        request = supertest(server);
+        request = await init();
     });
 
     it("Add Categroy", async () => {

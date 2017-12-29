@@ -1,5 +1,5 @@
 import {
-    Controller, Post, Res, Body, Get, HttpStatus, HttpCode
+    Controller, Post, Res, Body, Get, HttpStatus, HttpCode, BadRequestException
 } from "@nestjs/common";
 import { Model as RegexpModel } from "@models/Regexp";
 import { NewRegexp, EditRegexpDot, CommonRegexpDot } from "./regexps.dto";
@@ -18,8 +18,7 @@ export class RegexpsController {
         try {
             await RegexpModel.addRegexp(ctx.name, ctx.value);
         } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error.toString());
-            return;
+            throw new BadRequestException(error.toString());
         }
         res.status(HttpStatus.CREATED).json({ });
     }
@@ -31,8 +30,7 @@ export class RegexpsController {
                 name: ctx.name, value: ctx.value
             }).exec();
         } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error.toString());
-            return;
+            throw new BadRequestException(error.toString());
         }
         res.status(HttpStatus.OK).json({ });
     }
@@ -42,8 +40,7 @@ export class RegexpsController {
         try {
             await RegexpModel.removeRegexp(ctx.id);
         } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error.toString());
-            return;
+            throw new BadRequestException(error.toString());
         }
         res.status(HttpStatus.OK).json({ });
     }

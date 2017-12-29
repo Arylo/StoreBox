@@ -1,6 +1,6 @@
 import {
     Controller, Req, Res, Body, Get, Post, Param, Session,
-    HttpStatus, HttpCode, HttpException
+    HttpStatus, BadRequestException
 } from "@nestjs/common";
 import { CreateValueDto, EditValueDto } from "../values/values.dto";
 import { IValues, Model as ValuesModel } from "@models/Value";
@@ -21,21 +21,15 @@ export class GoodsController {
         const regexpCount = (await RegexpModel.list()).length;
         if (regexpCount === 0) {
             fs.remove(file.path);
-            throw new HttpException(
-                "Lost The Good Role", HttpStatus.BAD_GATEWAY
-            );
+            throw new BadRequestException("Lost The Good Role");
         }
         const catgroies = await RegexpModel.discern(req.file.originalname);
         if (catgroies.length !== 1) {
             fs.remove(file.path);
             if (catgroies.length === 0) {
-                throw new HttpException(
-                    "Lost Role for the file", HttpStatus.BAD_REQUEST
-                );
+                throw new BadRequestException("Lost Role for the file");
             } else {
-                throw new HttpException(
-                    "Much Role for the file", HttpStatus.BAD_REQUEST
-                );
+                throw new BadRequestException("Much Role for the file");
             }
         }
         let goodObj;
@@ -53,7 +47,7 @@ export class GoodsController {
                 active: true
             });
         } catch (error) {
-            throw new HttpException(error.toString(), HttpStatus.BAD_GATEWAY);
+            throw new BadRequestException(error.toString());
         }
         const newFilePath =
             `${config.paths.upload}/${catgroies[0]._id}/${file.filename}`;
@@ -66,12 +60,12 @@ export class GoodsController {
         let obj;
         try {
             obj = await GoodsModels.findById(id)
-                .populate("uploader", "username nickname")
+                .populate("uploader", "nickname")
                 .populate("attributes")
                 .populate("categroy", "name attributes tags")
                 .exec();
         } catch (error) {
-            throw new HttpException(error.toString(), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(error.toString());
         }
         res.status(HttpStatus.OK).json(obj);
     }
@@ -94,9 +88,7 @@ export class GoodsController {
                 return set;
             }, attrSet);
             if (attrSet.has(ctx.key)) {
-                throw new HttpException(
-                    "The Attributes is exist", HttpStatus.BAD_REQUEST
-                );
+                throw new BadRequestException("The Attributes is exist");
             }
         }
         const newAttr = await ValuesModel.create(ctx);
@@ -113,7 +105,7 @@ export class GoodsController {
         try {
             await ValuesModel.findByIdAndUpdate(aid, ctx).exec();
         } catch (error) {
-            throw new HttpException(error.toString(), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(error.toString());
         }
         res.status(HttpStatus.OK).json();
     }
@@ -125,7 +117,7 @@ export class GoodsController {
                 $pull: { attributes: aid}
             }).exec();
         } catch (error) {
-            throw new HttpException(error.toString(), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(error.toString());
         }
         try {
             await ValuesModel.findByIdAndRemove(aid).exec();
@@ -133,7 +125,7 @@ export class GoodsController {
             await GoodsModels.findByIdAndUpdate(
                 id, { $push: { attributes: aid } }
             ).exec();
-            throw new HttpException(error.toString(), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(error.toString());
         }
         return { };
     }

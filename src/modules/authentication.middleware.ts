@@ -1,5 +1,6 @@
 import {
-    Middleware, NestMiddleware, ExpressMiddleware, HttpException, HttpStatus
+    Middleware, NestMiddleware, ExpressMiddleware, HttpStatus,
+    UnauthorizedException
 } from "@nestjs/common";
 
 @Middleware()
@@ -13,9 +14,7 @@ export class AuthenticationMiddleware implements NestMiddleware {
                 return next();
             }
             if (!req.session.loginUser) {
-                throw new HttpException(
-                    "Unauthorized", HttpStatus.UNAUTHORIZED
-                );
+                throw new UnauthorizedException();
             }
             next();
         };

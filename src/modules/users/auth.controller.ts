@@ -1,5 +1,6 @@
 import {
-    Controller, Post, Res, Body, HttpStatus, Session, Get, HttpException
+    Controller, Post, Res, Body, HttpStatus, Session, Get, BadRequestException,
+    GatewayTimeoutException
 } from "@nestjs/common";
 import { LoginDto } from "./auth.dto";
 import { Model as UserModel, UserDoc  } from "@models/User";
@@ -13,15 +14,13 @@ export class AuthController {
         try {
             user = await UserModel.isVaild(ctx.username, ctx.password);
         } catch (err) {
-            throw new HttpException(err.toString(), HttpStatus.NOT_FOUND);
+            throw new BadRequestException(err.toString());
         }
         session.loginUser = user.toObject().username;
         session.loginUserId = user.toObject()._id;
         // session.regenerate((err) => {
         //     if (err) {
-        //         throw new HttpException(
-        //             err.toString(), HttpStatus.GATEWAY_TIMEOUT
-        //         );
+        //         throw new GatewayTimeoutException(err.toString());
         //     }
         // });
         res.status(HttpStatus.OK).json({ });
@@ -31,9 +30,7 @@ export class AuthController {
     public logout(@Res() res, @Session() session) {
         session.destroy((err) => {
             if (err) {
-                throw new HttpException(
-                    err.toString(), HttpStatus.GATEWAY_TIMEOUT
-                );
+                throw new GatewayTimeoutException(err.toString());
             }
             res.status(HttpStatus.OK).json({ });
         });

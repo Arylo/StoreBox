@@ -1,5 +1,6 @@
 import {
-    Controller, Post, Res, Body, Get, HttpStatus, HttpCode, HttpException, Param
+    Controller, Post, Res, Body, Get, HttpStatus, HttpCode, Param,
+    BadRequestException
 } from "@nestjs/common";
 import {
     Model as CategroiesModel, CategroyDoc, ICategroy
@@ -25,9 +26,7 @@ export class CategroiesController {
     @Post()
     public async add(@Res() res, @Body() ctx: NewCategroyDto) {
         if (ctx.pid && !(await CategroiesModel.findById(ctx.pid).exec())) {
-            throw new HttpException(
-                "The Parent Categroy isnt exist!", HttpStatus.BAD_REQUEST
-            );
+            throw new BadRequestException("The Parent Categroy isnt exist!");
         }
         let attrsIds = [ ];
         if (ctx.attributes) {
@@ -38,9 +37,7 @@ export class CategroiesController {
                     key = obj.key;
                     value = obj.value;
                 } catch (error) {
-                    throw new HttpException(
-                        error.toString(), HttpStatus.BAD_REQUEST
-                    );
+                    throw new BadRequestException(error.toString());
                 }
                 return { key, value };
             });
@@ -48,9 +45,7 @@ export class CategroiesController {
             try {
                 attrs = await ValuesModel.create(attributes);
             } catch (error) {
-                throw new HttpException(
-                    error.toString(), HttpStatus.BAD_REQUEST
-                );
+                throw new BadRequestException(error.toString());
             }
             attrsIds = attrsIds.concat(
                 attrs.map((item) => item.toObject()._id)
@@ -68,7 +63,7 @@ export class CategroiesController {
             attrsIds.forEach((id) => {
                 ValuesModel.findByIdAndRemove(id).exec();
             });
-            throw new HttpException(error.toString(), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(error.toString());
         }
         res.status(HttpStatus.CREATED).send(result);
     }
@@ -85,7 +80,7 @@ export class CategroiesController {
                 .exec();
             obj = doc.toObject();
         } catch (error) {
-            throw new HttpException(error.toString(), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(error.toString());
         }
         obj.goods = (
             await GoodsModels.find({ categroy: obj._id })
@@ -117,9 +112,7 @@ export class CategroiesController {
                 key: md5(ctx.key)
             };
             if (attrSet.has(curValue.key)) {
-                throw new HttpException(
-                    "The Attributes is exist", HttpStatus.BAD_REQUEST
-                );
+                throw new BadRequestException("The Attributes is exist");
             }
         }
         const newAttr = await ValuesModel.create(ctx);
@@ -136,7 +129,7 @@ export class CategroiesController {
         try {
             await ValuesModel.findByIdAndUpdate(aid, ctx).exec();
         } catch (error) {
-            throw new HttpException(error.toString(), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(error.toString());
         }
         res.status(HttpStatus.OK).json();
     }
@@ -148,7 +141,7 @@ export class CategroiesController {
                 $pull: { attributes: aid}
             }).exec();
         } catch (error) {
-            throw new HttpException(error.toString(), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(error.toString());
         }
         try {
             await ValuesModel.findByIdAndRemove(aid).exec();
@@ -156,7 +149,7 @@ export class CategroiesController {
             await CategroiesModel.findByIdAndUpdate(
                 id, { $push: { attributes: aid } }
             ).exec();
-            throw new HttpException(error.toString(), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(error.toString());
         }
         return { };
     }
@@ -180,16 +173,15 @@ export class CategroiesController {
                     path: "pid", populate: { path: "pid" }
                 }).exec();
             if (!parentCategroy) {
-                throw new HttpException(
-                    "The Parent Categroy isnt exist!", HttpStatus.BAD_REQUEST
+                throw new BadRequestException(
+                    "The Parent Categroy isnt exist!"
                 );
             }
-            // TODO parent Dead Loop
         }
         try {
             await CategroiesModel.findByIdAndUpdate(id, ctx).exec();
         } catch (error) {
-            throw new HttpException(error.toString(), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(error.toString());
         }
         res.status(HttpStatus.OK).json();
     }
@@ -199,7 +191,7 @@ export class CategroiesController {
         try {
             await CategroiesModel.findByIdAndRemove(id).exec();
         } catch (error) {
-            throw new HttpException(error.toString(), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(error.toString());
         }
         res.status(HttpStatus.OK).json();
     }

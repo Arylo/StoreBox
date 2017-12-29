@@ -1,26 +1,18 @@
-import supertest = require("supertest-session");
-import ST = require("supertest");
-import { Test } from "@nestjs/testing";
+import supertest = require("supertest");
 import path = require("path");
 import faker = require("faker");
+import { HttpStatus } from "@nestjs/common";
 import { Model as UsersModel } from "@models/User";
 
-import { initExpress } from "../../src/express";
-import { ApplicationModule } from "../../src/modules/app.module";
 import { connect, drop } from "../helpers/database";
 import { uploadFile } from "../helpers/files";
 import { addCategroyAndRegexp } from "../helpers/categroies";
 import { sleep } from "../helpers/utils";
+import { init, initWithAuth } from "../helpers/server";
 
 describe("Goods Api", () => {
 
-    let request: ST.SuperTest<ST.Test>;
-    const server = initExpress();
-
-    const user = {
-        name: faker.name.firstName(),
-        pass: faker.random.words()
-    };
+    let request: supertest.SuperTest<supertest.Test>;
 
     before(async () => {
         connect();
@@ -31,22 +23,24 @@ describe("Goods Api", () => {
     });
 
     before(async () => {
-        const module = await Test.createTestingModule({
-            modules: [ApplicationModule]
-        })
-        .compile();
-        const app = module.createNestApplication(server);
-        await app.init();
-        request = supertest(server);
+        request = await initWithAuth();
     });
 
     before(async () => {
+        const user = {
+            name: faker.name.firstName(),
+            pass: faker.random.words()
+        };
         const obj = await UsersModel.addUser(user.name, user.pass);
         const { body: result } = await request.post("/auth/login")
             .send({
                 username: user.name, password: user.pass
             }).then();
     });
+
+    const getFileUrl = (cid: string, id: string) => {
+        return `/files/categories/${cid}/goods/${id}`;
+    };
 
     it("Download File", async () => {
         const filepath = `${__dirname}/../files/icon_pandorabox_64x64.png`;
@@ -56,24 +50,39 @@ describe("Goods Api", () => {
 
         await sleep(500);
 
-        const result = await request.get(`/files/${cid}/${id}`).then();
-        result.status.should.be.eql(200);
+        const url = getFileUrl(cid, id);
+        const result = await request.get(url).then();
+        result.should.have.property("status", HttpStatus.OK);
         result.header.should.match({
             "content-disposition": new RegExp(`filename=['"]${filename}['"]`)
         });
     });
 
     it("Download Nonexist File", async () => {
-        const url = "/files/5a44d78fec77afe7c8aa3eca/5a44d78fec77afe7c8aa3eca";
+        const cid = "5a44d78fec77afe7c8aa3eca";
+        const id = "5a44d78fec77afe7c8aa3eca";
+        const url = getFileUrl(cid, id);
         const result = await request.get(url).then();
 
-        result.status.should.be.eql(404);
+        result.should.have.property("status", HttpStatus.NOT_FOUND);
     });
 
-    it("Download Wrong ID File", async () => {
-        const url = "/files/1111/1111";
+    it("Download Wrong ID File #0", async () => {
+        const cid = "5a44d78fec77afe7c8aa3eca";
+        const id = "1111";
+        const url = getFileUrl(cid, id);
         const result = await request.get(url).then();
 
-        result.status.should.be.eql(400);
+        result.should.have.property("status", HttpStatus.BAD_REQUEST);
     });
+
+    it("Download Wrong ID File #1", async () => {
+        const cid = "1111";
+        const id = "5a44d78fec77afe7c8aa3eca";
+        const url = getFileUrl(cid, id);
+        const result = await request.get(url).then();
+
+        result.should.have.property("status", HttpStatus.BAD_REQUEST);
+    });
+
 });
