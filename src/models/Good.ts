@@ -9,8 +9,9 @@ export const Flag = "goods";
 const Definition: SchemaDefinition = {
     limitAt: Date,
     hidden: { type: Boolean, default: true },
-    active: { type: Boolean, default: false },
-    md5sum: String, sha256sum: String,
+    active: { type: Boolean, default: true },
+    md5sum: { type: String, required: true},
+    sha256sum: { type: String, required: true},
     filename: { type: String, required: true },
     originname: { type: String, required: true },
     categroy: {

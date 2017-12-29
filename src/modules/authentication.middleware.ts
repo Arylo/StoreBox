@@ -9,6 +9,9 @@ export class AuthenticationMiddleware implements NestMiddleware {
             if (req.url === "/auth/login") {
                 return next();
             }
+            if (/^\/files/.test(req.url)) {
+                return next();
+            }
             if (!req.session.loginUser) {
                 throw new HttpException(
                     "Unauthorized", HttpStatus.UNAUTHORIZED

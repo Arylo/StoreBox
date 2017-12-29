@@ -8,6 +8,7 @@ import { Model as GoodsModels } from "@models/Good";
 import { Model as RegexpModel } from "@models/Regexp";
 import { config } from "@utils/config";
 
+import * as hasha from "hasha";
 import fs = require("fs-extra");
 import multer  = require("multer");
 
@@ -39,11 +40,17 @@ export class GoodsController {
         }
         let goodObj;
         try {
+            const md5sum =
+                hasha.fromFileSync(file.path, { algorithm: "md5" });
+            const sha256sum =
+                hasha.fromFileSync(file.path, { algorithm: "sha256" });
             goodObj = await GoodsModels.create({
                 filename: file.filename,
                 originname: file.originalname,
                 categroy: catgroies[0]._id,
-                uploader: session.loginUserId
+                uploader: session.loginUserId,
+                md5sum, sha256sum,
+                active: true
             });
         } catch (error) {
             throw new HttpException(error.toString(), HttpStatus.BAD_GATEWAY);

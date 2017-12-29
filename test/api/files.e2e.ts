@@ -10,6 +10,7 @@ import { ApplicationModule } from "../../src/modules/app.module";
 import { connect, drop } from "../helpers/database";
 import { uploadFile } from "../helpers/files";
 import { addCategroyAndRegexp } from "../helpers/categroies";
+import { sleep } from "../helpers/utils";
 
 describe("Goods Api", () => {
 
@@ -47,36 +48,32 @@ describe("Goods Api", () => {
             }).then();
     });
 
-    beforeEach(async () => {
-        await addCategroyAndRegexp(/^icon_.+64x64\.png$/);
-    });
-
-    it("Upload File", async () => {
+    it("Download File", async () => {
         const filepath = `${__dirname}/../files/icon_pandorabox_64x64.png`;
-        let result;
-        // Create
-        result = await uploadFile(request, filepath);
-        result = result.body;
+        const filename = path.basename(filepath);
+        const cid = (await addCategroyAndRegexp(/^icon_.+64x64\.png$/))[0]._id;
+        const id = (await uploadFile(request, filepath)).body._id;
 
-        result.should.have.properties([
-            "_id", "originname", "categroy", "uploader"
-        ]);
-        result.should.have.property("originname", path.basename(filepath));
+        await sleep(500);
 
-        // Get
-        result = await request.get(`/goods/${result._id}`).then();
-        result = result.body;
-        result.should.have.properties([
-            "_id", "createdAt", "updatedAt",
-            "filename", "originname", "attributes", "tags", "active", "hidden",
-            "categroy", "uploader"
-        ]);
-        result.categroy.should.have.properties([
-            "_id", "name", "attributes", "tags"
-        ]);
-        result.uploader.should.have.properties([
-            "_id", "username", "nickname"
-        ]);
+        const result = await request.get(`/files/${cid}/${id}`).then();
+        result.status.should.be.eql(200);
+        result.header.should.match({
+            "content-disposition": new RegExp(`filename=['"]${filename}['"]`)
+        });
     });
 
+    it("Download Nonexist File", async () => {
+        const url = "/files/5a44d78fec77afe7c8aa3eca/5a44d78fec77afe7c8aa3eca";
+        const result = await request.get(url).then();
+
+        result.status.should.be.eql(404);
+    });
+
+    it("Download Wrong ID File", async () => {
+        const url = "/files/1111/1111";
+        const result = await request.get(url).then();
+
+        result.status.should.be.eql(400);
+    });
 });

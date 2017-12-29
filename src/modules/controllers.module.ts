@@ -6,10 +6,12 @@ import { RegexpsController } from "./regexps/regexps.controller";
 import { CategroiesController } from "./categroies/categroies.controller";
 import { GoodsController } from "./goods/goods.controller";
 import { UploadFileMiddleware } from "./upload.middleware";
+import { FilesController } from "./files/files.controller";
 
 export const controllers = [
     UsersController, AuthController,
-    RegexpsController, CategroiesController, GoodsController
+    RegexpsController, CategroiesController, GoodsController,
+    FilesController
 ];
 
 @Module({
