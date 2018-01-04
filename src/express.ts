@@ -2,6 +2,7 @@ import * as express from "express";
 import * as session from "express-session";
 import * as bodyParser from "body-parser";
 import * as cookieParser from "cookie-parser";
+import { access, error } from "./modules/common/middlewares/logger.middleware";
 
 let server: express.Express;
 
@@ -23,6 +24,12 @@ export const initExpress = () => {
         saveUninitialized: true,
         cookie: { secure: false, maxAge: 1800 * 1000 }
     }));
+    mServer.use(/^(?!\/files|\/api\/v1).*/, access);
+    mServer.all("/files/*", (req, res, next) => {
+        res.redirect(`/api/v1${req.url}`);
+        next();
+    });
+    mServer.use(error);
 
     server = mServer;
     return server;

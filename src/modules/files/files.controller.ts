@@ -5,7 +5,15 @@ import {
 import { Model as GoodsModels, GoodDoc } from "@models/Good";
 import { config } from "@utils/config";
 import { Response } from "express";
+import pathExists = require("path-exists");
+import fs = require("fs-extra");
 import { DownlaodDto } from "./files.dto";
+
+(async () => {
+    if (!(await pathExists(config.paths.upload))) {
+        fs.mkdirp(config.paths.upload);
+    }
+})();
 
 @Controller("files")
 export class FilesController {
@@ -29,9 +37,12 @@ export class FilesController {
         const good = obj.toObject();
         const filepath =
             `${config.paths.upload}/${params.cid}/${good.filename}`;
+
         if (!good.active) {
             throw new BadRequestException("Disallow download the File");
         }
-        res.download(filepath, good.originname);
+        res.download(filepath, good.originname, (err) => {
+            throw new BadRequestException(err.message);
+        });
     }
 }
