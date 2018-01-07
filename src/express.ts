@@ -16,7 +16,7 @@ export const initExpress = () => {
     mServer.enable("trust proxy");
 
     mServer.use(bodyParser.json());
-    mServer.use(bodyParser.urlencoded({ extended: false }));
+    mServer.use(bodyParser.urlencoded());
     mServer.use(cookieParser("storebox"));
     mServer.use(session({
         secret: "storebox",

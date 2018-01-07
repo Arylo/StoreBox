@@ -14,7 +14,7 @@ export class ValidationPipe implements PipeTransform<any> {
         const object = plainToClass(metatype, value);
         const errors = await validate(object);
         if (errors.length > 0) {
-            if (errors.length === 1) {
+            if (Object.keys(value).length === 1) {
                 throw new BadRequestException("Param Validation failed");
             } else {
                 throw new BadRequestException("Params Validation failed");
