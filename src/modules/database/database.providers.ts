@@ -2,6 +2,7 @@ import * as mongoose from "mongoose";
 import { isArray } from "util";
 import { config } from "@utils/config";
 import { Model as UsersModel } from "@models/User";
+import { systemLogger } from "../common/helper/log";
 
 const getDatabaseUrl = () => {
     let host: string[] = [ ];
@@ -24,6 +25,7 @@ export const connectDatabase = () => {
             if (err) {
                 return reject(err);
             }
+            systemLogger.info("Connected Database.");
             UsersModel.count({ }).exec().then((num) => {
                 if (num === 0) {
                     return UsersModel.addUser("root", "admin");

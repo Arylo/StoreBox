@@ -5,35 +5,52 @@ import { config } from "@utils/config";
 import bunyan = require("bunyan");
 import useragent = require("useragent");
 
-(async () => {
-    if (!(await pathExists(config.paths.log))) {
-        await fs.mkdirp(config.paths.log);
-    }
-    systemLogger = conventionalLog({
-        name: "system"
-    });
-    systemLogger.error = errorLogger().error;
-    systemLogger.fatal = errorLogger().fatal;
-    accessLogger = conventionalLog({
-        name: "access"
-    });
-    apiLogger = conventionalLog({
-        name: "api"
-    });
-    downloadLogger = conventionalLog({
-        name: "download"
-    });
-})();
-
+// Common Function Start
 const isDebug = () => {
-    const envValues = ["development", "test"];
+    const envValues = [ "development", "test" ];
     return envValues.find((item) => item === process.env.NODE_ENV);
 };
 
-const logs: { [key: string]: bunyan } = { };
+// Logger Cache Factory Before Log File Create
+interface ICachedSet {
+    [name: string]: Array<{
+        level: string, context: any[]
+    }>;
+}
+const CACHEDLOGGERS: ICachedSet = { };
+const cachedLog = (name: string) => {
+    CACHEDLOGGERS[name] = [ ];
+    const action = (level: string) => {
+        return (...args) => {
+            CACHEDLOGGERS[name].push({
+                level: level,
+                context: args
+            });
+        };
+    };
+    return {
+        "trace": action("trace"),
+        "debug": action("debug"),
+        "info": action("info"),
+        "warn": action("warng"),
+        "error": action("error"),
+        "fatal": action("fatal")
+    };
+};
+const importCache = (name: string) => {
+    const logger = LOGGERS[name];
+    const cache = CACHEDLOGGERS[name];
+    for (const item of cache) {
+        logger[item.level](...item.context);
+    }
+    return logger;
+};
+
+// Logger Factory
+const LOGGERS: { [key: string]: bunyan } = { };
 const conventionalLog = (opts) => {
-    if (logs[opts.name]) {
-        return logs[opts.name];
+    if (LOGGERS[opts.name]) {
+        return LOGGERS[opts.name];
     }
     const logFilePath = `${config.paths.log}/${opts.name}.log`;
     const options: bunyan.LoggerOptions = {
@@ -44,49 +61,86 @@ const conventionalLog = (opts) => {
             level: "info",
             period: "1m",
             count: 6
-        }]
-    };
-    if (isDebug()) {
-        options.streams.push({
+        }, {
             level: "trace",
             stream: process.stdout
-        });
-    }
-    logs[opts.name] = bunyan.createLogger(options);
-    return logs[opts.name];
-};
-
-export let systemLogger: bunyan = null;
-
-export let accessLogger: bunyan = null;
-
-export let apiLogger: bunyan = null;
-
-export let downloadLogger: bunyan = null;
-
-export const errorLogger = () => {
-    const FLAG = "error";
-    if (logs[FLAG]) {
-        return logs[FLAG];
-    }
-    const options: bunyan.LoggerOptions = {
-        name: "error",
-        level: "error",
-        streams: [{
-            type: "rotating-file",
-            path: `${config.paths.log}/error.log`,
-            period: "1m",
-            count: 6
         }]
     };
-    if (isDebug()) {
-        options.streams.push({
-            stream: process.stderr
-        });
-    }
-    logs[FLAG] = bunyan.createLogger(options);
-    return logs[FLAG];
+    LOGGERS[opts.name] = bunyan.createLogger(options);
+    return LOGGERS[opts.name];
 };
+// Common Function Start
+
+// Loggers Start
+export let systemLogger: bunyan = cachedLog("system") as any;
+
+export let accessLogger: bunyan = cachedLog("access") as any;
+
+export let apiLogger: bunyan = cachedLog("api") as any;
+
+export let downloadLogger: bunyan = cachedLog("download") as any;
+
+export let errorLogger: bunyan = cachedLog("error") as any;
+// Loggers End
+
+// Init Strat
+(async () => {
+    try {
+        if (!(await pathExists(config.paths.log))) {
+            fs.mkdirp(config.paths.log);
+        }
+    } catch (error) {
+        throw error;
+    }
+    (await initLoggers()).map((logger) => {
+        logger.level(isDebug() ? "trace" : "info");
+    });
+})();
+const initLoggers = () => {
+    errorLogger = (() => {
+        const FLAG = "error";
+        if (LOGGERS[FLAG]) {
+            return LOGGERS[FLAG];
+        }
+        const options: bunyan.LoggerOptions = {
+            name: "error",
+            level: "error",
+            streams: [{
+                type: "rotating-file",
+                path: `${config.paths.log}/error.log`,
+                period: "1m",
+                count: 6
+            }, {
+                stream: process.stderr
+            }]
+        };
+        LOGGERS[FLAG] = bunyan.createLogger(options);
+        return LOGGERS[FLAG];
+    })();
+    importCache("error");
+    systemLogger = conventionalLog({
+        name: "system"
+    });
+    systemLogger.error = errorLogger.error;
+    systemLogger.fatal = errorLogger.fatal;
+    importCache("system");
+    accessLogger = conventionalLog({
+        name: "access"
+    });
+    importCache("access");
+    apiLogger = conventionalLog({
+        name: "api"
+    });
+    importCache("api");
+    downloadLogger = conventionalLog({
+        name: "download"
+    });
+    importCache("download");
+    return [
+        systemLogger, accessLogger, apiLogger, downloadLogger, errorLogger
+    ];
+};
+// Init End
 
 const getIp = (req: Request) => {
     const socket = req.socket;

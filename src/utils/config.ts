@@ -26,3 +26,6 @@ for (const item of Object.keys(configModule.paths)) {
 }
 
 export const config = configModule.getConfig() as ConfigObj;
+
+import { systemLogger } from "../modules/common/helper/log";
+systemLogger.debug(config);
