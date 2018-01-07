@@ -2,7 +2,7 @@ import * as express from "express";
 import * as session from "express-session";
 import * as bodyParser from "body-parser";
 import * as cookieParser from "cookie-parser";
-import { access, error } from "./modules/common/middlewares/logger.middleware";
+import { error } from "./modules/common/middlewares/logger.middleware";
 
 let server: express.Express;
 
