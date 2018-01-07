@@ -5,7 +5,7 @@ import {
 import { LoginDto } from "./auth.dto";
 import { Model as UserModel, UserDoc  } from "@models/User";
 
-@Controller("auth")
+@Controller("api/v1/auth")
 export class AuthController {
 
     @Post("login")

@@ -12,7 +12,7 @@ import * as hasha from "hasha";
 import fs = require("fs-extra");
 import multer  = require("multer");
 
-@Controller("goods")
+@Controller("api/v1/goods")
 export class GoodsController {
 
     @Post()

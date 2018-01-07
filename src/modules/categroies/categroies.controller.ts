@@ -12,7 +12,7 @@ import { Model as GoodsModels } from "@models/Good";
 
 import md5 = require("md5");
 
-@Controller("categroies")
+@Controller("api/v1/categroies")
 export class CategroiesController {
 
     @HttpCode(HttpStatus.OK)

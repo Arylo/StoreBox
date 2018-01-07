@@ -27,7 +27,7 @@ export class ControllersModule {
         consumer
             .apply([ UploadFileMiddleware ])
             .forRoutes(
-                { path: "/goods", method: RequestMethod.POST }
+                { path: "/api/v1/goods", method: RequestMethod.POST }
             )
             .apply([ ApiLoggerMiddleware ])
             .forRoutes(...controllers.filter((item) => {

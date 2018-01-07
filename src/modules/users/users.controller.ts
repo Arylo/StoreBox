@@ -4,7 +4,7 @@ import {
 import { Model as UserModel, IUser } from "@models/User";
 import { CreateUserDto, ModifyPasswordDto, CommonUserDot } from "./users.dto";
 
-@Controller("users")
+@Controller("api/v1/users")
 export class UsersController {
 
     @Get()

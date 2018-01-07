@@ -42,7 +42,9 @@ export class FilesController {
             throw new BadRequestException("Disallow download the File");
         }
         res.download(filepath, good.originname, (err) => {
-            throw new BadRequestException(err.message);
+            if (err) {
+                // Recode Error
+            }
         });
     }
 }

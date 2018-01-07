@@ -7,7 +7,7 @@ import {
 export class AuthenticationMiddleware implements NestMiddleware {
     public resolve(): ExpressMiddleware {
         return (req, res, next) => {
-            if (req.url === "/auth/login") {
+            if (req.url === "/api/v1/auth/login") {
                 return next();
             }
             if (/^\/files/.test(req.url)) {

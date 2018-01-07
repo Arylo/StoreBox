@@ -24,11 +24,6 @@ export const initExpress = () => {
         saveUninitialized: true,
         cookie: { secure: false, maxAge: 1800 * 1000 }
     }));
-    mServer.use(/^(?!\/files|\/api\/v1).*/, access);
-    mServer.all("/files/*", (req, res, next) => {
-        res.redirect(`/api/v1${req.url}`);
-        next();
-    });
     mServer.use(error);
 
     server = mServer;

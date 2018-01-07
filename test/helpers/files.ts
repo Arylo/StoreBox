@@ -1,9 +1,9 @@
 import supertest = require("supertest");
 
-export const uploadFile = async (
+export const uploadFile = (
     request: supertest.SuperTest<supertest.Test>, filepath: string
 ) => {
-    return await request.post("/goods")
+    return request.post("/api/v1/goods")
         .attach("file", filepath)
         .then();
 };

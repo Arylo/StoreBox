@@ -8,7 +8,6 @@ const bootstrap = async () => {
     const server = initExpress();
 
     const app = await NestFactory.create(ApplicationModule, server);
-    app.setGlobalPrefix("/api/v1");
     app.useGlobalPipes(new ValidationPipe());
     await app.listen(config.server.port);
     return app.getHttpServer();

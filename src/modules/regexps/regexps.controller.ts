@@ -4,7 +4,7 @@ import {
 import { Model as RegexpModel } from "@models/Regexp";
 import { NewRegexp, EditRegexpDot, CommonRegexpDot } from "./regexps.dto";
 
-@Controller("regexps")
+@Controller("api/v1/regexps")
 export class RegexpsController {
 
     @HttpCode(HttpStatus.OK)

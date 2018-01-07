@@ -24,7 +24,7 @@ describe("Categroies Api", () => {
         const ctx = {
             name: faker.name.firstName()
         };
-        const { body: result } = await request.post("/categroies")
+        const { body: result } = await request.post("/api/v1/categroies")
             .send(ctx)
             .then();
         result.should.have.properties({
@@ -43,7 +43,7 @@ describe("Categroies Api", () => {
                 faker.random.words()
             ]
         };
-        const { body: result } = await request.post("/categroies")
+        const { body: result } = await request.post("/api/v1/categroies")
             .send(ctx)
             .then();
         result.should.have.properties({
@@ -70,7 +70,7 @@ describe("Categroies Api", () => {
                 }
             ].map((item) => JSON.stringify(item))
         };
-        const { body: result } = await request.post("/categroies")
+        const { body: result } = await request.post("/api/v1/categroies")
             .send(ctx)
             .then();
         result.should.have.properties({

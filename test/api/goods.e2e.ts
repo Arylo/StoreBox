@@ -31,7 +31,7 @@ describe("Goods Api", () => {
 
     before(async () => {
         const obj = await UsersModel.addUser(user.name, user.pass);
-        const { body: result } = await request.post("/auth/login")
+        const { body: result } = await request.post("/api/v1/auth/login")
             .send({
                 username: user.name, password: user.pass
             }).then();
@@ -54,7 +54,7 @@ describe("Goods Api", () => {
         result.should.have.property("originname", path.basename(filepath));
 
         // Get
-        result = await request.get(`/goods/${result._id}`).then();
+        result = await request.get(`/api/v1/goods/${result._id}`).then();
         result = result.body;
         result.should.have.properties([
             "_id", "createdAt", "updatedAt",

@@ -24,9 +24,9 @@ const start = async (modules: any[]) => {
 };
 
 export const init = () => {
-    return start([ControllersModule]);
+    return start([ ControllersModule ]);
 };
 
 export const initWithAuth = async () => {
-    return start([ApplicationModule]);
+    return start([ ApplicationModule ]);
 };
