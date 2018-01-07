@@ -9,14 +9,21 @@ import { Model as ValuesModel, ValueDoc, IValues } from "@models/Value";
 import { NewCategroyDto, EditCategroyDto } from "./categroies.dto";
 import { CreateValueDto, EditValueDto } from "../values/values.dto";
 import { Model as GoodsModels } from "@models/Good";
+import {
+    ApiBearerAuth, ApiUseTags, ApiResponse, ApiImplicitParam, ApiOperation
+} from "@nestjs/swagger";
 
 import md5 = require("md5");
 
 @Controller("api/v1/categroies")
+@ApiUseTags("categroies")
+@ApiBearerAuth()
+@ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: "Unauthorized" })
 export class CategroiesController {
 
-    @HttpCode(HttpStatus.OK)
     @Get()
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Get Categroy List" })
     public async list() {
         return await CategroiesModel.find()
             .select("-attributes")
@@ -24,6 +31,7 @@ export class CategroiesController {
     }
 
     @Post()
+    @ApiOperation({ title: "Add Categroy" })
     public async add(@Res() res, @Body() ctx: NewCategroyDto) {
         if (ctx.pid && !(await CategroiesModel.findById(ctx.pid).exec())) {
             throw new BadRequestException("The Parent Categroy isnt exist!");
@@ -69,6 +77,8 @@ export class CategroiesController {
     }
 
     @Get("/:id")
+    @ApiOperation({ title: "Get Categroy Info" })
+    @ApiImplicitParam({ name: "id", description: "Categroy ID" })
     public async get(@Res() res, @Param("id") id) {
         let obj: ICategroy;
         try {
@@ -95,6 +105,8 @@ export class CategroiesController {
     }
 
     @Post("/:id/attributes")
+    @ApiOperation({ title: "Add Attribute" })
+    @ApiImplicitParam({ name: "id", description: "Categroy ID" })
     public async addAttr(
         @Res() res, @Param("id") id, @Body() ctx: CreateValueDto
     ) {
@@ -123,6 +135,9 @@ export class CategroiesController {
     }
 
     @Post("/:id/attributes/:aid")
+    @ApiOperation({ title: "Edit Categroy" })
+    @ApiImplicitParam({ name: "id", description: "Categroy ID" })
+    @ApiImplicitParam({ name: "aid", description: "Attribute ID" })
     public async editAttr(
         @Res() res, @Param("aid") aid, @Body() ctx: EditValueDto
     ) {
@@ -134,7 +149,10 @@ export class CategroiesController {
         res.status(HttpStatus.OK).json();
     }
 
-    @Post("/:id/attributes/:aid/delete")
+    @Get("/:id/attributes/:aid/delete")
+    @ApiOperation({ title: "Delete Categroy" })
+    @ApiImplicitParam({ name: "id", description: "Categroy ID" })
+    @ApiImplicitParam({ name: "aid", description: "Attribute ID" })
     public async deleteAttr(@Param("id") id, @Param("aid") aid) {
         try {
             await CategroiesModel.findByIdAndUpdate(id, {
@@ -155,6 +173,8 @@ export class CategroiesController {
     }
 
     @Post("/:id")
+    @ApiOperation({ title: "Edit Categroy" })
+    @ApiImplicitParam({ name: "id", description: "Categroy ID" })
     public async edit(
         @Res() res, @Param("id") id, @Body() ctx: EditCategroyDto
     ) {
@@ -186,7 +206,9 @@ export class CategroiesController {
         res.status(HttpStatus.OK).json();
     }
 
-    @Post("/:id/delete")
+    @Get("/:id/delete")
+    @ApiOperation({ title: "Delete Categroy" })
+    @ApiImplicitParam({ name: "id", description: "Categroy ID" })
     public async delete(@Res() res, @Param("id") id) {
         try {
             await CategroiesModel.findByIdAndRemove(id).exec();

@@ -9,7 +9,7 @@
     "build": "npm run clean && mkdirp dist && npm run tsc && cp -r config ./dist",
     "prestart": "npm run build",
     "start-svr": "node -r tsconfig-paths/register index.js",
-    "start-dev": "cross-env NODE_ENV=development npm run start-svr",
+    "start:dev": "npm run prestart && cross-env NODE_ENV=development npm run start-svr",
     "start": "cross-env NODE_ENV=production npm run start-svr",
     "pretest": "npm run build && cp -r test ./dist",
     "test-spec": "cross-env NODE_ENV=test mocha",
@@ -58,6 +58,7 @@
   "dependencies": {
     "@nestjs/common": "^4.5.1",
     "@nestjs/core": "^4.5.1",
+    "@nestjs/swagger": "^1.1.3",
     "body-parser": "^1.18.2",
     "bunyan": "^1.8.12",
     "class-validator": "^0.7.3",

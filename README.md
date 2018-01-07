@@ -6,6 +6,20 @@ Store PandoraBox Firmware Images and its packages
 [![Coveralls](https://img.shields.io/coveralls/github/Arylo/StoreBox.svg?style=flat-square)](https://coveralls.io/github/Arylo/StoreBox)
 [![license](https://img.shields.io/github/license/Arylo/StoreBox.svg?style=flat-square)](https://github.com/Arylo/storebox)
 
+# Api Docs
+
+1. Run command on your shell
+
+```bash
+npm run start:dev
+```
+
+2. Open the api doc url(default port: 9000) on your browser
+
+```
+http://127.0.0.1:9000/docs
+```
+
 # License (MIT)
 
 >  Copyright (C) 2017 by AryloYeung

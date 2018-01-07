@@ -2,6 +2,10 @@ import {
     Controller, Req, Res, Body, Get, Post, Param, Session,
     HttpStatus, BadRequestException
 } from "@nestjs/common";
+import {
+    ApiBearerAuth, ApiUseTags, ApiResponse, ApiOperation, ApiImplicitParam,
+    ApiImplicitBody
+} from "@nestjs/swagger";
 import { CreateValueDto, EditValueDto } from "../values/values.dto";
 import { IValues, Model as ValuesModel } from "@models/Value";
 import { Model as GoodsModels } from "@models/Good";
@@ -13,9 +17,13 @@ import fs = require("fs-extra");
 import multer  = require("multer");
 
 @Controller("api/v1/goods")
+@ApiUseTags("goods")
+@ApiBearerAuth()
+@ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: "Unauthorized" })
 export class GoodsController {
 
     @Post()
+    @ApiOperation({ title: "Upload Good" })
     public async add(@Req() req, @Res() res, @Session() session) {
         const file: Express.Multer.File = req.file;
         const regexpCount = (await RegexpModel.list()).length;
@@ -56,6 +64,8 @@ export class GoodsController {
     }
 
     @Get("/:id")
+    @ApiOperation({ title: "Get Good Info" })
+    @ApiImplicitParam({ name: "id", description: "Good ID" })
     public async get(@Res() res, @Param("id") id) {
         let obj;
         try {
@@ -71,6 +81,8 @@ export class GoodsController {
     }
 
     @Post("/:id/attributes")
+    @ApiOperation({ title: "Add Attributes" })
+    @ApiImplicitParam({ name: "id", description: "Good ID" })
     public async addAttr(
         @Res() res, @Param("id") id, @Body() ctx: CreateValueDto
     ) {
@@ -99,6 +111,9 @@ export class GoodsController {
     }
 
     @Post("/:id/attributes/:aid")
+    @ApiOperation({ title: "Edit Attribute" })
+    @ApiImplicitParam({ name: "id", description: "Good ID" })
+    @ApiImplicitParam({ name: "aid", description: "Attribute ID" })
     public async editAttr(
         @Res() res, @Param("aid") aid, @Body() ctx: EditValueDto
     ) {
@@ -111,6 +126,9 @@ export class GoodsController {
     }
 
     @Get("/:id/attributes/:aid/delete")
+    @ApiOperation({ title: "Delete Attribute" })
+    @ApiImplicitParam({ name: "id", description: "Good ID" })
+    @ApiImplicitParam({ name: "aid", description: "Attribute ID" })
     public async deleteAttr(@Param("id") id, @Param("aid") aid) {
         try {
             await GoodsModels.findByIdAndUpdate(id, {

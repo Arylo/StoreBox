@@ -2,14 +2,9 @@ import { Request, Response } from "express";
 import pathExists = require("path-exists");
 import fs = require("fs-extra");
 import { config } from "@utils/config";
+import { isDebug } from "./env";
 import bunyan = require("bunyan");
 import useragent = require("useragent");
-
-// Common Function Start
-const isDebug = () => {
-    const envValues = [ "development", "test" ];
-    return envValues.find((item) => item === process.env.NODE_ENV);
-};
 
 // Logger Cache Factory Before Log File Create
 interface ICachedSet {

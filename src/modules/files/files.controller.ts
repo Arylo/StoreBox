@@ -8,6 +8,7 @@ import { Response } from "express";
 import pathExists = require("path-exists");
 import fs = require("fs-extra");
 import { DownlaodDto } from "./files.dto";
+import { ApiUseTags, ApiImplicitParam, ApiOperation } from "@nestjs/swagger";
 
 (async () => {
     if (!(await pathExists(config.paths.upload))) {
@@ -15,10 +16,14 @@ import { DownlaodDto } from "./files.dto";
     }
 })();
 
+@ApiUseTags("files")
 @Controller("files")
 export class FilesController {
 
     @Get("/categories/:cid/goods/:id")
+    @ApiOperation({ title: "Download File" })
+    @ApiImplicitParam({ name: "cid", description: "Categroy ID" })
+    @ApiImplicitParam({ name: "id", description: "Good ID" })
     public async downloadFile(
         @Req() req, @Res() res: Response, @Param() params: DownlaodDto
     ) {
