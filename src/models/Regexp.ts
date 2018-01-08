@@ -43,22 +43,16 @@ RegexpSchema.static("removeRegexp", (id: ObjectId) => {
 });
 
 RegexpSchema.static("link", (id: ObjectId, linkId: ObjectId | false) => {
-    let p: Promise<RegexpDoc>;
+    cache.clear();
     if (!linkId) {
-        cache.clear();
-        p = Model.findByIdAndUpdate(id, {
+        return Model.findByIdAndUpdate(id, {
             "$unset": { link: 0 }
         }).exec();
     } else {
-        p = CM.findById(linkId).exec().then((categroy) => {
-            if (!categroy) {
-                return Promise.reject("The Categroy ID is not exist");
-            }
-            cache.clear();
-            return Model.findByIdAndUpdate(id, { link: linkId }).exec();
-        });
+        return Model.findByIdAndUpdate(
+            id, { link: linkId }, { runValidators: true }
+        ).exec();
     }
-    return p;
 });
 
 RegexpSchema.static("list", () => {
@@ -66,7 +60,7 @@ RegexpSchema.static("list", () => {
     if (cache.get(FLAG_LIST)) {
         return cache.get(FLAG_LIST);
     }
-    cache.put(FLAG_LIST, Model.find().populate("link").exec());
+    cache.put(FLAG_LIST, Model.find({ }).populate("link").exec());
     return cache.get(FLAG_LIST);
 });
 
@@ -120,3 +114,30 @@ interface IRegexpModel<T extends RegexpDoc> extends M<T> {
 }
 
 export const Model = model(Flag, RegexpSchema) as IRegexpModel<RegexpDoc>;
+
+Model.schema.path("name").validate({
+    isAsync: true,
+    validator: async (value, respond) => {
+        const result = await Model.findOne({ name: value }).exec();
+        return !result;
+    },
+    message: "The name is exist"
+});
+
+Model.schema.path("value").validate({
+    isAsync: true,
+    validator: async (value, respond) => {
+        const result = await Model.findOne({ value: value }).exec();
+        return !result;
+    },
+    message: "The value is exist"
+});
+
+Model.schema.path("link").validate({
+    isAsync: true,
+    validator: async (value, respond) => {
+        const result = await CM.findById(value).exec();
+        return !!result;
+    },
+    message: "The Categroy ID is not exist"
+});
