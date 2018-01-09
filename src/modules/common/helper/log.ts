@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import pathExists = require("path-exists");
 import fs = require("fs-extra");
 import { config } from "@utils/config";
-import { isDebug } from "./env";
+import { isTest } from "./env";
 import bunyan = require("bunyan");
 import useragent = require("useragent");
 
@@ -41,7 +41,7 @@ const importCache = (name: string) => {
     return logger;
 };
 
-// Logger Factory
+// region Logger Factory
 const LOGGERS: { [key: string]: bunyan } = { };
 const conventionalLog = (opts) => {
     if (LOGGERS[opts.name]) {
@@ -64,9 +64,9 @@ const conventionalLog = (opts) => {
     LOGGERS[opts.name] = bunyan.createLogger(options);
     return LOGGERS[opts.name];
 };
-// Common Function Start
+// endregion Logger Factory
 
-// Loggers Start
+// region Loggers
 export let systemLogger: bunyan = cachedLog("system") as any;
 
 export let accessLogger: bunyan = cachedLog("access") as any;
@@ -76,21 +76,9 @@ export let apiLogger: bunyan = cachedLog("api") as any;
 export let downloadLogger: bunyan = cachedLog("download") as any;
 
 export let errorLogger: bunyan = cachedLog("error") as any;
-// Loggers End
+// endregion Loggers
 
-// Init Strat
-(async () => {
-    try {
-        if (!(await pathExists(config.paths.log))) {
-            fs.mkdirp(config.paths.log);
-        }
-    } catch (error) {
-        throw error;
-    }
-    (await initLoggers()).map((logger) => {
-        logger.level(isDebug() ? "trace" : "info");
-    });
-})();
+// region Init
 const initLoggers = () => {
     errorLogger = (() => {
         const FLAG = "error";
@@ -113,6 +101,9 @@ const initLoggers = () => {
         return LOGGERS[FLAG];
     })();
     importCache("error");
+    if (isTest()) {
+        return;
+    }
     systemLogger = conventionalLog({
         name: "system"
     });
@@ -135,7 +126,18 @@ const initLoggers = () => {
         systemLogger, accessLogger, apiLogger, downloadLogger, errorLogger
     ];
 };
-// Init End
+
+(async () => {
+    try {
+        if (!(await pathExists(config.paths.log))) {
+            fs.mkdirp(config.paths.log);
+        }
+    } catch (error) {
+        throw error;
+    }
+    await initLoggers();
+})();
+// endregion Init
 
 const getIp = (req: Request) => {
     const socket = req.socket;
