@@ -109,21 +109,21 @@ describe("User Model", () => {
         });
     });
 
-    it("Login", () => {
+    it("Vaild", () => {
         return UsersModel.isVaild(user.username, user.password)
             .then((result) => {
                 result.should.be.not.empty();
             });
     });
 
-    it("Login which unexist user", () => {
+    it("Vaild which unexist user", () => {
         const str = md5(Date.now() + "");
         return UsersModel.isVaild(str, str).then(null, (result) => {
             should(result).be.not.empty();
         });
     });
 
-    it("Login which use wrong password", () => {
+    it("Vaild which use wrong password", () => {
         const pass = user.password.replace(/[0-5]/g, "0");
         return UsersModel.isVaild(user.username, pass).then(null, (result) => {
             should(result).be.not.empty();
