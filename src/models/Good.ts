@@ -9,15 +9,16 @@ export const Flag = "goods";
 const Definition: SchemaDefinition = {
     limitAt: Date,
     hidden: { type: Boolean, default: true },
-    active: { type: Boolean, default: false },
-    md5sum: String, sha256sum: String,
-    filename: String,
+    active: { type: Boolean, default: true },
+    md5sum: { type: String, required: true},
+    sha256sum: { type: String, required: true},
+    filename: { type: String, required: true },
     originname: { type: String, required: true },
     categroy: {
         type: SchemaTypes.ObjectId,
-        ref: CategroyFlag
+        ref: CategroyFlag,
+        required: true
     },
-    version: { type: String, required: true },
     uploader: {
         type: SchemaTypes.ObjectId,
         ref: UserFlag,

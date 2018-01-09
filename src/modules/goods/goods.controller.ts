@@ -1,29 +1,88 @@
 import {
-    Controller, Post, Res, Body, Get, HttpStatus, HttpCode, HttpException, Param
+    Controller, Req, Res, Body, Get, Post, Param, Session,
+    HttpStatus, BadRequestException
 } from "@nestjs/common";
-import { Model as GoodsModels } from "@models/Good";
-import { IValues, Model as ValuesModel } from "@models/Value";
+import {
+    ApiBearerAuth, ApiUseTags, ApiResponse, ApiOperation, ApiImplicitParam,
+    ApiImplicitBody
+} from "@nestjs/swagger";
 import { CreateValueDto, EditValueDto } from "../values/values.dto";
+import { IValues, Model as ValuesModel } from "@models/Value";
+import { Model as GoodsModels } from "@models/Good";
+import { Model as RegexpModel } from "@models/Regexp";
+import { config } from "@utils/config";
 
-@Controller("goods")
+import * as hasha from "hasha";
+import fs = require("fs-extra");
+import multer  = require("multer");
+
+@Controller("api/v1/goods")
+@ApiUseTags("goods")
+@ApiBearerAuth()
+@ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: "Unauthorized" })
 export class GoodsController {
 
+    @Post()
+    @ApiOperation({ title: "Upload Good" })
+    public async add(@Req() req, @Res() res, @Session() session) {
+        const file: Express.Multer.File = req.file;
+        const regexpCount = (await RegexpModel.list()).length;
+        if (regexpCount === 0) {
+            fs.remove(file.path);
+            throw new BadRequestException("Lost The Good Role");
+        }
+        const catgroies = await RegexpModel.discern(req.file.originalname);
+        if (catgroies.length !== 1) {
+            fs.remove(file.path);
+            if (catgroies.length === 0) {
+                throw new BadRequestException("Lost Role for the file");
+            } else {
+                throw new BadRequestException("Much Role for the file");
+            }
+        }
+        let goodObj;
+        try {
+            const md5sum =
+                hasha.fromFileSync(file.path, { algorithm: "md5" });
+            const sha256sum =
+                hasha.fromFileSync(file.path, { algorithm: "sha256" });
+            goodObj = await GoodsModels.create({
+                filename: file.filename,
+                originname: file.originalname,
+                categroy: catgroies[0]._id,
+                uploader: session.loginUserId,
+                md5sum, sha256sum,
+                active: true
+            });
+        } catch (error) {
+            throw new BadRequestException(error.toString());
+        }
+        const newFilePath =
+            `${config.paths.upload}/${catgroies[0]._id}/${file.filename}`;
+        fs.move(file.path, newFilePath);
+        res.status(HttpStatus.CREATED).json(goodObj);
+    }
+
     @Get("/:id")
+    @ApiOperation({ title: "Get Good Info" })
+    @ApiImplicitParam({ name: "id", description: "Good ID" })
     public async get(@Res() res, @Param("id") id) {
         let obj;
         try {
             obj = await GoodsModels.findById(id)
-                .populate("uploader")
+                .populate("uploader", "nickname")
                 .populate("attributes")
-                .populate("categroy")
+                .populate("categroy", "name attributes tags")
                 .exec();
         } catch (error) {
-            throw new HttpException(error.toString(), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(error.toString());
         }
         res.status(HttpStatus.OK).json(obj);
     }
 
     @Post("/:id/attributes")
+    @ApiOperation({ title: "Add Attributes" })
+    @ApiImplicitParam({ name: "id", description: "Good ID" })
     public async addAttr(
         @Res() res, @Param("id") id, @Body() ctx: CreateValueDto
     ) {
@@ -41,9 +100,7 @@ export class GoodsController {
                 return set;
             }, attrSet);
             if (attrSet.has(ctx.key)) {
-                throw new HttpException(
-                    "The Attributes is exist", HttpStatus.BAD_REQUEST
-                );
+                throw new BadRequestException("The Attributes is exist");
             }
         }
         const newAttr = await ValuesModel.create(ctx);
@@ -54,25 +111,31 @@ export class GoodsController {
     }
 
     @Post("/:id/attributes/:aid")
+    @ApiOperation({ title: "Edit Attribute" })
+    @ApiImplicitParam({ name: "id", description: "Good ID" })
+    @ApiImplicitParam({ name: "aid", description: "Attribute ID" })
     public async editAttr(
         @Res() res, @Param("aid") aid, @Body() ctx: EditValueDto
     ) {
         try {
             await ValuesModel.findByIdAndUpdate(aid, ctx).exec();
         } catch (error) {
-            throw new HttpException(error.toString(), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(error.toString());
         }
         res.status(HttpStatus.OK).json();
     }
 
     @Get("/:id/attributes/:aid/delete")
+    @ApiOperation({ title: "Delete Attribute" })
+    @ApiImplicitParam({ name: "id", description: "Good ID" })
+    @ApiImplicitParam({ name: "aid", description: "Attribute ID" })
     public async deleteAttr(@Param("id") id, @Param("aid") aid) {
         try {
             await GoodsModels.findByIdAndUpdate(id, {
                 $pull: { attributes: aid}
             }).exec();
         } catch (error) {
-            throw new HttpException(error.toString(), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(error.toString());
         }
         try {
             await ValuesModel.findByIdAndRemove(aid).exec();
@@ -80,7 +143,7 @@ export class GoodsController {
             await GoodsModels.findByIdAndUpdate(
                 id, { $push: { attributes: aid } }
             ).exec();
-            throw new HttpException(error.toString(), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(error.toString());
         }
         return { };
     }

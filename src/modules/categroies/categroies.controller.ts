@@ -1,5 +1,6 @@
 import {
-    Controller, Post, Res, Body, Get, HttpStatus, HttpCode, HttpException, Param
+    Controller, Post, Res, Body, Get, HttpStatus, HttpCode, Param,
+    BadRequestException
 } from "@nestjs/common";
 import {
     Model as CategroiesModel, CategroyDoc, ICategroy
@@ -8,14 +9,21 @@ import { Model as ValuesModel, ValueDoc, IValues } from "@models/Value";
 import { NewCategroyDto, EditCategroyDto } from "./categroies.dto";
 import { CreateValueDto, EditValueDto } from "../values/values.dto";
 import { Model as GoodsModels } from "@models/Good";
+import {
+    ApiBearerAuth, ApiUseTags, ApiResponse, ApiImplicitParam, ApiOperation
+} from "@nestjs/swagger";
 
 import md5 = require("md5");
 
-@Controller("categroies")
+@Controller("api/v1/categroies")
+@ApiUseTags("categroies")
+@ApiBearerAuth()
+@ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: "Unauthorized" })
 export class CategroiesController {
 
-    @HttpCode(HttpStatus.OK)
     @Get()
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Get Categroy List" })
     public async list() {
         return await CategroiesModel.find()
             .select("-attributes")
@@ -23,26 +31,37 @@ export class CategroiesController {
     }
 
     @Post()
+    @ApiOperation({ title: "Add Categroy" })
     public async add(@Res() res, @Body() ctx: NewCategroyDto) {
         if (ctx.pid && !(await CategroiesModel.findById(ctx.pid).exec())) {
-            throw new HttpException(
-                "The Parent Categroy isnt exist!", HttpStatus.BAD_REQUEST
-            );
+            throw new BadRequestException("The Parent Categroy isnt exist!");
         }
         let attrsIds = [ ];
         if (ctx.attributes) {
             const attributes = ctx.attributes.map((str) => {
-                const obj = JSON.parse(str);
-                const { key, value } = obj;
+                let key, value;
+                try {
+                    const obj = JSON.parse(str);
+                    key = obj.key;
+                    value = obj.value;
+                } catch (error) {
+                    throw new BadRequestException(error.toString());
+                }
                 return { key, value };
             });
-            const attrs = await ValuesModel.create(attributes);
+            let attrs = [ ];
+            try {
+                attrs = await ValuesModel.create(attributes);
+            } catch (error) {
+                throw new BadRequestException(error.toString());
+            }
             attrsIds = attrsIds.concat(
                 attrs.map((item) => item.toObject()._id)
             );
         }
+        let result;
         try {
-            await CategroiesModel.create({
+            result = await CategroiesModel.create({
                 name: ctx.name,
                 tags: ctx.tags,
                 attributes: attrsIds,
@@ -52,12 +71,14 @@ export class CategroiesController {
             attrsIds.forEach((id) => {
                 ValuesModel.findByIdAndRemove(id).exec();
             });
-            throw new HttpException(error.toString(), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(error.toString());
         }
-        res.status(HttpStatus.CREATED).send({ });
+        res.status(HttpStatus.CREATED).send(result);
     }
 
     @Get("/:id")
+    @ApiOperation({ title: "Get Categroy Info" })
+    @ApiImplicitParam({ name: "id", description: "Categroy ID" })
     public async get(@Res() res, @Param("id") id) {
         let obj: ICategroy;
         try {
@@ -69,7 +90,7 @@ export class CategroiesController {
                 .exec();
             obj = doc.toObject();
         } catch (error) {
-            throw new HttpException(error.toString(), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(error.toString());
         }
         obj.goods = (
             await GoodsModels.find({ categroy: obj._id })
@@ -84,6 +105,8 @@ export class CategroiesController {
     }
 
     @Post("/:id/attributes")
+    @ApiOperation({ title: "Add Attribute" })
+    @ApiImplicitParam({ name: "id", description: "Categroy ID" })
     public async addAttr(
         @Res() res, @Param("id") id, @Body() ctx: CreateValueDto
     ) {
@@ -101,9 +124,7 @@ export class CategroiesController {
                 key: md5(ctx.key)
             };
             if (attrSet.has(curValue.key)) {
-                throw new HttpException(
-                    "The Attributes is exist", HttpStatus.BAD_REQUEST
-                );
+                throw new BadRequestException("The Attributes is exist");
             }
         }
         const newAttr = await ValuesModel.create(ctx);
@@ -114,25 +135,31 @@ export class CategroiesController {
     }
 
     @Post("/:id/attributes/:aid")
+    @ApiOperation({ title: "Edit Categroy" })
+    @ApiImplicitParam({ name: "id", description: "Categroy ID" })
+    @ApiImplicitParam({ name: "aid", description: "Attribute ID" })
     public async editAttr(
         @Res() res, @Param("aid") aid, @Body() ctx: EditValueDto
     ) {
         try {
             await ValuesModel.findByIdAndUpdate(aid, ctx).exec();
         } catch (error) {
-            throw new HttpException(error.toString(), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(error.toString());
         }
         res.status(HttpStatus.OK).json();
     }
 
-    @Post("/:id/attributes/:aid/delete")
+    @Get("/:id/attributes/:aid/delete")
+    @ApiOperation({ title: "Delete Categroy" })
+    @ApiImplicitParam({ name: "id", description: "Categroy ID" })
+    @ApiImplicitParam({ name: "aid", description: "Attribute ID" })
     public async deleteAttr(@Param("id") id, @Param("aid") aid) {
         try {
             await CategroiesModel.findByIdAndUpdate(id, {
                 $pull: { attributes: aid}
             }).exec();
         } catch (error) {
-            throw new HttpException(error.toString(), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(error.toString());
         }
         try {
             await ValuesModel.findByIdAndRemove(aid).exec();
@@ -140,12 +167,14 @@ export class CategroiesController {
             await CategroiesModel.findByIdAndUpdate(
                 id, { $push: { attributes: aid } }
             ).exec();
-            throw new HttpException(error.toString(), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(error.toString());
         }
         return { };
     }
 
     @Post("/:id")
+    @ApiOperation({ title: "Edit Categroy" })
+    @ApiImplicitParam({ name: "id", description: "Categroy ID" })
     public async edit(
         @Res() res, @Param("id") id, @Body() ctx: EditCategroyDto
     ) {
@@ -164,26 +193,27 @@ export class CategroiesController {
                     path: "pid", populate: { path: "pid" }
                 }).exec();
             if (!parentCategroy) {
-                throw new HttpException(
-                    "The Parent Categroy isnt exist!", HttpStatus.BAD_REQUEST
+                throw new BadRequestException(
+                    "The Parent Categroy isnt exist!"
                 );
             }
-            // TODO parent Dead Loop
         }
         try {
             await CategroiesModel.findByIdAndUpdate(id, ctx).exec();
         } catch (error) {
-            throw new HttpException(error.toString(), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(error.toString());
         }
         res.status(HttpStatus.OK).json();
     }
 
-    @Post("/:id/delete")
+    @Get("/:id/delete")
+    @ApiOperation({ title: "Delete Categroy" })
+    @ApiImplicitParam({ name: "id", description: "Categroy ID" })
     public async delete(@Res() res, @Param("id") id) {
         try {
             await CategroiesModel.findByIdAndRemove(id).exec();
         } catch (error) {
-            throw new HttpException(error.toString(), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(error.toString());
         }
         res.status(HttpStatus.OK).json();
     }

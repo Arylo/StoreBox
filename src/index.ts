@@ -1,30 +1,31 @@
-import * as express from "express";
-import * as session from "express-session";
-import * as bodyParser from "body-parser";
-import * as cookieParser from "cookie-parser";
 import { NestFactory } from "@nestjs/core";
-
+import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 import { config } from "@utils/config";
+import { initExpress } from "./express";
 import { ApplicationModule } from "./modules/app.module";
+import { ValidationPipe } from "./modules/common/pipes/validation.pipe";
+import { systemLogger } from "./modules/common/helper/log";
+import { isDevelopment } from "./modules/common/helper/env";
 
 const bootstrap = async () => {
-    const server = express();
-
-    server.enable("trust proxy");
-
-    server.use(bodyParser.json());
-    server.use(bodyParser.urlencoded({ extended: false }));
-    server.use(cookieParser());
-    server.use(session({
-        secret: "packagebox",
-        resave: false,
-        saveUninitialized: true,
-        cookie: { secure: false, maxAge: 1800 * 1000 }
-    }));
+    const server = initExpress();
 
     const app = await NestFactory.create(ApplicationModule, server);
-    app.setGlobalPrefix("/api/v1");
+    app.useGlobalPipes(new ValidationPipe());
+
+    if (isDevelopment()) {
+        const options = new DocumentBuilder()
+            .setTitle("StoreBox Apis")
+            .setVersion("1.0.0")
+            .addBearerAuth()
+            .build();
+        const document = SwaggerModule.createDocument(app, options);
+        SwaggerModule.setup("/docs", app, document);
+        systemLogger.debug("Api Document path in `/docs`");
+    }
+
     await app.listen(config.server.port);
+    systemLogger.info(`Server Listening ${config.server.port} Port`);
     return app.getHttpServer();
 };
 

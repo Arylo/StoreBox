@@ -1,24 +1,22 @@
 import { Module, MiddlewaresConsumer } from "@nestjs/common";
+// Modules
 import { DatabaseModule } from "./database/database.module";
-import { UsersController } from "./users/users.controller";
-import { AuthController } from "./users/auth.controller";
-import { AuthenticationMiddleware } from "./authentication.middleware";
-import { RegexpsController } from "./regexps/regexps.controller";
-import { CategroiesController } from "./categroies/categroies.controller";
-import { GoodsController } from "./goods/goods.controller";
-
-const controllers = [
-    UsersController, AuthController,
-    RegexpsController, CategroiesController, GoodsController
-];
+import { ControllersModule, controllers } from "./controllers.module";
+// Controllers
+import { FilesController } from "./files/files.controller";
+// Middlewares
+import {
+    AuthenticationMiddleware
+} from "./common/middlewares/authentication.middleware";
 
 @Module({
-    modules: [DatabaseModule],
-    controllers
+    modules: [ DatabaseModule, ControllersModule ]
 })
 export class ApplicationModule {
     public configure(consumer: MiddlewaresConsumer) {
         consumer.apply(AuthenticationMiddleware)
-            .forRoutes(...controllers);
+            .forRoutes(...controllers.filter((item) => {
+                return item !== FilesController;
+            }));
     }
 }

@@ -1,10 +1,11 @@
 --require should
+--require ts-node/register
 --require tsconfig-paths/register
 --require source-map-support/register
 --reporter mochawesome
 --reporter-options reportDir=./coverage/mochawesome
 --recursive
---slow 5000
 --timeout 10000
-./dist/test/**/*.spec.js
-./dist/test/**/*.e2e.js
+--exit
+./test/**/*.spec.ts
+./test/**/*.e2e.ts

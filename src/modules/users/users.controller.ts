@@ -1,11 +1,24 @@
-import { Controller, Get, Post, Body, Res, HttpStatus, Req } from "@nestjs/common";
+import {
+    Controller, Get, Post, Body, Res, HttpStatus, Req, BadRequestException,
+    Param
+} from "@nestjs/common";
 import { Model as UserModel, IUser } from "@models/User";
 import { CreateUserDto, ModifyPasswordDto, CommonUserDot } from "./users.dto";
+import {
+    ApiBearerAuth, ApiUseTags, ApiResponse, ApiOperation, ApiImplicitParam
+} from "@nestjs/swagger";
 
-@Controller("users")
+@Controller("api/v1/users")
+@ApiUseTags("users")
+@ApiBearerAuth()
+@ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: "Unauthorized" })
 export class UsersController {
 
     @Get()
+    @ApiOperation({ title: "Get User List" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "User List", isArray: true
+    })
     public async findAll(@Res() res) {
         res.status(HttpStatus.OK).json(
             await UserModel.list()
@@ -13,51 +26,72 @@ export class UsersController {
     }
 
     @Post()
+    @ApiOperation({ title: "Add User" })
+    @ApiResponse({ status: HttpStatus.CREATED, description: "Add Success" })
+    @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: "Add Fail" })
     public async addUser(@Res() res, @Body() user: CreateUserDto) {
         try {
             await UserModel.addUser(user.username, user.password);
         } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error.toString());
+            throw new BadRequestException(error.toString());
         }
         res.status(HttpStatus.CREATED).json({ });
     }
 
     @Post("/:id/password")
-    public async password(@Res() res, @Body() user: ModifyPasswordDto) {
+    @ApiOperation({ title: "Modify User Password" })
+    @ApiImplicitParam({ name: "id", description: "User ID" })
+    @ApiResponse({ status: HttpStatus.OK, description: "Modify Success" })
+    @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: "Modify Fail" })
+    public async password(
+        @Res() res, @Body() user: ModifyPasswordDto, @Param("id") id
+    ) {
         try {
-            await UserModel.passwd(user.id, user.oldPassword, user.newPassword);
+            await UserModel.passwd(id, user.oldPassword, user.newPassword);
         } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error.toString());
+            throw new BadRequestException(error.toString());
         }
         res.status(HttpStatus.OK).send();
     }
 
-    @Post("/:id/delete")
-    public async delete(@Res() res, @Body() user: CommonUserDot) {
+    @Get("/:id/delete")
+    @ApiOperation({ title: "Delete User" })
+    @ApiImplicitParam({ name: "id", description: "User ID" })
+    @ApiResponse({ status: HttpStatus.OK, description: "Delete Success" })
+    @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: "Delete Fail" })
+    public async delete(@Res() res, @Param() user: CommonUserDot) {
         try {
             await UserModel.removeUser(user.id);
         } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error.toString());
+            throw new BadRequestException(error.toString());
         }
         res.status(HttpStatus.OK).json({ });
     }
 
-    @Post("/:id/ban")
-    public async ban(@Res() res, @Body() user: CommonUserDot) {
+    @Get("/:id/ban")
+    @ApiOperation({ title: "Ban User" })
+    @ApiImplicitParam({ name: "id", description: "User ID" })
+    @ApiResponse({ status: HttpStatus.OK, description: "Ban Success" })
+    @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: "Ban Fail" })
+    public async ban(@Res() res, @Param() user: CommonUserDot) {
         try {
             await UserModel.ban(user.id);
         } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error.toString());
+            throw new BadRequestException(error.toString());
         }
         res.status(HttpStatus.OK).json({ });
     }
 
-    @Post("/:id/allow")
-    public async allow(@Res() res, @Body() user: CommonUserDot) {
+    @Get("/:id/allow")
+    @ApiOperation({ title: "Allow User" })
+    @ApiImplicitParam({ name: "id", description: "User ID" })
+    @ApiResponse({ status: HttpStatus.OK, description: "Allow Success" })
+    @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: "Allow Fail" })
+    public async allow(@Res() res, @Param() user: CommonUserDot) {
         try {
             await UserModel.allow(user.id);
         } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error.toString());
+            throw new BadRequestException(error.toString());
         }
         res.status(HttpStatus.OK).json({ });
     }

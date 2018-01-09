@@ -1,0 +1,16 @@
+{
+    "report-dir": "./coverage",
+    "reporter": [
+        "clover",
+        "cobertura",
+        "lcov"
+    ],
+    "extension": [
+        ".ts", ".tsx"
+    ],
+    "include": [
+        "src"
+    ],
+    "all": true,
+    "cache": true
+}
