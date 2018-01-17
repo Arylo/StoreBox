@@ -1,12 +1,14 @@
 import {
     Controller, Post, Res, Body, HttpStatus, Session, Get, BadRequestException,
-    GatewayTimeoutException
+    GatewayTimeoutException, Query
 } from "@nestjs/common";
-import { LoginDto } from "./auth.dto";
-import { Model as UserModel, UserDoc  } from "@models/User";
 import {
     ApiUseTags, ApiBearerAuth, ApiResponse, ApiOperation
 } from "@nestjs/swagger";
+import { Model as UserModel, UserDoc  } from "@models/User";
+import { Model as TokensModel } from "@models/Token";
+import uuid = require("uuid");
+import { LoginDto } from "./auth.dto";
 
 @ApiUseTags("auth")
 @Controller("api/v1/auth")
@@ -16,7 +18,9 @@ export class AuthController {
     @ApiOperation({ title: "Login System" })
     @ApiResponse({ status: HttpStatus.OK, description: "Login Success" })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: "Login Fail" })
-    public async login(@Res() res, @Body() ctx: LoginDto, @Session() session) {
+    public async login(
+        @Session() session, @Body() ctx: LoginDto, @Query() query
+    ) {
         let user: UserDoc = null;
         try {
             user = await UserModel.isVaild(ctx.username, ctx.password);
@@ -30,7 +34,17 @@ export class AuthController {
         //         throw new GatewayTimeoutException(err.toString());
         //     }
         // });
-        res.status(HttpStatus.OK).json({ });
+        const obj: any = { };
+        if (query.token) {
+            const token = uuid();
+            try {
+                await TokensModel.create({ token, user: session.loginUserId });
+            } catch (error) {
+                throw new BadRequestException("Generate Token Fail");
+            }
+            obj.token = token;
+        }
+        return obj;
     }
 
     @Get("logout")
