@@ -1,21 +1,25 @@
 import {
     Controller, Post, Res, Body, Get, HttpStatus, HttpCode, BadRequestException,
-    Param, Delete
+    Param, Delete, UseGuards
 } from "@nestjs/common";
+import {
+    ApiBearerAuth, ApiUseTags, ApiResponse, ApiOperation, ApiImplicitParam
+} from "@nestjs/swagger";
 import { Model as RegexpsModel } from "@models/Regexp";
 import {
     NewRegexp, EditRegexpDot, CommonRegexpDot, EditRegexpRawDot
 } from "./regexps.dto";
-import {
-    ApiBearerAuth, ApiUseTags, ApiResponse, ApiOperation, ApiImplicitParam
-} from "@nestjs/swagger";
+import { Roles } from "../common/decorators/roles.decorator";
+import { RolesGuard } from "../common/guards/roles.guard";
 
+@UseGuards(RolesGuard)
 @Controller("api/v1/regexps")
 @ApiUseTags("regexps")
 @ApiBearerAuth()
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: "Unauthorized" })
 export class RegexpsController {
 
+    @Roles("admin")
     @Get()
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Get RegExp List" })
@@ -24,6 +28,7 @@ export class RegexpsController {
         return await RegexpsModel.list();
     }
 
+    @Roles("admin")
     @Post()
     @ApiOperation({ title: "Add RegExp" })
     public async add(@Res() res, @Body() ctx: NewRegexp) {
@@ -36,6 +41,7 @@ export class RegexpsController {
         res.status(HttpStatus.CREATED).json(regexp);
     }
 
+    @Roles("admin")
     @Post("/:id")
     @ApiOperation({ title: "Edit RegExp" })
     @ApiImplicitParam({ name: "id", description: "RegExp ID" })
@@ -60,6 +66,7 @@ export class RegexpsController {
         res.status(HttpStatus.OK).json({ });
     }
 
+    @Roles("admin")
     @Delete("/:id")
     @ApiOperation({ title: "Delete RegExp" })
     @ApiImplicitParam({ name: "id", description: "RegExp ID" })
@@ -67,6 +74,7 @@ export class RegexpsController {
         return this.deleteByGet(res, id);
     }
 
+    @Roles("admin")
     @Get("/:id/delete")
     @ApiOperation({ title: "Delete RegExp" })
     @ApiImplicitParam({ name: "id", description: "RegExp ID" })

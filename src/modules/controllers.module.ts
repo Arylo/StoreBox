@@ -12,6 +12,7 @@ import { UploadFileMiddleware } from "./common/middlewares/upload.middleware";
 import {
     ApiLoggerMiddleware, DownloadLoggerMiddleware
 } from "./common/middlewares/logger.middleware";
+import { RolesMiddleware } from "./common/middlewares/roles.middleware";
 
 export const controllers = [
     UsersController, AuthController,
@@ -25,6 +26,8 @@ export const controllers = [
 export class ControllersModule {
     public configure(consumer: MiddlewaresConsumer) {
         consumer
+            .apply(RolesMiddleware)
+            .forRoutes(...controllers)
             .apply([ UploadFileMiddleware ])
             .forRoutes(
                 { path: "/api/v1/goods", method: RequestMethod.POST }
