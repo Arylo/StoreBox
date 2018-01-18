@@ -1,27 +1,32 @@
 import {
     Controller, Req, Res, Body, Get, Post, Param, Session,
-    HttpStatus, BadRequestException
+    HttpStatus, BadRequestException, UseGuards
 } from "@nestjs/common";
 import {
     ApiBearerAuth, ApiUseTags, ApiResponse, ApiOperation, ApiImplicitParam,
     ApiImplicitBody
 } from "@nestjs/swagger";
-import { CreateValueDto, EditValueDto } from "../values/values.dto";
 import { IValues, Model as ValuesModel } from "@models/Value";
 import { Model as GoodsModels } from "@models/Good";
 import { Model as RegexpModel } from "@models/Regexp";
 import { config } from "@utils/config";
 
+import { CreateValueDto, EditValueDto } from "../values/values.dto";
+import { Roles } from "../common/decorators/roles.decorator";
+import { RolesGuard } from "../common/guards/roles.guard";
+
 import * as hasha from "hasha";
 import fs = require("fs-extra");
 import multer  = require("multer");
 
+@UseGuards(RolesGuard)
 @Controller("api/v1/goods")
 @ApiUseTags("goods")
 @ApiBearerAuth()
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: "Unauthorized" })
 export class GoodsController {
 
+    @Roles("admin", "token")
     @Post()
     @ApiOperation({ title: "Upload Good" })
     public async add(@Req() req, @Res() res, @Session() session) {
@@ -63,6 +68,7 @@ export class GoodsController {
         res.status(HttpStatus.CREATED).json(goodObj);
     }
 
+    @Roles("admin")
     @Get("/:id")
     @ApiOperation({ title: "Get Good Info" })
     @ApiImplicitParam({ name: "id", description: "Good ID" })
@@ -80,6 +86,7 @@ export class GoodsController {
         res.status(HttpStatus.OK).json(obj);
     }
 
+    @Roles("admin")
     @Post("/:id/attributes")
     @ApiOperation({ title: "Add Attributes" })
     @ApiImplicitParam({ name: "id", description: "Good ID" })
@@ -110,6 +117,7 @@ export class GoodsController {
         res.status(HttpStatus.CREATED).json({ });
     }
 
+    @Roles("admin")
     @Post("/:id/attributes/:aid")
     @ApiOperation({ title: "Edit Attribute" })
     @ApiImplicitParam({ name: "id", description: "Good ID" })
@@ -125,6 +133,7 @@ export class GoodsController {
         res.status(HttpStatus.OK).json();
     }
 
+    @Roles("admin")
     @Get("/:id/attributes/:aid/delete")
     @ApiOperation({ title: "Delete Attribute" })
     @ApiImplicitParam({ name: "id", description: "Good ID" })

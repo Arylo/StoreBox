@@ -1,14 +1,18 @@
 import {
     Controller, Get, Param, Req, Res, BadRequestException,
-    NotFoundException
+    NotFoundException, UseGuards
 } from "@nestjs/common";
+import { ApiUseTags, ApiImplicitParam, ApiOperation } from "@nestjs/swagger";
 import { Model as GoodsModels, GoodDoc } from "@models/Good";
 import { config } from "@utils/config";
+
 import { Response } from "express";
 import pathExists = require("path-exists");
 import fs = require("fs-extra");
+
 import { DownlaodDto } from "./files.dto";
-import { ApiUseTags, ApiImplicitParam, ApiOperation } from "@nestjs/swagger";
+import { Roles } from "../common/decorators/roles.decorator";
+import { RolesGuard } from "../common/guards/roles.guard";
 
 (async () => {
     if (!(await pathExists(config.paths.upload))) {
@@ -16,10 +20,12 @@ import { ApiUseTags, ApiImplicitParam, ApiOperation } from "@nestjs/swagger";
     }
 })();
 
+@UseGuards(RolesGuard)
 @ApiUseTags("files")
 @Controller("files")
 export class FilesController {
 
+    @Roles("guest")
     @Get("/categories/:cid/goods/:id")
     @ApiOperation({ title: "Download File" })
     @ApiImplicitParam({ name: "cid", description: "Categroy ID" })

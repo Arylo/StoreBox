@@ -8,9 +8,15 @@ import { Model as TokensModel } from "@models/Token";
 import { IUser } from "@models/User";
 
 @Middleware()
-export class AuthenticationMiddleware implements NestMiddleware {
+export class RolesMiddleware implements NestMiddleware {
     public resolve(): ExpressMiddleware {
         return async (req: Request, res: Response, next) => {
+            let user = (req as any).user;
+            if (!user) {
+                user = (req as any).user = {
+                    roles: [ "guest" ]
+                };
+            }
             const tokenUser = basicAuth(req);
             if (tokenUser && tokenUser.name && tokenUser.pass) {
                 const token =
@@ -19,19 +25,23 @@ export class AuthenticationMiddleware implements NestMiddleware {
                     .exec();
                 const tokenOwn = token.toObject().user as IUser;
                 if (tokenOwn.username === tokenUser.name) {
+                    user.account = tokenUser.name;
+                    user.roles.push("token");
                     next();
                     return;
                 }
             }
-            if (req.path === "/api/v1/auth/login") {
-                return next();
+            if ((req as any).session.loginUser) {
+                user.account = (req as any).session.loginUser;
+                user.roles.push("admin");
+                // throw new UnauthorizedException();
             }
-            if (/^\/files/.test(req.url)) {
-                return next();
-            }
-            if (!(req as any).session.loginUser) {
-                throw new UnauthorizedException();
-            }
+            // if (req.path === "/api/v1/auth/login") {
+            //     return next();
+            // }
+            // if (/^\/files/.test(req.url)) {
+            //     return next();
+            // }
             next();
         };
     }

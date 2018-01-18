@@ -1,19 +1,24 @@
 import {
     Controller, Get, Post, Body, Res, HttpStatus, Req, BadRequestException,
-    Param
+    Param,
+    UseGuards
 } from "@nestjs/common";
-import { Model as UserModel, IUser } from "@models/User";
-import { CreateUserDto, ModifyPasswordDto, CommonUserDot } from "./users.dto";
 import {
     ApiBearerAuth, ApiUseTags, ApiResponse, ApiOperation, ApiImplicitParam
 } from "@nestjs/swagger";
+import { Model as UserModel, IUser } from "@models/User";
+import { CreateUserDto, ModifyPasswordDto, CommonUserDot } from "./users.dto";
+import { Roles } from "../common/decorators/roles.decorator";
+import { RolesGuard } from "../common/guards/roles.guard";
 
+@UseGuards(RolesGuard)
 @Controller("api/v1/users")
 @ApiUseTags("users")
 @ApiBearerAuth()
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: "Unauthorized" })
 export class UsersController {
 
+    @Roles("admin")
     @Get()
     @ApiOperation({ title: "Get User List" })
     @ApiResponse({
@@ -25,6 +30,7 @@ export class UsersController {
         );
     }
 
+    @Roles("admin")
     @Post()
     @ApiOperation({ title: "Add User" })
     @ApiResponse({ status: HttpStatus.CREATED, description: "Add Success" })
@@ -38,6 +44,7 @@ export class UsersController {
         res.status(HttpStatus.CREATED).json({ });
     }
 
+    @Roles("admin")
     @Post("/:id/password")
     @ApiOperation({ title: "Modify User Password" })
     @ApiImplicitParam({ name: "id", description: "User ID" })
@@ -54,6 +61,7 @@ export class UsersController {
         res.status(HttpStatus.OK).send();
     }
 
+    @Roles("admin")
     @Get("/:id/delete")
     @ApiOperation({ title: "Delete User" })
     @ApiImplicitParam({ name: "id", description: "User ID" })
@@ -68,6 +76,7 @@ export class UsersController {
         res.status(HttpStatus.OK).json({ });
     }
 
+    @Roles("admin")
     @Get("/:id/ban")
     @ApiOperation({ title: "Ban User" })
     @ApiImplicitParam({ name: "id", description: "User ID" })
@@ -82,6 +91,7 @@ export class UsersController {
         res.status(HttpStatus.OK).json({ });
     }
 
+    @Roles("admin")
     @Get("/:id/allow")
     @ApiOperation({ title: "Allow User" })
     @ApiImplicitParam({ name: "id", description: "User ID" })

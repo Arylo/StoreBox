@@ -1,6 +1,6 @@
 import {
     Controller, Post, Res, Body, HttpStatus, Session, Get, BadRequestException,
-    GatewayTimeoutException, Query
+    GatewayTimeoutException, Query, UseGuards
 } from "@nestjs/common";
 import {
     ApiUseTags, ApiBearerAuth, ApiResponse, ApiOperation
@@ -9,7 +9,9 @@ import { Model as UserModel, UserDoc  } from "@models/User";
 import { Model as TokensModel } from "@models/Token";
 import uuid = require("uuid");
 import { LoginDto } from "./auth.dto";
+import { RolesGuard } from "../common/guards/roles.guard";
 
+@UseGuards(RolesGuard)
 @ApiUseTags("auth")
 @Controller("api/v1/auth")
 export class AuthController {

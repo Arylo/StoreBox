@@ -1,26 +1,31 @@
 import {
     Controller, Post, Res, Body, Get, HttpStatus, HttpCode, Param,
-    BadRequestException
+    BadRequestException, UseGuards
 } from "@nestjs/common";
+import {
+    ApiBearerAuth, ApiUseTags, ApiResponse, ApiImplicitParam, ApiOperation
+} from "@nestjs/swagger";
 import {
     Model as CategroiesModel, CategroyDoc, ICategroy
 } from "@models/Categroy";
 import { Model as ValuesModel, ValueDoc, IValues } from "@models/Value";
-import { NewCategroyDto, EditCategroyDto } from "./categroies.dto";
-import { CreateValueDto, EditValueDto } from "../values/values.dto";
 import { Model as GoodsModels } from "@models/Good";
-import {
-    ApiBearerAuth, ApiUseTags, ApiResponse, ApiImplicitParam, ApiOperation
-} from "@nestjs/swagger";
 
 import md5 = require("md5");
 
+import { NewCategroyDto, EditCategroyDto } from "./categroies.dto";
+import { CreateValueDto, EditValueDto } from "../values/values.dto";
+import { Roles } from "../common/decorators/roles.decorator";
+import { RolesGuard } from "../common/guards/roles.guard";
+
+@UseGuards(RolesGuard)
 @Controller("api/v1/categroies")
 @ApiUseTags("categroies")
 @ApiBearerAuth()
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: "Unauthorized" })
 export class CategroiesController {
 
+    @Roles("admin")
     @Get()
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Get Categroy List" })
@@ -30,6 +35,7 @@ export class CategroiesController {
             .exec();
     }
 
+    @Roles("admin")
     @Post()
     @ApiOperation({ title: "Add Categroy" })
     public async add(@Res() res, @Body() ctx: NewCategroyDto) {
@@ -76,6 +82,7 @@ export class CategroiesController {
         res.status(HttpStatus.CREATED).send(result);
     }
 
+    @Roles("admin")
     @Get("/:id")
     @ApiOperation({ title: "Get Categroy Info" })
     @ApiImplicitParam({ name: "id", description: "Categroy ID" })
@@ -104,6 +111,7 @@ export class CategroiesController {
         res.status(HttpStatus.OK).send(obj);
     }
 
+    @Roles("admin")
     @Post("/:id/attributes")
     @ApiOperation({ title: "Add Attribute" })
     @ApiImplicitParam({ name: "id", description: "Categroy ID" })
@@ -134,6 +142,7 @@ export class CategroiesController {
         res.status(HttpStatus.CREATED).json({ });
     }
 
+    @Roles("admin")
     @Post("/:id/attributes/:aid")
     @ApiOperation({ title: "Edit Categroy" })
     @ApiImplicitParam({ name: "id", description: "Categroy ID" })
@@ -149,6 +158,7 @@ export class CategroiesController {
         res.status(HttpStatus.OK).json();
     }
 
+    @Roles("admin")
     @Get("/:id/attributes/:aid/delete")
     @ApiOperation({ title: "Delete Categroy" })
     @ApiImplicitParam({ name: "id", description: "Categroy ID" })
@@ -172,6 +182,7 @@ export class CategroiesController {
         return { };
     }
 
+    @Roles("admin")
     @Post("/:id")
     @ApiOperation({ title: "Edit Categroy" })
     @ApiImplicitParam({ name: "id", description: "Categroy ID" })
@@ -206,6 +217,7 @@ export class CategroiesController {
         res.status(HttpStatus.OK).json();
     }
 
+    @Roles("admin")
     @Get("/:id/delete")
     @ApiOperation({ title: "Delete Categroy" })
     @ApiImplicitParam({ name: "id", description: "Categroy ID" })
