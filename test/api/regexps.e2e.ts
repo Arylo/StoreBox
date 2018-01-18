@@ -1,11 +1,12 @@
 import supertest = require("supertest");
 import faker = require("faker");
 
-import { connect, drop } from "../helpers/database";
-import { init } from "../helpers/server";
 import { Model as RegexpsModel } from "@models/Regexp";
+import { connect, drop, newUser } from "../helpers/database";
+import { init } from "../helpers/server";
+import { sleep } from "../helpers/utils";
 
-describe("Categroies Api", () => {
+describe("Categroies E2E Api", () => {
 
     let request: supertest.SuperTest<supertest.Test>;
 
@@ -13,92 +14,103 @@ describe("Categroies Api", () => {
         return connect();
     });
 
-    before(() => {
-        return drop();
-    });
+    const ids = {
+        users: [ ],
+        regexps: [ ]
+    };
 
-    afterEach(() => {
-        return drop();
+    after(() => {
+        return drop(ids);
     });
 
     before(async () => {
         request = await init();
     });
 
-    // FIXME Test is running asynchronous
-    it.skip("List", async () => {
+    const user = {
+        name: faker.name.firstName(),
+        pass: faker.random.words()
+    };
+    step("Login", async () => {
+        const doc = await newUser(user.name, user.pass);
+        ids.users.push(doc._id);
+        await request.post("/api/v1/auth/login")
+            .send({
+                username: user.name, password: user.pass
+            }).then();
+    });
+
+    step("List", async () => {
         const data = [{
             name: faker.random.word(),
-            value: "^abc.ccd"
-        }, {
-            name: faker.random.word(),
-            value: "^abc..ccd"
-        }, {
-            name: faker.random.word(),
             value: "^abc...ccd"
+        }, {
+            name: faker.random.word(),
+            value: "^abc....ccd"
+        }, {
+            name: faker.random.word(),
+            value: "^abc.....ccd"
         }];
-        await RegexpsModel.create(data);
+        data.forEach(async (item) => {
+            const doc = await RegexpsModel.addRegexp(item.name, item.value);
+            ids.regexps.push(doc._id);
+        });
+
+        await sleep(1000);
         const {
             body: result, status: status
         } = await request.get("/api/v1/regexps").then();
         status.should.be.eql(200);
-        result.should.be.length(3);
+        result.length.should.be.aboveOrEqual(3);
     });
 
-    it("Add Regexp", async () => {
-        const data = {
-            name: faker.random.word(),
-            value: "^abc.ccd"
-        };
+    const data = {
+        name: faker.random.word(),
+        value: "^abc.ccd"
+    };
+    step("Add Regexp", async () => {
         const {
             body: result, status: status
         } = await request.post("/api/v1/regexps").send(data).then();
+        ids.regexps.push(result._id);
         status.should.be.eql(201);
         result.should.have.properties(data);
         const regexp = await RegexpsModel.findById(result._id).exec();
         should(regexp).be.not.an.null();
     });
 
-    it("Add Exist Regexp", async () => {
-        const data = {
-            name: faker.random.word(),
-            value: "^abc.ccd"
-        };
-        await RegexpsModel.addRegexp(data.name, data.value);
+    step("Add Exist Regexp", async () => {
         const {
             body: result, status: status
         } = await request.post("/api/v1/regexps").send(data).then();
         status.should.be.eql(400);
     });
 
-    it("Add Exist(Name Field) Regexp", async () => {
-        const data = {
-            name: faker.random.word(),
-            value: "^abc.ccd"
-        };
-        await RegexpsModel.addRegexp(data.name, data.value + "1");
+    step("Add Exist(Name Field) Regexp", async () => {
         const {
             body: result, status: status
-        } = await request.post("/api/v1/regexps").send(data).then();
+        } = await request.post("/api/v1/regexps").send({
+            name: data.name,
+            value: data.value + "1"
+        }).then();
         status.should.be.eql(400);
     });
 
-    it("Add Exist(Value Field) Regexp", async () => {
-        const data = {
-            name: faker.random.word(),
-            value: "^abc.ccd"
-        };
-        await RegexpsModel.addRegexp(data.name + "1", data.value);
+    step("Add Exist(Value Field) Regexp", async () => {
         const {
             body: result, status: status
-        } = await request.post("/api/v1/regexps").send(data).then();
+        } = await request.post("/api/v1/regexps").send({
+            name: data.name + "1",
+            value: data.value
+        }).then();
         status.should.be.eql(400);
     });
 
-    it("Modify Name", async () => {
+    step("Modify Name", async () => {
         const raw = await RegexpsModel.addRegexp(
-            faker.random.word(), "^adb.ccd"
+            faker.random.word(), "^modify"
         );
+        ids.regexps.push(raw._id);
         const { body: result, status: status } =
             await request.post(`/api/v1/regexps/${raw._id}`)
             .send({ name: "test" }).then();
@@ -107,10 +119,11 @@ describe("Categroies Api", () => {
         regexp.toObject().should.have.property("name", "test");
     });
 
-    it("Modify Value", async () => {
+    step("Modify Value", async () => {
         const raw = await RegexpsModel.addRegexp(
-            faker.random.word(), "^adb.ccd"
+            faker.random.word(), "modify value"
         );
+        ids.regexps.push(raw._id);
         const { body: result, status: status } =
             await request.post(`/api/v1/regexps/${raw._id}`)
             .send({ value: "^adb.ccd$" }).then();
@@ -119,47 +132,44 @@ describe("Categroies Api", () => {
         regexp.toObject().should.have.property("value", "^adb.ccd$");
     });
 
-    it("Modify Exist Name", async () => {
-        const data = {
-            name: faker.random.word(),
-            value: "^abc.ccd"
-        };
-        await RegexpsModel.addRegexp(data.name, data.value);
+    step("Modify Exist Name", async () => {
         const raw =
             await RegexpsModel.addRegexp(faker.random.word(), "^abc.ccd$");
+        ids.regexps.push(raw._id);
         const { body: result, status: status } =
             await request.post(`/api/v1/regexps/${raw._id}`)
             .send({ name: data.name }).then();
         status.should.be.eql(400);
     });
 
-    it("Modify Exist Value", async () => {
+    step("Modify Exist Value", async () => {
         const data = {
             name: faker.random.word(),
-            value: "^abc.ccd"
+            value: "^modify.exist.value"
         };
-        await RegexpsModel.addRegexp(data.name, data.value);
-        const raw =
-            await RegexpsModel.addRegexp(faker.random.word(), "^abc.ccd$");
+        const raw = await RegexpsModel.addRegexp(data.name, data.value);
+        ids.regexps.push(raw._id);
         const { body: result, status: status } =
             await request.post(`/api/v1/regexps/${raw._id}`)
             .send({ value: data.value }).then();
         status.should.be.eql(400);
     });
 
-    it("Modify with Empty Param", async () => {
+    step("Modify with Empty Param", async () => {
         const raw = await RegexpsModel.addRegexp(
-            faker.random.word(), "^adb.ccd"
+            faker.random.word(), "^empty.param"
         );
+        ids.regexps.push(raw._id);
         const { body: result, status: status } =
             await request.post(`/api/v1/regexps/${raw._id}`).then();
         status.should.be.eql(400);
     });
 
-    it("Delete Regexp By GET", async () => {
+    step("Delete Regexp By GET", async () => {
         const raw = await RegexpsModel.addRegexp(
-            faker.random.word(), "^adb.ccd"
+            faker.random.word(), "^get.delete"
         );
+        ids.regexps.push(raw._id);
         // Delete
         const { body: result, status: status } =
             await request.get(`/api/v1/regexps/${raw._id}/delete`).then();
@@ -168,10 +178,11 @@ describe("Categroies Api", () => {
         should(regexp).be.an.null();
     });
 
-    it("Delete Regexp By DELETE", async () => {
+    step("Delete Regexp By DELETE", async () => {
         const raw = await RegexpsModel.addRegexp(
-            faker.random.word(), "^adb.ccd"
+            faker.random.word(), "^delete.delete"
         );
+        ids.regexps.push(raw._id);
         // Delete
         const { body: result, status: status } =
             await request.delete(`/api/v1/regexps/${raw._id}`).then();
