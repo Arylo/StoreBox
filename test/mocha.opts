@@ -1,6 +1,7 @@
 --require should
 --require ts-node/register
 --require tsconfig-paths/register
+--require mocha-steps
 --require source-map-support/register
 --reporter mochawesome
 --reporter-options reportDir=./coverage/mochawesome
