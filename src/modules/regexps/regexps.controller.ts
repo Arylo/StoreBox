@@ -26,8 +26,17 @@ export class RegexpsController {
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Get RegExp List" })
     @ApiResponse({ status: HttpStatus.OK, description: "RegExp List" })
-    public list(@Query(new ParseIntPipe()) query: PerPageDto) {
-        return RegexpsModel.list(query.perNum, query.page);
+    public async list(@Query(new ParseIntPipe()) query: PerPageDto) {
+        const pageCount = await RegexpsModel.pageCount(query.perNum);
+        const data = {
+            data: [ ],
+            current: (query.page || 1),
+            total: pageCount
+        };
+        if (pageCount >= (query.page || 1)) {
+            data.data = await RegexpsModel.list(query.perNum, query.page);
+        }
+        return data;
     }
 
     @Roles("admin")

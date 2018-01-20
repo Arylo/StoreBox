@@ -1,9 +1,10 @@
 import { model, SchemaDefinition, Model as M, SchemaTypes } from "mongoose";
-import { Base, IDoc, IDocRaw, ObjectId } from "@models/common";
+import { Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS } from "@models/common";
 import { ICategroy, Flag as CF, Model as CM } from "@models/Categroy";
 import Cache =  require("schedule-cache");
 import { PER_COUNT } from "../modules/common/dtos/page.dto";
-const cache = Cache.create();
+
+export const cache = Cache.create();
 
 const Definition: SchemaDefinition = {
     name: { type: String, required: true, unique: true },
@@ -28,6 +29,16 @@ export type RegexpDoc = IDoc<IRegexp>;
 
 const RegexpSchema = new Base(Definition).createSchema();
 
+// region static methods
+RegexpSchema.static("pageCount", async (perNum = PER_COUNT[0]) => {
+    const FLAG = `page_count_${perNum}`;
+    if (cache.get(FLAG)) {
+        return cache.get(FLAG);
+    }
+    cache.put(FLAG, Math.ceil((await Model.count({ }).exec()) / perNum));
+    return cache.get(FLAG);
+});
+
 RegexpSchema.static("addRegexp", (name: string, value: string) => {
     return Model.create({
         name: name,
@@ -39,12 +50,10 @@ RegexpSchema.static("addRegexp", (name: string, value: string) => {
 });
 
 RegexpSchema.static("removeRegexp", (id: ObjectId) => {
-    cache.clear();
     return Model.findByIdAndRemove(id).exec();
 });
 
 RegexpSchema.static("link", (id: ObjectId, linkId: ObjectId | false) => {
-    cache.clear();
     if (!linkId) {
         return Model.findByIdAndUpdate(id, {
             "$unset": { link: 0 }
@@ -93,6 +102,7 @@ RegexpSchema.static("discern", (name: string) => {
         return list;
     });
 });
+// endregion static methods
 
 export const Flag = "regexps";
 
@@ -124,11 +134,14 @@ interface IRegexpModel<T extends RegexpDoc> extends M<T> {
      * @return {Promise}
      */
     discern(filename: string): Promise<ICategroy[]>;
+    /**
+     * 返回总页数
+     */
+    pageCount(perNum?: number): Promise<number>;
 }
 
-export const Model = model(Flag, RegexpSchema) as IRegexpModel<RegexpDoc>;
-
-Model.schema.path("name").validate({
+// region Validators
+RegexpSchema.path("name").validate({
     isAsync: true,
     validator: async (value, respond) => {
         const result = await Model.findOne({ name: value }).exec();
@@ -137,7 +150,7 @@ Model.schema.path("name").validate({
     message: "The name is exist"
 });
 
-Model.schema.path("value").validate({
+RegexpSchema.path("value").validate({
     isAsync: true,
     validator: async (value, respond) => {
         const result = await Model.findOne({ value: value }).exec();
@@ -146,7 +159,7 @@ Model.schema.path("value").validate({
     message: "The value is exist"
 });
 
-Model.schema.path("link").validate({
+RegexpSchema.path("link").validate({
     isAsync: true,
     validator: async (value, respond) => {
         const result = await CM.findById(value).exec();
@@ -154,3 +167,12 @@ Model.schema.path("link").validate({
     },
     message: "The Categroy ID is not exist"
 });
+// endregion Validators
+
+for (const method of MODIFY_MOTHODS) {
+    RegexpSchema.post(method, () => {
+        cache.clear();
+    });
+}
+
+export const Model = model(Flag, RegexpSchema) as IRegexpModel<RegexpDoc>;

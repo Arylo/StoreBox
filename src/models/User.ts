@@ -1,9 +1,12 @@
 import { model, SchemaDefinition, Model as M } from "mongoose";
 import * as md5 from "md5";
-import { Base, IDoc, IDocRaw } from "./common";
+import { Base, IDoc, IDocRaw, MODIFY_MOTHODS } from "./common";
 import { config } from "@utils/config";
 import { ObjectId } from "@models/common";
+import Cache =  require("schedule-cache");
 import { PER_COUNT } from "../modules/common/dtos/page.dto";
+
+const cache = Cache.create();
 
 export const Flag = "users";
 
@@ -24,19 +27,19 @@ export type UserDoc = IDoc<IUser>;
 
 const UsersSchema = new Base(Definition).createSchema();
 
-UsersSchema.path("username").validate({
-    isAsync: true,
-    validator: (val, respond) => {
-        Model.findOne({ username: val }).exec().then((result) => {
-            respond(result ? false : true);
-        });
-    },
-    message: "The username is existed"
-});
-
 const encryptStr = (pwd: string) => {
     return md5(md5(pwd) + config.db.salt);
 };
+
+// region static methods
+UsersSchema.static("pageCount", async (perNum = PER_COUNT[0]) => {
+    const FLAG = `page_count_${perNum}`;
+    if (cache.get(FLAG)) {
+        return cache.get(FLAG);
+    }
+    cache.put(FLAG, Math.ceil((await Model.count({ }).exec()) / perNum));
+    return cache.get(FLAG);
+});
 
 UsersSchema.static("addUser", (username: string, password: string) => {
     const newObj = {
@@ -120,6 +123,7 @@ UsersSchema.static("isVaild", (username: string, password: string) => {
             });
         });
 });
+// endregion static methods
 
 interface IUserModel<T extends UserDoc> extends M<T> {
     /**
@@ -176,6 +180,28 @@ interface IUserModel<T extends UserDoc> extends M<T> {
      * @return {Promise}
      */
     isVaild(username: string, password: string): Promise<T>;
+    /**
+     * 返回总页数
+     */
+    pageCount(perNum?: number): Promise<number>;
+}
+
+// region Validators
+UsersSchema.path("username").validate({
+    isAsync: true,
+    validator: (val, respond) => {
+        Model.findOne({ username: val }).exec().then((result) => {
+            respond(result ? false : true);
+        });
+    },
+    message: "The username is existed"
+});
+// endregion Validators
+
+for (const method of MODIFY_MOTHODS) {
+    UsersSchema.post(method, () => {
+        cache.clear();
+    });
 }
 
 export const Model = model(Flag, UsersSchema) as IUserModel<UserDoc>;

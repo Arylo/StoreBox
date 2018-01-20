@@ -41,27 +41,29 @@ describe("Regexp E2E Api", () => {
     });
 
     step("List", async () => {
-        const data = [{
+        const items = [{
             name: faker.random.word(),
-            value: "^abc...ccd"
+            value: "^list.0"
         }, {
             name: faker.random.word(),
-            value: "^abc....ccd"
+            value: "^list.1"
         }, {
             name: faker.random.word(),
-            value: "^abc.....ccd"
+            value: "^list.2"
         }];
-        data.forEach(async (item) => {
-            const doc = await RegexpsModel.addRegexp(item.name, item.value);
+        for (const item of items) {
+            const doc = await RegexpsModel.addRegexp(
+                item.name + Date.now(), item.value + Date.now()
+            );
             ids.regexps.push(doc._id);
-        });
+            await sleep(100);
+        }
 
-        await sleep(500);
         const {
             body: result, status: status
         } = await request.get("/api/v1/regexps").then();
         status.should.be.eql(200);
-        result.length.should.be.aboveOrEqual(3);
+        result.data.length.should.be.aboveOrEqual(3);
     });
 
     const data = {

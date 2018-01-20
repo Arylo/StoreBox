@@ -22,11 +22,18 @@ export class UsersController {
     @Roles("admin")
     @Get()
     @ApiOperation({ title: "Get User List" })
-    @ApiResponse({
-        status: HttpStatus.OK, description: "User List", isArray: true
-    })
-    public findAll(@Query(new ParseIntPipe()) query: PerPageDto) {
-        return UserModel.list(query.perNum, query.page);
+    @ApiResponse({ status: HttpStatus.OK, description: "User List" })
+    public async findAll(@Query(new ParseIntPipe()) query: PerPageDto) {
+        const pageCount = await UserModel.pageCount(query.perNum);
+        const data = {
+            data: [ ],
+            current: (query.page || 1),
+            total: pageCount
+        };
+        if (pageCount >= (query.page || 1)) {
+            data.data = await UserModel.list(query.perNum, query.page);
+        }
+        return data;
     }
 
     @Roles("admin")

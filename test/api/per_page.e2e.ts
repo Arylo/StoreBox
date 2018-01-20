@@ -42,14 +42,14 @@ describe("the E2E Api of display item count Per page", () => {
             const {
                 body: result, status: status
             } = await request.get("/api/v1/users?page=3").then();
-            result.should.be.an.Array().which.length(0);
+            result.data.should.be.an.Array().which.length(0);
         });
 
         step("More than total display list # 1", async () => {
             const {
                 body: result, status: status
             } = await request.get("/api/v1/users?page=3").then();
-            result.should.be.an.Array().which.length(0);
+            result.data.should.be.an.Array().which.length(0);
         });
 
         step("No in `perNum` choice # 0", async () => {
@@ -77,42 +77,55 @@ describe("the E2E Api of display item count Per page", () => {
             }
         });
 
-        step("have 5 pages by 25 per page", async () => {
+        step("have 4 pages by 25 per page", async () => {
             let req;
             req = await request.get("/api/v1/users?page=1&perNum=25").then();
-            req.body.should.have.length(25);
+            req.body.total.should.have.aboveOrEqual(4);
+            req.body.data.should.have.length(25);
             req = await request.get("/api/v1/users?page=2&perNum=25").then();
-            req.body.should.have.length(25);
+            req.body.total.should.have.aboveOrEqual(4);
+            req.body.data.should.have.length(25);
             req = await request.get("/api/v1/users?page=3&perNum=25").then();
-            req.body.should.have.length(25);
+            req.body.total.should.have.aboveOrEqual(4);
+            req.body.data.should.have.length(25);
             req = await request.get("/api/v1/users?page=4&perNum=25").then();
-            req.body.should.have.length(25);
+            req.body.total.should.have.aboveOrEqual(4);
+            req.body.data.should.have.length(25);
             req = await request.get("/api/v1/users?page=5&perNum=25").then();
-            req.body.length.should.have.aboveOrEqual(0);
+            req.body.total.should.have.aboveOrEqual(4);
+            req.body.data.length.should.have.aboveOrEqual(0);
             req = await request.get("/api/v1/users?page=6&perNum=25").then();
-            req.body.should.have.length(0);
+            req.body.total.should.have.aboveOrEqual(4);
+            req.body.data.should.have.length(0);
         });
 
-        step("have 3 pages by 50 per page", async () => {
+        step("have 2 pages by 50 per page", async () => {
             let req;
             req = await request.get("/api/v1/users?page=1&perNum=50").then();
-            req.body.should.have.length(50);
+            req.body.total.should.have.aboveOrEqual(2);
+            req.body.data.should.have.length(50);
             req = await request.get("/api/v1/users?page=2&perNum=50").then();
-            req.body.should.have.length(50);
+            req.body.total.should.have.aboveOrEqual(2);
+            req.body.data.should.have.length(50);
             req = await request.get("/api/v1/users?page=3&perNum=50").then();
-            req.body.length.should.have.aboveOrEqual(0);
+            req.body.total.should.have.aboveOrEqual(2);
+            req.body.data.length.should.have.aboveOrEqual(0);
             req = await request.get("/api/v1/users?page=4&perNum=50").then();
-            req.body.should.have.length(0);
+            req.body.total.should.have.aboveOrEqual(2);
+            req.body.data.should.have.length(0);
         });
 
         step("have 2 pages by 75 per page", async () => {
             let req;
             req = await request.get("/api/v1/users?page=1&perNum=75").then();
-            req.body.should.have.length(75);
+            req.body.total.should.have.aboveOrEqual(2);
+            req.body.data.should.have.length(75);
             req = await request.get("/api/v1/users?page=2&perNum=75").then();
-            req.body.length.should.have.aboveOrEqual(0);
+            req.body.total.should.have.aboveOrEqual(2);
+            req.body.data.length.should.have.aboveOrEqual(25);
             req = await request.get("/api/v1/users?page=3&perNum=75").then();
-            req.body.should.have.length(0);
+            req.body.total.should.have.aboveOrEqual(2);
+            req.body.data.should.have.length(0);
         });
 
     });
@@ -123,14 +136,14 @@ describe("the E2E Api of display item count Per page", () => {
             const {
                 body: result, status: status
             } = await request.get("/api/v1/regexps?page=2").then();
-            result.should.be.an.Array().which.length(0);
+            result.data.should.have.length(0);
         });
 
         step("More than total display list # 1", async () => {
             const {
                 body: result, status: status
             } = await request.get("/api/v1/regexps?page=3").then();
-            result.should.be.an.Array().which.length(0);
+            result.data.should.have.length(0);
         });
 
         step("No in `perNum` choice # 0", async () => {
@@ -160,42 +173,55 @@ describe("the E2E Api of display item count Per page", () => {
             }
         });
 
-        step("have 5 pages by 25 per page", async () => {
+        step("have 4 pages by 25 per page", async () => {
             let req;
             req = await request.get("/api/v1/regexps?page=1&perNum=25").then();
-            req.body.should.have.length(25);
+            req.body.total.should.have.aboveOrEqual(4);
+            req.body.data.should.have.length(25);
             req = await request.get("/api/v1/regexps?page=2&perNum=25").then();
-            req.body.should.have.length(25);
+            req.body.total.should.have.aboveOrEqual(4);
+            req.body.data.should.have.length(25);
             req = await request.get("/api/v1/regexps?page=3&perNum=25").then();
-            req.body.should.have.length(25);
+            req.body.total.should.have.aboveOrEqual(4);
+            req.body.data.should.have.length(25);
             req = await request.get("/api/v1/regexps?page=4&perNum=25").then();
-            req.body.should.have.length(25);
+            req.body.total.should.have.aboveOrEqual(4);
+            req.body.data.should.have.length(25);
             req = await request.get("/api/v1/regexps?page=5&perNum=25").then();
-            req.body.length.should.have.aboveOrEqual(0);
+            req.body.total.should.have.aboveOrEqual(4);
+            req.body.data.length.should.have.aboveOrEqual(0);
             req = await request.get("/api/v1/regexps?page=6&perNum=25").then();
-            req.body.should.have.length(0);
+            req.body.total.should.have.aboveOrEqual(4);
+            req.body.data.should.have.length(0);
         });
 
-        step("have 3 pages by 50 per page", async () => {
+        step("have 2 pages by 50 per page", async () => {
             let req;
             req = await request.get("/api/v1/regexps?page=1&perNum=50").then();
-            req.body.should.have.length(50);
+            req.body.total.should.have.aboveOrEqual(2);
+            req.body.data.should.have.length(50);
             req = await request.get("/api/v1/regexps?page=2&perNum=50").then();
-            req.body.should.have.length(50);
+            req.body.total.should.have.aboveOrEqual(2);
+            req.body.data.should.have.length(50);
             req = await request.get("/api/v1/regexps?page=3&perNum=50").then();
-            req.body.length.should.have.aboveOrEqual(0);
+            req.body.total.should.have.aboveOrEqual(2);
+            req.body.data.length.should.have.aboveOrEqual(0);
             req = await request.get("/api/v1/regexps?page=4&perNum=50").then();
-            req.body.should.have.length(0);
+            req.body.total.should.have.aboveOrEqual(2);
+            req.body.data.should.have.length(0);
         });
 
         step("have 2 pages by 75 per page", async () => {
             let req;
             req = await request.get("/api/v1/regexps?page=1&perNum=75").then();
-            req.body.should.have.length(75);
+            req.body.total.should.have.aboveOrEqual(2);
+            req.body.data.should.have.length(75);
             req = await request.get("/api/v1/regexps?page=2&perNum=75").then();
-            req.body.length.should.have.aboveOrEqual(0);
+            req.body.total.should.have.aboveOrEqual(2);
+            req.body.data.length.should.have.aboveOrEqual(0);
             req = await request.get("/api/v1/regexps?page=3&perNum=75").then();
-            req.body.should.have.length(0);
+            req.body.total.should.have.aboveOrEqual(2);
+            req.body.data.should.have.length(0);
         });
     });
 });
