@@ -1,7 +1,6 @@
 import {
     Controller, Get, Post, Body, Res, HttpStatus, Req, BadRequestException,
-    Param,
-    UseGuards
+    Param, UseGuards, Query
 } from "@nestjs/common";
 import {
     ApiBearerAuth, ApiUseTags, ApiResponse, ApiOperation, ApiImplicitParam
@@ -10,6 +9,8 @@ import { Model as UserModel, IUser } from "@models/User";
 import { CreateUserDto, ModifyPasswordDto, CommonUserDot } from "./users.dto";
 import { Roles } from "../common/decorators/roles.decorator";
 import { RolesGuard } from "../common/guards/roles.guard";
+import { PerPageDto } from "../common/dtos/page.dto";
+import { ParseIntPipe } from "../common/pipes/parse-int.pipe";
 
 @UseGuards(RolesGuard)
 @Controller("api/v1/users")
@@ -24,10 +25,8 @@ export class UsersController {
     @ApiResponse({
         status: HttpStatus.OK, description: "User List", isArray: true
     })
-    public async findAll(@Res() res) {
-        res.status(HttpStatus.OK).json(
-            await UserModel.list()
-        );
+    public findAll(@Query(new ParseIntPipe()) query: PerPageDto) {
+        return UserModel.list(query.perNum, query.page);
     }
 
     @Roles("admin")

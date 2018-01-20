@@ -1,6 +1,6 @@
 import {
     Controller, Post, Res, Body, Get, HttpStatus, HttpCode, BadRequestException,
-    Param, Delete, UseGuards
+    Param, Delete, UseGuards, Query
 } from "@nestjs/common";
 import {
     ApiBearerAuth, ApiUseTags, ApiResponse, ApiOperation, ApiImplicitParam
@@ -11,6 +11,8 @@ import {
 } from "./regexps.dto";
 import { Roles } from "../common/decorators/roles.decorator";
 import { RolesGuard } from "../common/guards/roles.guard";
+import { PerPageDto } from "../common/dtos/page.dto";
+import { ParseIntPipe } from "../common/pipes/parse-int.pipe";
 
 @UseGuards(RolesGuard)
 @Controller("api/v1/regexps")
@@ -24,8 +26,8 @@ export class RegexpsController {
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Get RegExp List" })
     @ApiResponse({ status: HttpStatus.OK, description: "RegExp List" })
-    public async list() {
-        return await RegexpsModel.list();
+    public list(@Query(new ParseIntPipe()) query: PerPageDto) {
+        return RegexpsModel.list(query.perNum, query.page);
     }
 
     @Roles("admin")

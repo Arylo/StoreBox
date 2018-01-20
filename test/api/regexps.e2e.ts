@@ -6,7 +6,7 @@ import { connect, drop, newUser } from "../helpers/database";
 import { init } from "../helpers/server";
 import { sleep } from "../helpers/utils";
 
-describe("Categroies E2E Api", () => {
+describe("Regexp E2E Api", () => {
 
     let request: supertest.SuperTest<supertest.Test>;
 
@@ -56,7 +56,7 @@ describe("Categroies E2E Api", () => {
             ids.regexps.push(doc._id);
         });
 
-        await sleep(1000);
+        await sleep(500);
         const {
             body: result, status: status
         } = await request.get("/api/v1/regexps").then();

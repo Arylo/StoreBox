@@ -2,6 +2,7 @@ import { model, SchemaDefinition, Model as M, SchemaTypes } from "mongoose";
 import { Base, IDoc, IDocRaw, ObjectId } from "@models/common";
 import { ICategroy, Flag as CF, Model as CM } from "@models/Categroy";
 import Cache =  require("schedule-cache");
+import { PER_COUNT } from "../modules/common/dtos/page.dto";
 const cache = Cache.create();
 
 const Definition: SchemaDefinition = {
@@ -55,12 +56,17 @@ RegexpSchema.static("link", (id: ObjectId, linkId: ObjectId | false) => {
     }
 });
 
-RegexpSchema.static("list", () => {
-    const FLAG_LIST = "list";
+RegexpSchema.static("list", (perNum = PER_COUNT[0], page = 1) => {
+    const FLAG_LIST = `list_${perNum}_${page}`;
     if (cache.get(FLAG_LIST)) {
         return cache.get(FLAG_LIST);
     }
-    cache.put(FLAG_LIST, Model.find({ }).populate("link").exec());
+    cache.put(
+        FLAG_LIST,
+        Model.find({ })
+            .skip((page - 1) * perNum).limit(perNum)
+            .populate("link").exec()
+    );
     return cache.get(FLAG_LIST);
 });
 
@@ -93,24 +99,31 @@ export const Flag = "regexps";
 interface IRegexpModel<T extends RegexpDoc> extends M<T> {
     /**
      * 创建新规则
+     * @return {Promise}
      */
     addRegexp(name: string, value: string): Promise<T>;
     /**
      * 移除规则
+     * @return {Promise}
      */
     removeRegexp(id: ObjectId): Promise<T>;
     /**
      * 规则关联
+     * @return {Promise}
      */
     link(id: ObjectId, linkId: ObjectId | false): Promise<T>;
     /**
      * 规则列表
+     * @param  perNum {number} 每页数量
+     * @param  page {number} 页数
+     * @return {Promise}
      */
-    list(): Promise<T[]>;
+    list(perNum?: number, page?: number): Promise<T[]>;
     /**
      * 根据规则进行识别
+     * @return {Promise}
      */
-    discern(name: string): Promise<ICategroy[]>;
+    discern(filename: string): Promise<ICategroy[]>;
 }
 
 export const Model = model(Flag, RegexpSchema) as IRegexpModel<RegexpDoc>;

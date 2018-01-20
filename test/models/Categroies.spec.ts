@@ -9,8 +9,11 @@ describe("Category Model", () => {
         return db.connect();
     });
 
+    const ids = {
+        categroies: [ ]
+    };
     after(() => {
-        return db.drop();
+        return db.drop(ids);
     });
 
     it("Add Category", async () => {
@@ -18,6 +21,7 @@ describe("Category Model", () => {
             name: faker.name.firstName()
         };
         const obj = await CategroiesModel.create(ctx);
+        ids.categroies.push(obj._id);
         obj.toObject().should.have.properties({
             name: ctx.name,
             tags: [ ],
@@ -27,14 +31,15 @@ describe("Category Model", () => {
 
     describe("Loop Parent ID Checker", () => {
 
-        let ids = [ ];
+        let cids = [ ];
         before(async () => {
-            ids = [];
+            cids = [];
             for (let i = 0; i < 10; i++) {
                 const result = await CategroiesModel.create({
                     name: faker.name.firstName()
                 });
-                ids.push(result._id);
+                cids.push(result._id);
+                ids.categroies.push(result._id);
             }
             // [parent, child]
             const initGroups = [
@@ -44,14 +49,14 @@ describe("Category Model", () => {
                 [8, 9]
             ];
             for (const set of initGroups) {
-                await CategroiesModel.moveCategroy(ids[set[1]], ids[set[0]]);
+                await CategroiesModel.moveCategroy(cids[set[1]], cids[set[0]]);
             }
         });
 
         it("# 0", async () => {
             let err;
             try {
-                await CategroiesModel.moveCategroy(ids[2], ids[6]);
+                await CategroiesModel.moveCategroy(cids[2], cids[6]);
             } catch (error) {
                 err = error;
             }
