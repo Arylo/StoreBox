@@ -3,6 +3,7 @@ import * as md5 from "md5";
 import { Base, IDoc, IDocRaw } from "./common";
 import { config } from "@utils/config";
 import { ObjectId } from "@models/common";
+import { PER_COUNT } from "../modules/common/dtos/page.dto";
 
 export const Flag = "users";
 
@@ -55,8 +56,9 @@ UsersSchema.static("removeUser", (id: ObjectId) => {
     });
 });
 
-UsersSchema.static("list", () => {
+UsersSchema.static("list", (perNum = PER_COUNT[0], page = 1) => {
     return Model.find().select("-password")
+        .skip((page - 1) * perNum).limit(perNum)
         .exec();
 });
 
@@ -138,9 +140,11 @@ interface IUserModel<T extends UserDoc> extends M<T> {
     /**
      * 获取用户列表
      *
+     * @param  perNum {number} 每页数量
+     * @param  page {number} 页数
      * @return {Promise}
      */
-    list(): Promise<T[]>;
+    list(perNum?: number, page?: number): Promise<T[]>;
     /**
      * 修改用户密码
      *
