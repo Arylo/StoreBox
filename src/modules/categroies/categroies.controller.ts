@@ -1,6 +1,6 @@
 import {
     Controller, Post, Res, Body, Get, HttpStatus, HttpCode, Param,
-    BadRequestException, UseGuards
+    BadRequestException, UseGuards, Delete
 } from "@nestjs/common";
 import {
     ApiBearerAuth, ApiUseTags, ApiResponse, ApiImplicitParam, ApiOperation
@@ -159,11 +159,20 @@ export class CategroiesController {
     }
 
     @Roles("admin")
+    @Delete("/:id/attributes/:aid")
+    @ApiOperation({ title: "Delete Categroy" })
+    @ApiImplicitParam({ name: "id", description: "Categroy ID" })
+    @ApiImplicitParam({ name: "aid", description: "Attribute ID" })
+    public deleteAttrByDelete(@Param("id") id, @Param("aid") aid) {
+        return this.deleteAttrByGet(id, aid);
+    }
+
+    @Roles("admin")
     @Get("/:id/attributes/:aid/delete")
     @ApiOperation({ title: "Delete Categroy" })
     @ApiImplicitParam({ name: "id", description: "Categroy ID" })
     @ApiImplicitParam({ name: "aid", description: "Attribute ID" })
-    public async deleteAttr(@Param("id") id, @Param("aid") aid) {
+    public async deleteAttrByGet(@Param("id") id, @Param("aid") aid) {
         try {
             await CategroiesModel.findByIdAndUpdate(id, {
                 $pull: { attributes: aid}
@@ -218,15 +227,23 @@ export class CategroiesController {
     }
 
     @Roles("admin")
+    @Delete("/:id")
+    @ApiOperation({ title: "Delete Categroy" })
+    @ApiImplicitParam({ name: "id", description: "Categroy ID" })
+    public deleteByDelete(@Param("id") id) {
+        return this.deleteByGet(id);
+    }
+
+    @Roles("admin")
     @Get("/:id/delete")
     @ApiOperation({ title: "Delete Categroy" })
     @ApiImplicitParam({ name: "id", description: "Categroy ID" })
-    public async delete(@Res() res, @Param("id") id) {
+    public async deleteByGet(@Param("id") id) {
         try {
             await CategroiesModel.findByIdAndRemove(id).exec();
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        res.status(HttpStatus.OK).json();
+        return { };
     }
 }

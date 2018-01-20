@@ -1,6 +1,6 @@
 import {
     Controller, Get, Post, Body, Res, HttpStatus, Req, BadRequestException,
-    Param, UseGuards, Query
+    Param, UseGuards, Query, Delete
 } from "@nestjs/common";
 import {
     ApiBearerAuth, ApiUseTags, ApiResponse, ApiOperation, ApiImplicitParam
@@ -61,18 +61,28 @@ export class UsersController {
     }
 
     @Roles("admin")
+    @Delete("/:id")
+    @ApiOperation({ title: "Delete User" })
+    @ApiImplicitParam({ name: "id", description: "User ID" })
+    @ApiResponse({ status: HttpStatus.OK, description: "Delete Success" })
+    @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: "Delete Fail" })
+    public deleteByDelete(@Param() user: CommonUserDot) {
+        return this.delete(user);
+    }
+
+    @Roles("admin")
     @Get("/:id/delete")
     @ApiOperation({ title: "Delete User" })
     @ApiImplicitParam({ name: "id", description: "User ID" })
     @ApiResponse({ status: HttpStatus.OK, description: "Delete Success" })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: "Delete Fail" })
-    public async delete(@Res() res, @Param() user: CommonUserDot) {
+    public async delete(@Param() user: CommonUserDot) {
         try {
             await UserModel.removeUser(user.id);
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        res.status(HttpStatus.OK).json({ });
+        return { };
     }
 
     @Roles("admin")

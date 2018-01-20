@@ -72,21 +72,21 @@ export class RegexpsController {
     @Delete("/:id")
     @ApiOperation({ title: "Delete RegExp" })
     @ApiImplicitParam({ name: "id", description: "RegExp ID" })
-    public async deleteByDelete(@Res() res, @Param("id") id) {
-        return this.deleteByGet(res, id);
+    public deleteByDelete(@Param("id") id) {
+        return this.deleteByGet(id);
     }
 
     @Roles("admin")
     @Get("/:id/delete")
     @ApiOperation({ title: "Delete RegExp" })
     @ApiImplicitParam({ name: "id", description: "RegExp ID" })
-    public async deleteByGet(@Res() res, @Param("id") id) {
+    public async deleteByGet(@Param("id") id) {
         try {
             await RegexpsModel.removeRegexp(id);
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        res.status(HttpStatus.OK).json({ });
+        return { };
     }
 
 }
