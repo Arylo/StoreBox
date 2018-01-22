@@ -1,7 +1,7 @@
-import { IsString } from "class-validator";
+import { IsString, IsOptional, IsIn } from "class-validator";
 import { ApiModelProperty } from "@nestjs/swagger";
 
-export class LoginDto {
+export class LoginBodyDto {
     @ApiModelProperty({ type: String })
     @IsString()
     public readonly username: string;
@@ -9,3 +9,13 @@ export class LoginDto {
     @IsString()
     public readonly password: string;
 }
+
+class TokenQueryDto {
+    @IsIn(["true", "false"])
+    @IsOptional()
+    public readonly token: boolean;
+}
+
+export class LoginQueryDto extends TokenQueryDto { }
+
+export class LogoutQueryDto extends TokenQueryDto { }
