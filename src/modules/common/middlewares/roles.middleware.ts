@@ -19,13 +19,9 @@ export class RolesMiddleware implements NestMiddleware {
             }
             const tokenUser = basicAuth(req);
             if (tokenUser && tokenUser.name && tokenUser.pass) {
-                const token =
-                    await TokensModel.findOne({ token: tokenUser.pass })
-                    .populate("user", "username")
-                    .exec();
-                const tokenOwn = token.toObject().user as IUser;
-                if (tokenOwn.username === tokenUser.name) {
+                if (await TokensModel.isVaild(tokenUser.name, tokenUser.pass)) {
                     user.account = tokenUser.name;
+                    user.token = tokenUser.pass;
                     user.roles.push("token");
                     next();
                     return;

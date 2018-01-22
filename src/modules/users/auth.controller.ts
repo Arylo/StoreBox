@@ -1,14 +1,15 @@
 import {
     Controller, Post, Res, Body, HttpStatus, Session, Get, BadRequestException,
-    GatewayTimeoutException, Query, UseGuards
+    GatewayTimeoutException, Query, UseGuards, Req
 } from "@nestjs/common";
 import {
     ApiUseTags, ApiBearerAuth, ApiResponse, ApiOperation
 } from "@nestjs/swagger";
+import uuid = require("uuid");
+import basicAuth = require("basic-auth");
 import { Model as UserModel, UserDoc  } from "@models/User";
 import { Model as TokensModel } from "@models/Token";
-import uuid = require("uuid");
-import { LoginDto } from "./auth.dto";
+import { LoginBodyDto, LoginQueryDto, LogoutQueryDto } from "./auth.dto";
 import { RolesGuard } from "../common/guards/roles.guard";
 
 @UseGuards(RolesGuard)
@@ -21,7 +22,8 @@ export class AuthController {
     @ApiResponse({ status: HttpStatus.OK, description: "Login Success" })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: "Login Fail" })
     public async login(
-        @Session() session, @Body() ctx: LoginDto, @Query() query
+        @Session() session,
+        @Body() ctx: LoginBodyDto, @Query() query: LoginQueryDto
     ) {
         let user: UserDoc = null;
         try {
@@ -42,7 +44,7 @@ export class AuthController {
             try {
                 await TokensModel.create({ token, user: session.loginUserId });
             } catch (error) {
-                throw new BadRequestException("Generate Token Fail");
+                throw new BadRequestException(error.toString());
             }
             obj.token = token;
         }
@@ -55,13 +57,21 @@ export class AuthController {
     @ApiResponse({
         status: HttpStatus.GATEWAY_TIMEOUT, description: "Logout Timeout"
     })
-    public logout(@Res() res, @Session() session) {
-        session.destroy((err) => {
-            if (err) {
-                throw new GatewayTimeoutException(err.toString());
-            }
+    public async logout(@Req() req, @Res() res, @Session() session) {
+        const user = (req as any).user;
+        if (user && user.token && !!~user.roles.indexOf("token")) {
+            const token = user.token;
+            await TokensModel.findOneAndRemove({ token }).exec();
             res.status(HttpStatus.OK).json({ });
-        });
+            return;
+        } else {
+            session.destroy((err) => {
+                if (err) {
+                    throw new GatewayTimeoutException(err.toString());
+                }
+                res.status(HttpStatus.OK).json({ });
+            });
+        }
     }
 
 }
