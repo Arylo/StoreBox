@@ -5,7 +5,7 @@ import { connect, drop, newUser } from "../helpers/database";
 import { init } from "../helpers/server";
 import { Model as TokensModel } from "@models/Token";
 
-describe.only("Token E2E Api", () => {
+describe("Token E2E Api", () => {
 
     let request: supertest.SuperTest<supertest.Test>;
 
