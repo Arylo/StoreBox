@@ -15,8 +15,8 @@ import md5 = require("md5");
 
 import { NewCategroyDto, EditCategroyDto } from "./categroies.dto";
 import { CreateValueDto, EditValueDto } from "../values/values.dto";
-import { Roles } from "../common/decorators/roles.decorator";
-import { RolesGuard } from "../common/guards/roles.guard";
+import { Roles } from "@decorators/roles";
+import { RolesGuard } from "@guards/roles";
 
 @UseGuards(RolesGuard)
 @Controller("api/v1/categroies")

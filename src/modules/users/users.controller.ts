@@ -7,10 +7,10 @@ import {
 } from "@nestjs/swagger";
 import { Model as UserModel, IUser, UserDoc } from "@models/User";
 import { CreateUserDto, ModifyPasswordDto, CommonUserDot } from "./users.dto";
-import { Roles } from "../common/decorators/roles.decorator";
-import { RolesGuard } from "../common/guards/roles.guard";
+import { Roles } from "@decorators/roles";
+import { RolesGuard } from "@guards/roles";
 import { PerPageDto, ListResponse } from "../common/dtos/page.dto";
-import { ParseIntPipe } from "../common/pipes/parse-int.pipe";
+import { ParseIntPipe } from "@pipes/parse-int";
 
 @UseGuards(RolesGuard)
 @Controller("api/v1/users")

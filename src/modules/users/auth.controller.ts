@@ -10,7 +10,7 @@ import basicAuth = require("basic-auth");
 import { Model as UserModel, UserDoc  } from "@models/User";
 import { Model as TokensModel } from "@models/Token";
 import { LoginBodyDto, LoginQueryDto, LogoutQueryDto } from "./auth.dto";
-import { RolesGuard } from "../common/guards/roles.guard";
+import { RolesGuard } from "@guards/roles";
 
 @UseGuards(RolesGuard)
 @ApiUseTags("auth")

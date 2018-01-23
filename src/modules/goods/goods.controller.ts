@@ -12,8 +12,8 @@ import { Model as RegexpModel } from "@models/Regexp";
 import { config } from "@utils/config";
 
 import { CreateValueDto, EditValueDto } from "../values/values.dto";
-import { Roles } from "../common/decorators/roles.decorator";
-import { RolesGuard } from "../common/guards/roles.guard";
+import { Roles } from "@decorators/roles";
+import { RolesGuard } from "@guards/roles";
 
 import * as hasha from "hasha";
 import fs = require("fs-extra");

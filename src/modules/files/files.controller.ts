@@ -11,8 +11,8 @@ import pathExists = require("path-exists");
 import fs = require("fs-extra");
 
 import { DownlaodDto } from "./files.dto";
-import { Roles } from "../common/decorators/roles.decorator";
-import { RolesGuard } from "../common/guards/roles.guard";
+import { Roles } from "@decorators/roles";
+import { RolesGuard } from "@guards/roles";
 
 (async () => {
     if (!(await pathExists(config.paths.upload))) {
