@@ -63,7 +63,7 @@ export class RegexpsController {
     @ApiOperation({ title: "Edit RegExp" })
     @ApiImplicitParam({ name: "id", description: "RegExp ID" })
     // endregion Swagger Docs
-    public async edit(@Res() res, @Body() ctx: EditRegexpDot, @Param("id") id) {
+    public async edit(@Body() ctx: EditRegexpDot, @Param("id") id) {
         const data: EditRegexpRawDot = { };
         if (ctx.name) { data.name = ctx.name; }
         if (ctx.value) { data.value = ctx.value; }
@@ -81,7 +81,7 @@ export class RegexpsController {
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        res.status(HttpStatus.OK).json({ });
+        return { };
     }
 
     @Roles("admin")

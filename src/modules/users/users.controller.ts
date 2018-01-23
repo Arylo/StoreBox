@@ -65,15 +65,13 @@ export class UsersController {
     @ApiResponse({ status: HttpStatus.OK, description: "Modify Success" })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: "Modify Fail" })
     // endregion Swagger Docs
-    public async password(
-        @Res() res, @Body() user: ModifyPasswordDto, @Param("id") id
-    ) {
+    public async password(@Body() user: ModifyPasswordDto, @Param("id") id) {
         try {
             await UserModel.passwd(id, user.oldPassword, user.newPassword);
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        res.status(HttpStatus.OK).send();
+        return { };
     }
 
     @Roles("admin")
@@ -113,13 +111,13 @@ export class UsersController {
     @ApiResponse({ status: HttpStatus.OK, description: "Ban Success" })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: "Ban Fail" })
     // endregion Swagger Docs
-    public async ban(@Res() res, @Param() user: CommonUserDot) {
+    public async ban(@Param() user: CommonUserDot) {
         try {
             await UserModel.ban(user.id);
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        res.status(HttpStatus.OK).json({ });
+        return { };
     }
 
     @Roles("admin")
@@ -136,6 +134,6 @@ export class UsersController {
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        res.status(HttpStatus.OK).json({ });
+        return { };
     }
 }
