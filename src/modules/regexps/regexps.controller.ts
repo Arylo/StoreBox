@@ -24,8 +24,8 @@ export class RegexpsController {
 
     @Roles("admin")
     @Get()
-    @HttpCode(HttpStatus.OK)
     // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Get RegExp List" })
     @ApiResponse({
         status: HttpStatus.OK, description: "RegExp List",
@@ -60,6 +60,7 @@ export class RegexpsController {
     @Roles("admin")
     @Post("/:id")
     // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Edit RegExp" })
     @ApiImplicitParam({ name: "id", description: "RegExp ID" })
     // endregion Swagger Docs
@@ -87,8 +88,12 @@ export class RegexpsController {
     @Roles("admin")
     @Delete("/:id")
     // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Delete RegExp" })
     @ApiImplicitParam({ name: "id", description: "RegExp ID" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Delete RegExp Success"
+    })
     // endregion Swagger Docs
     public deleteByDelete(@Param("id") id) {
         return this.deleteByGet(id);
@@ -97,8 +102,12 @@ export class RegexpsController {
     @Roles("admin")
     @Get("/:id/delete")
     // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Delete RegExp" })
     @ApiImplicitParam({ name: "id", description: "RegExp ID" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Delete RegExp Success"
+    })
     // endregion Swagger Docs
     public async deleteByGet(@Param("id") id) {
         try {

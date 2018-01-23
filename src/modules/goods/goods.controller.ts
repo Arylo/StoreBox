@@ -1,6 +1,6 @@
 import {
     Controller, Req, Res, Body, Get, Post, Param, Session,
-    HttpStatus, BadRequestException, UseGuards, Delete
+    HttpStatus, BadRequestException, UseGuards, Delete, HttpCode
 } from "@nestjs/common";
 import {
     ApiBearerAuth, ApiUseTags, ApiResponse, ApiOperation, ApiImplicitParam,
@@ -135,18 +135,30 @@ export class GoodsController {
 
     @Roles("admin")
     @Delete("/:id/attributes/:aid")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Delete Attribute" })
     @ApiImplicitParam({ name: "id", description: "Good ID" })
     @ApiImplicitParam({ name: "aid", description: "Attribute ID" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Delete Attribute Success"
+    })
+    // endregion Swagger Docs
     public deleteAttrByDelete(@Param("id") id, @Param("aid") aid) {
         return this.deleteAttrByGet(id, aid);
     }
 
     @Roles("admin")
     @Get("/:id/attributes/:aid/delete")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Delete Attribute" })
     @ApiImplicitParam({ name: "id", description: "Good ID" })
     @ApiImplicitParam({ name: "aid", description: "Attribute ID" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Delete Attribute Success"
+    })
+    // endregion Swagger Docs
     public async deleteAttrByGet(@Param("id") id, @Param("aid") aid) {
         try {
             await GoodsModels.findByIdAndUpdate(id, {

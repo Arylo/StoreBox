@@ -1,6 +1,6 @@
 import {
     Controller, Get, Post, Body, Res, HttpStatus, Req, BadRequestException,
-    Param, UseGuards, Query, Delete
+    Param, UseGuards, Query, Delete, HttpCode
 } from "@nestjs/common";
 import {
     ApiBearerAuth, ApiUseTags, ApiResponse, ApiOperation, ApiImplicitParam
@@ -23,6 +23,7 @@ export class UsersController {
     @Roles("admin")
     @Get()
     // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Get User List" })
     @ApiResponse({
         status: HttpStatus.OK, description: "User List",
@@ -45,8 +46,12 @@ export class UsersController {
     @Post()
     // region Swagger Docs
     @ApiOperation({ title: "Add User" })
-    @ApiResponse({ status: HttpStatus.CREATED, description: "Add Success" })
-    @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: "Add Fail" })
+    @ApiResponse({
+        status: HttpStatus.CREATED, description: "Add User Success"
+    })
+    @ApiResponse({
+        status: HttpStatus.BAD_REQUEST, description: "Add User Fail"
+    })
     // endregion Swagger Docs
     public async addUser(@Res() res, @Body() user: CreateUserDto) {
         try {
@@ -60,10 +65,15 @@ export class UsersController {
     @Roles("admin")
     @Post("/:id/password")
     // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Modify User Password" })
     @ApiImplicitParam({ name: "id", description: "User ID" })
-    @ApiResponse({ status: HttpStatus.OK, description: "Modify Success" })
-    @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: "Modify Fail" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Modify Password Success"
+    })
+    @ApiResponse({
+        status: HttpStatus.BAD_REQUEST, description: "Modify Password Fail"
+    })
     // endregion Swagger Docs
     public async password(@Body() user: ModifyPasswordDto, @Param("id") id) {
         try {
@@ -77,10 +87,13 @@ export class UsersController {
     @Roles("admin")
     @Delete("/:id")
     // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Delete User" })
     @ApiImplicitParam({ name: "id", description: "User ID" })
-    @ApiResponse({ status: HttpStatus.OK, description: "Delete Success" })
-    @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: "Delete Fail" })
+    @ApiResponse({ status: HttpStatus.OK, description: "Delete User Success" })
+    @ApiResponse({
+        status: HttpStatus.BAD_REQUEST, description: "Delete User Fail"
+    })
     // endregion Swagger Docs
     public deleteByDelete(@Param() user: CommonUserDot) {
         return this.delete(user);
@@ -89,10 +102,13 @@ export class UsersController {
     @Roles("admin")
     @Get("/:id/delete")
     // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Delete User" })
     @ApiImplicitParam({ name: "id", description: "User ID" })
-    @ApiResponse({ status: HttpStatus.OK, description: "Delete Success" })
-    @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: "Delete Fail" })
+    @ApiResponse({ status: HttpStatus.OK, description: "Delete User Success" })
+    @ApiResponse({
+        status: HttpStatus.BAD_REQUEST, description: "Delete User Fail"
+    })
     // endregion Swagger Docs
     public async delete(@Param() user: CommonUserDot) {
         try {
@@ -106,6 +122,7 @@ export class UsersController {
     @Roles("admin")
     @Get("/:id/ban")
     // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Ban User" })
     @ApiImplicitParam({ name: "id", description: "User ID" })
     @ApiResponse({ status: HttpStatus.OK, description: "Ban Success" })
@@ -123,12 +140,13 @@ export class UsersController {
     @Roles("admin")
     @Get("/:id/allow")
     // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Allow User" })
     @ApiImplicitParam({ name: "id", description: "User ID" })
     @ApiResponse({ status: HttpStatus.OK, description: "Allow Success" })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: "Allow Fail" })
     // endregion Swagger Docs
-    public async allow(@Res() res, @Param() user: CommonUserDot) {
+    public async allow(@Param() user: CommonUserDot) {
         try {
             await UserModel.allow(user.id);
         } catch (error) {

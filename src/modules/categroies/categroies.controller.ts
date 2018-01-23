@@ -168,9 +168,13 @@ export class CategroiesController {
     @Roles("admin")
     @Delete("/:id/attributes/:aid")
     // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Delete Categroy" })
     @ApiImplicitParam({ name: "id", description: "Categroy ID" })
     @ApiImplicitParam({ name: "aid", description: "Attribute ID" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Delete Attribute Success"
+    })
     // endregion Swagger Docs
     public deleteAttrByDelete(@Param("id") id, @Param("aid") aid) {
         return this.deleteAttrByGet(id, aid);
@@ -179,9 +183,13 @@ export class CategroiesController {
     @Roles("admin")
     @Get("/:id/attributes/:aid/delete")
     // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Delete Categroy" })
     @ApiImplicitParam({ name: "id", description: "Categroy ID" })
     @ApiImplicitParam({ name: "aid", description: "Attribute ID" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Delete Attribute Success"
+    })
     // endregion Swagger Docs
     public async deleteAttrByGet(@Param("id") id, @Param("aid") aid) {
         try {
@@ -242,8 +250,12 @@ export class CategroiesController {
     @Roles("admin")
     @Delete("/:id")
     // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Delete Categroy" })
     @ApiImplicitParam({ name: "id", description: "Categroy ID" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Delete Categroy Success"
+    })
     // endregion Swagger Docs
     public deleteByDelete(@Param("id") id) {
         return this.deleteByGet(id);
@@ -252,8 +264,12 @@ export class CategroiesController {
     @Roles("admin")
     @Get("/:id/delete")
     // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Delete Categroy" })
     @ApiImplicitParam({ name: "id", description: "Categroy ID" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Delete Categroy Success"
+    })
     // endregion Swagger Docs
     public async deleteByGet(@Param("id") id) {
         try {
