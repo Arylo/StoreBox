@@ -5,35 +5,40 @@ import {
 import {
     ApiBearerAuth, ApiUseTags, ApiResponse, ApiOperation, ApiImplicitParam
 } from "@nestjs/swagger";
-import { Model as RegexpsModel } from "@models/Regexp";
+import { Model as RegexpsModel, IRegexp, RegexpDoc } from "@models/Regexp";
 import {
     NewRegexp, EditRegexpDot, CommonRegexpDot, EditRegexpRawDot
 } from "./regexps.dto";
 import { Roles } from "../common/decorators/roles.decorator";
 import { RolesGuard } from "../common/guards/roles.guard";
-import { PerPageDto } from "../common/dtos/page.dto";
+import { PerPageDto, ListResponse } from "../common/dtos/page.dto";
 import { ParseIntPipe } from "../common/pipes/parse-int.pipe";
 
 @UseGuards(RolesGuard)
 @Controller("api/v1/regexps")
+// region Swagger Docs
 @ApiUseTags("regexps")
 @ApiBearerAuth()
-@ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: "Unauthorized" })
+// endregion Swagger Docs
 export class RegexpsController {
 
     @Roles("admin")
     @Get()
     @HttpCode(HttpStatus.OK)
+    // region Swagger Docs
     @ApiOperation({ title: "Get RegExp List" })
-    @ApiResponse({ status: HttpStatus.OK, description: "RegExp List" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "RegExp List",
+        type: ListResponse
+    })
+    // endregion Swagger Docs
     public async list(@Query(new ParseIntPipe()) query: PerPageDto) {
-        const pageCount = await RegexpsModel.pageCount(query.perNum);
-        const data = {
-            data: [ ],
-            current: (query.page || 1),
-            total: pageCount
-        };
-        if (pageCount >= (query.page || 1)) {
+        const curPage = query.page || 1;
+        const totalPage = await RegexpsModel.pageCount(query.perNum);
+        const data = new ListResponse<IRegexp | RegexpDoc>();
+        data.current = curPage;
+        data.total = totalPage;
+        if (totalPage >= curPage) {
             data.data = await RegexpsModel.list(query.perNum, query.page);
         }
         return data;
@@ -54,8 +59,10 @@ export class RegexpsController {
 
     @Roles("admin")
     @Post("/:id")
+    // region Swagger Docs
     @ApiOperation({ title: "Edit RegExp" })
     @ApiImplicitParam({ name: "id", description: "RegExp ID" })
+    // endregion Swagger Docs
     public async edit(@Res() res, @Body() ctx: EditRegexpDot, @Param("id") id) {
         const data: EditRegexpRawDot = { };
         if (ctx.name) { data.name = ctx.name; }
@@ -79,16 +86,20 @@ export class RegexpsController {
 
     @Roles("admin")
     @Delete("/:id")
+    // region Swagger Docs
     @ApiOperation({ title: "Delete RegExp" })
     @ApiImplicitParam({ name: "id", description: "RegExp ID" })
+    // endregion Swagger Docs
     public deleteByDelete(@Param("id") id) {
         return this.deleteByGet(id);
     }
 
     @Roles("admin")
     @Get("/:id/delete")
+    // region Swagger Docs
     @ApiOperation({ title: "Delete RegExp" })
     @ApiImplicitParam({ name: "id", description: "RegExp ID" })
+    // endregion Swagger Docs
     public async deleteByGet(@Param("id") id) {
         try {
             await RegexpsModel.removeRegexp(id);

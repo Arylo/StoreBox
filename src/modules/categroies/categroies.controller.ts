@@ -20,9 +20,10 @@ import { RolesGuard } from "../common/guards/roles.guard";
 
 @UseGuards(RolesGuard)
 @Controller("api/v1/categroies")
+// region Swagger Docs
 @ApiUseTags("categroies")
 @ApiBearerAuth()
-@ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: "Unauthorized" })
+// endregion Swagger Docs
 export class CategroiesController {
 
     @Roles("admin")
@@ -84,8 +85,10 @@ export class CategroiesController {
 
     @Roles("admin")
     @Get("/:id")
+    // region Swagger Docs
     @ApiOperation({ title: "Get Categroy Info" })
     @ApiImplicitParam({ name: "id", description: "Categroy ID" })
+    // endregion Swagger Docs
     public async get(@Res() res, @Param("id") id) {
         let obj: ICategroy;
         try {
@@ -113,8 +116,10 @@ export class CategroiesController {
 
     @Roles("admin")
     @Post("/:id/attributes")
+    // region Swagger Docs
     @ApiOperation({ title: "Add Attribute" })
     @ApiImplicitParam({ name: "id", description: "Categroy ID" })
+    // endregion Swagger Docs
     public async addAttr(
         @Res() res, @Param("id") id, @Body() ctx: CreateValueDto
     ) {
@@ -144,9 +149,11 @@ export class CategroiesController {
 
     @Roles("admin")
     @Post("/:id/attributes/:aid")
+    // region Swagger Docs
     @ApiOperation({ title: "Edit Categroy" })
     @ApiImplicitParam({ name: "id", description: "Categroy ID" })
     @ApiImplicitParam({ name: "aid", description: "Attribute ID" })
+    // endregion Swagger Docs
     public async editAttr(
         @Res() res, @Param("aid") aid, @Body() ctx: EditValueDto
     ) {
@@ -160,18 +167,22 @@ export class CategroiesController {
 
     @Roles("admin")
     @Delete("/:id/attributes/:aid")
+    // region Swagger Docs
     @ApiOperation({ title: "Delete Categroy" })
     @ApiImplicitParam({ name: "id", description: "Categroy ID" })
     @ApiImplicitParam({ name: "aid", description: "Attribute ID" })
+    // endregion Swagger Docs
     public deleteAttrByDelete(@Param("id") id, @Param("aid") aid) {
         return this.deleteAttrByGet(id, aid);
     }
 
     @Roles("admin")
     @Get("/:id/attributes/:aid/delete")
+    // region Swagger Docs
     @ApiOperation({ title: "Delete Categroy" })
     @ApiImplicitParam({ name: "id", description: "Categroy ID" })
     @ApiImplicitParam({ name: "aid", description: "Attribute ID" })
+    // endregion Swagger Docs
     public async deleteAttrByGet(@Param("id") id, @Param("aid") aid) {
         try {
             await CategroiesModel.findByIdAndUpdate(id, {
@@ -193,8 +204,10 @@ export class CategroiesController {
 
     @Roles("admin")
     @Post("/:id")
+    // region Swagger Docs
     @ApiOperation({ title: "Edit Categroy" })
     @ApiImplicitParam({ name: "id", description: "Categroy ID" })
+    // endregion Swagger Docs
     public async edit(
         @Res() res, @Param("id") id, @Body() ctx: EditCategroyDto
     ) {
@@ -228,16 +241,20 @@ export class CategroiesController {
 
     @Roles("admin")
     @Delete("/:id")
+    // region Swagger Docs
     @ApiOperation({ title: "Delete Categroy" })
     @ApiImplicitParam({ name: "id", description: "Categroy ID" })
+    // endregion Swagger Docs
     public deleteByDelete(@Param("id") id) {
         return this.deleteByGet(id);
     }
 
     @Roles("admin")
     @Get("/:id/delete")
+    // region Swagger Docs
     @ApiOperation({ title: "Delete Categroy" })
     @ApiImplicitParam({ name: "id", description: "Categroy ID" })
+    // endregion Swagger Docs
     public async deleteByGet(@Param("id") id) {
         try {
             await CategroiesModel.findByIdAndRemove(id).exec();

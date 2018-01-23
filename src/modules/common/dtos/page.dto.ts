@@ -1,7 +1,22 @@
 import { IsIn, IsOptional, IsNumberString } from "class-validator";
-import { ApiModelPropertyOptional } from "@nestjs/swagger";
+import { ApiModelPropertyOptional, ApiModelProperty } from "@nestjs/swagger";
 
 export const PER_COUNT = [ 25, 50, 75 ];
+
+export class ListResponse<T> {
+    @ApiModelProperty({
+        type: Array, description: "Data Set"
+    })
+    public data: T[] = [ ];
+    @ApiModelProperty({
+        type: Number, description: "Current Page"
+    })
+    public current: number;
+    @ApiModelProperty({
+        type: Number, description: "Total Page Count"
+    })
+    public total: number;
+}
 
 export class PerPageDto {
     @ApiModelPropertyOptional({
