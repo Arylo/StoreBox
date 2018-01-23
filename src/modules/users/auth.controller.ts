@@ -9,8 +9,8 @@ import uuid = require("uuid");
 import basicAuth = require("basic-auth");
 import { Model as UserModel, UserDoc  } from "@models/User";
 import { Model as TokensModel } from "@models/Token";
-import { LoginBodyDto, LoginQueryDto, LogoutQueryDto } from "./auth.dto";
 import { RolesGuard } from "@guards/roles";
+import { LoginBodyDto, LoginQueryDto, LoginRespone } from "./auth.dto";
 
 @UseGuards(RolesGuard)
 @ApiUseTags("auth")
@@ -19,7 +19,10 @@ export class AuthController {
 
     @Post("login")
     @ApiOperation({ title: "Login System" })
-    @ApiResponse({ status: HttpStatus.OK, description: "Login Success" })
+    @ApiResponse({
+        status: HttpStatus.OK, type: LoginRespone,
+        description: "Login Success"
+    })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: "Login Fail" })
     public async login(
         @Session() session,
@@ -38,7 +41,11 @@ export class AuthController {
         //         throw new GatewayTimeoutException(err.toString());
         //     }
         // });
-        const obj: any = { };
+        const obj = new LoginRespone();
+        obj.expires = session.cookie.expires || session.cookie._expires;
+        obj.username = user.toObject().username;
+        obj.nickname = user.toObject().nickname;
+        obj.id = user.toObject()._id;
         if (query.token) {
             const token = uuid();
             try {
