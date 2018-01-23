@@ -7,6 +7,7 @@ import { error } from "./modules/common/middlewares/logger.middleware";
 let server: express.Express;
 
 export const initExpress = () => {
+    /* istanbul ignore if */
     if (server) {
         return server;
     }

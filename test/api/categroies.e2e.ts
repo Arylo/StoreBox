@@ -94,8 +94,8 @@ describe("Categroies E2E Api", () => {
             .send(ctx)
             .then();
         ids.categroies.push(result._id);
-        for (const attr of result.attributes) {
-            ids.values.push(attr._id);
+        for (const attrId of result.attributes) {
+            ids.values.push(attrId);
         }
         result.should.have.properties({
             name: ctx.name,

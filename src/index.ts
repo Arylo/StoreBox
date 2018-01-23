@@ -13,7 +13,7 @@ const bootstrap = async () => {
     const app = await NestFactory.create(ApplicationModule, server);
     app.useGlobalPipes(new ValidationPipe());
 
-    if (isDevelopment()) {
+    if (isDevelopment) {
         const options = new DocumentBuilder()
             .setTitle("StoreBox Apis")
             .setVersion("1.0.0")

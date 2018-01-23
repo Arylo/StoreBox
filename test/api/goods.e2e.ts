@@ -57,6 +57,7 @@ describe("Goods E2E Api", () => {
         result = await uploadFile(request, filepath);
         result = result.body;
 
+        ids.goods.push(result._id);
         result.should.have.properties([
             "_id", "originname", "categroy", "uploader"
         ]);

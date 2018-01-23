@@ -16,7 +16,7 @@ describe("RegExp Model", () => {
         const result = await CategroyModel.create({
             name: faker.name.findName()
         });
-        ids.regexps.push(result._id);
+        ids.categroies.push(result._id);
         Categroy = result.toObject() as ICategroyRaw;
     });
 

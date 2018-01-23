@@ -32,10 +32,15 @@ const cachedLog = (name: string) => {
         "fatal": action("fatal")
     };
 };
+
+/**
+ * 将缓存起来的日志输出到相关的日志模块
+ */
 const importCache = (name: string) => {
     const logger = LOGGERS[name];
     const cache = CACHEDLOGGERS[name];
     for (const item of cache) {
+        /* istanbul ignore next */
         logger[item.level](...item.context);
     }
     return logger;
@@ -43,7 +48,15 @@ const importCache = (name: string) => {
 
 // region Logger Factory
 const LOGGERS: { [key: string]: bunyan } = { };
+/**
+ * 将缓存日志模块转换成bunyan日志模块
+ * @param opts.name 日志模块名
+ */
 const conventionalLog = (opts) => {
+    if (isTest) {
+        return cachedLog(opts.name) as any;
+    }
+    /* istanbul ignore next */
     if (LOGGERS[opts.name]) {
         return LOGGERS[opts.name];
     }
@@ -82,6 +95,7 @@ export let errorLogger: bunyan = cachedLog("error") as any;
 const initLoggers = () => {
     errorLogger = (() => {
         const FLAG = "error";
+        /* istanbul ignore if */
         if (LOGGERS[FLAG]) {
             return LOGGERS[FLAG];
         }
@@ -101,9 +115,6 @@ const initLoggers = () => {
         return LOGGERS[FLAG];
     })();
     importCache("error");
-    if (isTest()) {
-        return;
-    }
     systemLogger = conventionalLog({
         name: "system"
     });
@@ -128,6 +139,7 @@ const initLoggers = () => {
 };
 
 (async () => {
+    /* istanbul ignore next */
     try {
         if (!(await pathExists(config.paths.log))) {
             fs.mkdirp(config.paths.log);
@@ -151,6 +163,7 @@ const getUA = (req: Request) => {
     try {
         return useragent.parse(req.header["user-agent"]);
     } catch (error) {
+        /* istanbul ignore next */
         return req.header["user-agent"];
     }
 };

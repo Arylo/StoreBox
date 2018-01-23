@@ -20,6 +20,9 @@
     "PandoraBox",
     "Arylo"
   ],
+  "engines": {
+    "node": ">=8"
+  },
   "author": "AryloYeung <arylo.open@gmail.com>",
   "license": "MIT",
   "devDependencies": {
@@ -62,6 +65,7 @@
     "@nestjs/common": "^4.5.1",
     "@nestjs/core": "^4.5.1",
     "@nestjs/swagger": "^1.1.3",
+    "@types/node": "^9.3.0",
     "basic-auth": "^2.0.0",
     "body-parser": "^1.18.2",
     "bunyan": "^1.8.12",
