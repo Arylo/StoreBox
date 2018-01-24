@@ -11,8 +11,6 @@ export class NewCategroyDto {
 
     @ApiModelPropertyOptional({ type: String, isArray: true })
     @IsOptional()
-    @IsArray()
-    @ArrayUnique()
     @IsString({
         each: true
     })
