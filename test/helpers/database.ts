@@ -8,7 +8,7 @@ import { Model as GoodsModels } from "@models/Good";
 import { Model as RegexpsModel } from "@models/Regexp";
 import { Model as UsersModel } from "@models/User";
 import { Model as TokensModel } from "@models/Token";
-import { Model as CategoriesModel } from "@models/Categroy";
+import { Model as CategoriesModel, CategoryDoc } from "@models/Categroy";
 
 config.db.database = "storebox-test";
 
@@ -67,4 +67,8 @@ export const newUser = (username: string, password: string) => {
 
 export const newRegexp = (name: string, value: RegExp) => {
     return RegexpsModel.addRegexp(name, value.source);
+};
+
+export const newCategory = (obj: object) => {
+    return CategoriesModel.create(obj) as Promise<CategoryDoc>;
 };
