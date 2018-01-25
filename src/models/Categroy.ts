@@ -5,6 +5,7 @@ import { isArray } from "util";
 import { reduce, includes, difference } from "lodash";
 import { MongoError } from "mongodb";
 import Cache =  require("schedule-cache");
+import { PER_COUNT } from "../modules/common/dtos/page.dto";
 
 const cache = Cache.create();
 
@@ -37,6 +38,27 @@ export interface ICategoryRaw extends ICategory {
 }
 
 const CategorySchema = new Base(Definition).createSchema();
+
+CategorySchema.static("pageCount", async (perNum = PER_COUNT[0]) => {
+    const FLAG = `page_count_${perNum}`;
+    if (cache.get(FLAG)) {
+        return cache.get(FLAG);
+    }
+    cache.put(FLAG, Math.ceil((await Model.count({ }).exec()) / perNum));
+    return cache.get(FLAG);
+});
+
+CategorySchema.static("list", (perNum = PER_COUNT[0], page = 1) => {
+    const FLAG_LIST = `list_${perNum}_${page}`;
+    if (cache.get(FLAG_LIST)) {
+        return cache.get(FLAG_LIST);
+    }
+    const p = Model.find({ })
+        .skip((page - 1) * perNum).limit(perNum)
+        .exec();
+    cache.put(FLAG_LIST, p);
+    return cache.get(FLAG_LIST);
+});
 
 const getIdGroups = (obj): string[] => {
     const selfIdArr = [ obj._id.toString() ];
@@ -113,6 +135,17 @@ CategorySchema.static("getCategories", async (tags: string | string[] = [ ]) => 
 export interface ICategoryModel<T extends CategoryDoc> extends M<T> {
     moveCategory(id: ObjectId, pid: ObjectId): Promise<T>;
     getCategories(tags: string | string[]): Promise<ICategoryRaw[]>;
+    /**
+     * Category 列表
+     * @param  perNum {number} 每页数量
+     * @param  page {number} 页数
+     * @return {Promise}
+     */
+    list(perNum?: number, page?: number): Promise<T[]>;
+    /**
+     * 返回总页数
+     */
+    pageCount(perNum?: number): Promise<number>;
 }
 
 for (const method of MODIFY_MOTHODS) {

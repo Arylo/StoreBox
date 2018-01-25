@@ -1,6 +1,6 @@
 import {
     Controller, Post, Res, Body, Get, HttpStatus, HttpCode, Param,
-    BadRequestException, UseGuards, Delete
+    BadRequestException, UseGuards, Delete, Query
 } from "@nestjs/common";
 import {
     ApiBearerAuth, ApiUseTags, ApiResponse, ApiImplicitParam, ApiOperation
@@ -17,6 +17,8 @@ import { NewCategoryDto, EditCategoryDto } from "./categroies.dto";
 import { CreateValueDto, EditValueDto } from "../values/values.dto";
 import { Roles } from "@decorators/roles";
 import { RolesGuard } from "@guards/roles";
+import { ParseIntPipe } from "@pipes/parse-int";
+import { PerPageDto, ListResponse } from "../../modules/common/dtos/page.dto";
 
 @UseGuards(RolesGuard)
 @Controller("api/v1/categories")
@@ -28,12 +30,24 @@ export class CategoriesController {
 
     @Roles("admin")
     @Get()
+    // region Swagger Docs
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Get Category List" })
-    public async list() {
-        return await CategoriesModel.find()
-            .select("-attributes")
-            .exec();
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Category List",
+        type: ListResponse
+    })
+    // endregion Swagger Docs
+    public async list(@Query(new ParseIntPipe()) query: PerPageDto) {
+        const curPage = query.page || 1;
+        const totalPage = await CategoriesModel.pageCount(query.perNum);
+        const data = new ListResponse<ICategory | CategoryDoc>();
+        data.current = curPage;
+        data.total = totalPage;
+        if (totalPage >= curPage) {
+            data.data = await CategoriesModel.list(query.perNum, query.page);
+        }
+        return data;
     }
 
     @Roles("admin")
