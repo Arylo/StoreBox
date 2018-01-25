@@ -3,7 +3,7 @@ import path = require("path");
 import faker = require("faker");
 import { HttpStatus } from "@nestjs/common";
 
-import { connect, drop, addCategroyAndRegexp, newUser } from "../helpers/database";
+import { connect, drop, addCategoryAndRegexp, newUser } from "../helpers/database";
 import { uploadFile } from "../helpers/files";
 import { sleep } from "../helpers/utils";
 import { init, initWithAuth } from "../helpers/server";
@@ -19,7 +19,7 @@ describe("Files E2E Api", () => {
     const ids = {
         users: [ ],
         regexps: [ ],
-        categroies: [ ],
+        categories: [ ],
         goods: [ ]
     };
 
@@ -52,10 +52,11 @@ describe("Files E2E Api", () => {
     let id = "";
     const uploadFilepath = `${__dirname}/../files/icon_pandorabox_64x64.png`;
     step("Upload File", async () => {
-        const docs = await addCategroyAndRegexp(/^icon_.+64x64\.png$/);
+        const docs = await addCategoryAndRegexp(/^icon_.+64x64\.png$/);
         cid = docs[0]._id;
-        id = (await uploadFile(request, uploadFilepath)).body._id;
-        ids.categroies.push(docs[0]._id);
+        const uploadInfo = await uploadFile(request, uploadFilepath);
+        id = uploadInfo.body._id;
+        ids.categories.push(docs[0]._id);
         ids.regexps.push(docs[1]._id);
         ids.goods.push(id);
         await sleep(50);
@@ -69,7 +70,7 @@ describe("Files E2E Api", () => {
         const filename = path.basename(uploadFilepath);
 
         const url = getFileUrl(cid, id);
-        const { status, header } = await request.get(url).then();
+        const { status, header, body } = await request.get(url).then();
 
         status.should.eql(HttpStatus.OK);
         header.should.match({

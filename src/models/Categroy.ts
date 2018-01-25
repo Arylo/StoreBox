@@ -8,8 +8,8 @@ import Cache =  require("schedule-cache");
 
 const cache = Cache.create();
 
-export const Flag = "categroies";
-export type CategroyDoc = IDoc<ICategroy>;
+export const FLAG = "categories";
+export type CategoryDoc = IDoc<ICategory>;
 
 const Definition: SchemaDefinition = {
     name: { type: String, required: true, unique: true },
@@ -20,23 +20,23 @@ const Definition: SchemaDefinition = {
     }],
     pid: {
         type: SchemaTypes.ObjectId,
-        ref: Flag
+        ref: FLAG
     }
 };
 
-export interface ICategroy extends IDocRaw {
+export interface ICategory extends IDocRaw {
     name: string;
     tags: string[];
     attributes: [ ObjectId ] | [ IValues ];
-    pid: ObjectId | ICategroy;
+    pid: ObjectId | ICategory;
 }
 
-export interface ICategroyRaw extends ICategroy {
+export interface ICategoryRaw extends ICategory {
     attributes: [ IValues ];
-    pid: ICategroyRaw;
+    pid: ICategoryRaw;
 }
 
-const CategroySchema = new Base(Definition).createSchema();
+const CategorySchema = new Base(Definition).createSchema();
 
 const getIdGroups = (obj): string[] => {
     const selfIdArr = [ obj._id.toString() ];
@@ -51,7 +51,7 @@ const getIdGroups = (obj): string[] => {
     }
 };
 
-CategroySchema.static("moveCategroy", async (id: ObjectId, pid: ObjectId) => {
+CategorySchema.static("moveCategory", async (id: ObjectId, pid: ObjectId) => {
     const curCate = await Model.findById(id)
         .exec();
     const parentCate = await Model.findById(pid)
@@ -70,7 +70,7 @@ CategroySchema.static("moveCategroy", async (id: ObjectId, pid: ObjectId) => {
     const idSet = new Set(getIdGroups(parentCate.toObject()));
     if (idSet.size !== 1 && idSet.has(curCate._id.toString())) {
         return Promise.reject(
-            new MongoError("It would bad loop, if set the Parent Categroy")
+            new MongoError("It would bad loop, if set the Parent Category")
         );
     }
     return Model.findByIdAndUpdate(id, {
@@ -78,7 +78,7 @@ CategroySchema.static("moveCategroy", async (id: ObjectId, pid: ObjectId) => {
     }).exec();
 });
 
-CategroySchema.static("getCategroies", async (tags: string | string[] = [ ]) => {
+CategorySchema.static("getCategories", async (tags: string | string[] = [ ]) => {
     if (!isArray(tags)) {
         tags = [ tags ];
     }
@@ -110,22 +110,22 @@ CategroySchema.static("getCategroies", async (tags: string | string[] = [ ]) => 
     return p;
 });
 
-export interface ICategroyModel<T extends CategroyDoc> extends M<T> {
-    moveCategroy(id: ObjectId, pid: ObjectId): Promise<T>;
-    getCategroies(tags: string | string[]): Promise<ICategroyRaw[]>;
+export interface ICategoryModel<T extends CategoryDoc> extends M<T> {
+    moveCategory(id: ObjectId, pid: ObjectId): Promise<T>;
+    getCategories(tags: string | string[]): Promise<ICategoryRaw[]>;
 }
 
 for (const method of MODIFY_MOTHODS) {
-    CategroySchema.post(method, () => {
+    CategorySchema.post(method, () => {
         cache.clear();
     });
 }
 
-export const Model = model(Flag, CategroySchema) as ICategroyModel<CategroyDoc>;
+export const Model = model(FLAG, CategorySchema) as ICategoryModel<CategoryDoc>;
 
-const getTags = (obj: ICategroyRaw | ICategroy) => {
+const getTags = (obj: ICategoryRaw | ICategory) => {
     const tags = obj.tags;
-    const pid = obj.pid as ICategroyRaw | void;
+    const pid = obj.pid as ICategoryRaw | void;
     if (pid && pid.tags) {
         return tags.concat(getTags(pid));
     }

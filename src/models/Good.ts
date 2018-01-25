@@ -2,7 +2,7 @@ import { model, SchemaDefinition, Model as M, SchemaTypes } from "mongoose";
 import { Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS } from "@models/common";
 import { IValues, Flag as ValueFlag } from "@models/Value";
 import { IUser, Flag as UserFlag } from "@models/User";
-import { ICategroy, Flag as CategroyFlag } from "@models/Categroy";
+import { ICategory, FLAG as CategoryFlag } from "@models/Categroy";
 import Cache =  require("schedule-cache");
 import { PER_COUNT } from "../modules/common/dtos/page.dto";
 import { isArray } from "util";
@@ -21,9 +21,9 @@ const Definition: SchemaDefinition = {
     sha256sum: { type: String, required: true},
     filename: { type: String, required: true },
     originname: { type: String, required: true },
-    categroy: {
+    category: {
         type: SchemaTypes.ObjectId,
-        ref: CategroyFlag,
+        ref: CategoryFlag,
         required: true
     },
     uploader: {
@@ -46,7 +46,7 @@ export interface IGoods extends IDocRaw {
     sha256sum?: string;
     filename?: string;
     readonly originname: string;
-    categroy: ObjectId | ICategroy;
+    category: ObjectId | ICategory;
     version: string;
     uploader: ObjectId | IUser;
     tags?: string[];
@@ -54,7 +54,7 @@ export interface IGoods extends IDocRaw {
 }
 
 export interface IGoodsRaw extends IGoods {
-    categroy: ICategroy;
+    category: ICategory;
     uploader: IUser;
     attributes?: [ IValues ];
 }
@@ -68,11 +68,11 @@ GoodsSchema.static(
             cids = [ cids ];
         }
         const conditions = cids.length === 1 ? {
-            categroy: cids[0],
+            category: cids[0],
             active: true
         } : {
             $or: reduce(cids, (arr, cid) => {
-                arr.push({ categroy: { $in: [ cid ] } });
+                arr.push({ category: { $in: [ cid ] } });
                 return arr;
             }, []),
             active: true
@@ -97,11 +97,11 @@ GoodsSchema.static(
             return count;
         }
         const conditions = cids.length === 1 ? {
-            categroy: cids[0],
+            category: cids[0],
             active: true
         } : {
             $or: reduce(cids, (arr, cid) => {
-                arr.push({ categroy: { $in: [ cid ] } });
+                arr.push({ category: { $in: [ cid ] } });
                 return arr;
             }, []),
             active: true

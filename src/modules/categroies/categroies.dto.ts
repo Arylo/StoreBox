@@ -4,7 +4,7 @@ import {
 import { ObjectId } from "@models/common";
 import { ApiModelProperty, ApiModelPropertyOptional } from "@nestjs/swagger";
 
-export class NewCategroyDto {
+export class NewCategoryDto {
     @ApiModelProperty({ type: String })
     @IsString()
     public readonly name: string;
@@ -31,7 +31,7 @@ export class NewCategroyDto {
     public readonly pid: ObjectId;
 }
 
-export class EditCategroyDto {
+export class EditCategoryDto {
     @ApiModelPropertyOptional({ type: String })
     @IsOptional()
     @IsString()

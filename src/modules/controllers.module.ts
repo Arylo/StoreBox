@@ -4,12 +4,10 @@ import { DatabaseModule } from "./database/database.module";
 import { UsersController } from "./users/users.controller";
 import { AuthController } from "./users/auth.controller";
 import { RegexpsController } from "./regexps/regexps.controller";
-import { CategroiesController } from "./categroies/categroies.controller";
+import { CategoriesController } from "./categroies/categroies.controller";
 import { GoodsController } from "./goods/goods.controller";
 import { FilesController } from "./files/files.controller";
-import {
-    GoodsController as FCategroiesController
-} from "./files/goods.controller";
+import { GoodsController as FGoodsController } from "./files/goods.controller";
 
 import { UploadFileMiddleware } from "./common/middlewares/upload.middleware";
 import {
@@ -18,9 +16,9 @@ import {
 import { RolesMiddleware } from "./common/middlewares/roles.middleware";
 
 export const controllers = [
+    FilesController, FGoodsController,
     UsersController, AuthController,
-    RegexpsController, CategroiesController, GoodsController,
-    FilesController, FCategroiesController
+    RegexpsController, CategoriesController, GoodsController
 ];
 
 @Module({

@@ -8,7 +8,7 @@ import { Model as GoodsModels } from "@models/Good";
 import { Model as RegexpsModel } from "@models/Regexp";
 import { Model as UsersModel } from "@models/User";
 import { Model as TokensModel } from "@models/Token";
-import { Model as CategroiesModel } from "@models/Categroy";
+import { Model as CategoriesModel } from "@models/Categroy";
 
 config.db.database = "storebox-test";
 
@@ -17,7 +17,7 @@ interface IIds {
     goods?: ObjectId[];
     regexps?: ObjectId[];
     users?: ObjectId[];
-    categroies?: ObjectId[];
+    categories?: ObjectId[];
     tokens?: ObjectId[];
 }
 
@@ -29,7 +29,7 @@ export const drop = async (ids?: IIds) => {
         await GoodsModels.remove({ }).exec();
         await RegexpsModel.remove({ }).exec();
         await UsersModel.remove({ }).exec();
-        await CategroiesModel.remove({ }).exec();
+        await CategoriesModel.remove({ }).exec();
         return;
     }
     for (const id of (ids.values || [ ])) {
@@ -47,18 +47,18 @@ export const drop = async (ids?: IIds) => {
     for (const id of (ids.tokens || [ ])) {
         await TokensModel.findByIdAndRemove(id).exec();
     }
-    for (const id of (ids.categroies || [ ])) {
-        await CategroiesModel.findByIdAndRemove(id).exec();
+    for (const id of (ids.categories || [ ])) {
+        await CategoriesModel.findByIdAndRemove(id).exec();
     }
 };
 
-export const addCategroyAndRegexp = async (regexp: RegExp) => {
-    const categroy = await CategroiesModel.create({
+export const addCategoryAndRegexp = async (regexp: RegExp) => {
+    const category = await CategoriesModel.create({
         name: faker.name.findName()
     });
     const reg = await newRegexp(faker.random.word(), regexp);
-    await RegexpsModel.link(reg._id, categroy._id);
-    return [categroy, reg];
+    await RegexpsModel.link(reg._id, category._id);
+    return [category, reg];
 };
 
 export const newUser = (username: string, password: string) => {

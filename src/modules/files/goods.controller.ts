@@ -2,7 +2,7 @@ import {
     UseGuards, Controller, Get, HttpCode, HttpStatus, Query
 } from "@nestjs/common";
 import { ApiUseTags, ApiOperation } from "@nestjs/swagger";
-import { Model as CategroiesModel } from "@models/Categroy";
+import { Model as CategoriesModel } from "@models/Categroy";
 import { RolesGuard } from "@guards/roles";
 import { Roles } from "@decorators/roles";
 import { ParseIntPipe } from "@pipes/parse-int";
@@ -13,8 +13,8 @@ import { reduce } from "lodash";
 import { IGoodsRaw } from "@models/Good";
 
 @UseGuards(RolesGuard)
-@ApiUseTags("goods")
 @Controller("goods")
+@ApiUseTags("goods")
 export class GoodsController {
 
     @Roles("guest")
@@ -25,27 +25,27 @@ export class GoodsController {
     // endregion Swagger Docs
     public async getList(@Query(new ParseIntPipe()) query: GoodsQueryDto) {
         const data = new GoodsResponseDto();
-        const categroyModels = await CategroiesModel.getCategroies(query.tags);
-        const categroies = reduce(categroyModels, (obj, cate) => {
+        const categoryModels = await CategoriesModel.getCategories(query.tags);
+        const categories = reduce(categoryModels, (obj, cate) => {
             obj[cate._id.toString()] = cate;
             return obj;
         }, { });
-        if (Object.keys(categroies).length === 0) {
+        if (Object.keys(categories).length === 0) {
             return data;
         }
-        // const categroies = categroyDocs.map((item) => item.toObject());
-        const cids = Object.keys(categroies);
+        // const categories = categoryDocs.map((item) => item.toObject());
+        const cids = Object.keys(categories);
         const goods =
             (await GoodsModels.getGoods(cids, query.perNum, query.page))
             .map((doc) => {
                 const good = doc.toObject() as IGoodsRaw;
-                const categroy = categroies[good.categroy.toString()];
-                delete good.categroy;
+                const category = categories[good.category.toString()];
+                delete good.category;
                 good.uploader = good.uploader.nickname as any;
                 good.tags =
-                    Array.from(new Set(good.tags.concat(categroy.tags)));
+                    Array.from(new Set(good.tags.concat(category.tags)));
                 good.attributes = Array.from(new Set(
-                    good.attributes.concat(categroy.attributes)
+                    good.attributes.concat(category.attributes)
                 )) as any;
                 return good;
             });

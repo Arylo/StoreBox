@@ -1,6 +1,6 @@
 import { model, SchemaDefinition, Model as M, SchemaTypes } from "mongoose";
 import { Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS } from "@models/common";
-import { ICategroy, Flag as CF, Model as CM } from "@models/Categroy";
+import { ICategory, FLAG as CF, Model as CM } from "@models/Categroy";
 import Cache =  require("schedule-cache");
 import { PER_COUNT } from "../modules/common/dtos/page.dto";
 
@@ -18,11 +18,11 @@ const Definition: SchemaDefinition = {
 export interface IRegexp extends IDocRaw {
     name: string;
     value: string;
-    link: ObjectId | ICategroy;
+    link: ObjectId | ICategory;
 }
 
 export interface IRegexpsRaw extends IRegexp {
-    link: ICategroy;
+    link: ICategory;
 }
 
 export type RegexpDoc = IDoc<IRegexp>;
@@ -104,7 +104,7 @@ RegexpSchema.static("discern", (name: string) => {
 });
 // endregion static methods
 
-export const Flag = "regexps";
+export const FLAG = "regexps";
 
 interface IRegexpModel<T extends RegexpDoc> extends M<T> {
     /**
@@ -133,7 +133,7 @@ interface IRegexpModel<T extends RegexpDoc> extends M<T> {
      * 根据规则进行识别
      * @return {Promise}
      */
-    discern(filename: string): Promise<ICategroy[]>;
+    discern(filename: string): Promise<ICategory[]>;
     /**
      * 返回总页数
      */
@@ -165,7 +165,7 @@ RegexpSchema.path("link").validate({
         const result = await CM.findById(value).exec();
         return !!result;
     },
-    message: "The Categroy ID is not exist"
+    message: "The Category ID is not exist"
 });
 // endregion Validators
 
@@ -175,4 +175,4 @@ for (const method of MODIFY_MOTHODS) {
     });
 }
 
-export const Model = model(Flag, RegexpSchema) as IRegexpModel<RegexpDoc>;
+export const Model = model(FLAG, RegexpSchema) as IRegexpModel<RegexpDoc>;

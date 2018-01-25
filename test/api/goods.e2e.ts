@@ -2,7 +2,7 @@ import supertest = require("supertest");
 import path = require("path");
 import faker = require("faker");
 
-import { connect, drop, addCategroyAndRegexp, newUser } from "../helpers/database";
+import { connect, drop, addCategoryAndRegexp, newUser } from "../helpers/database";
 import { uploadFile } from "../helpers/files";
 import { init } from "../helpers/server";
 
@@ -21,7 +21,7 @@ describe("Goods E2E Api", () => {
 
     const ids = {
         users: [ ],
-        categroies: [ ],
+        categories: [ ],
         values: [ ],
         regexps: [ ],
         goods: [ ]
@@ -44,9 +44,9 @@ describe("Goods E2E Api", () => {
             }).then();
     });
 
-    step("Add Categroy", async () => {
-        const docs = await addCategroyAndRegexp(/^icon_.+_64x64\.png$/);
-        ids.categroies.push(docs[0]._id);
+    step("Add Category", async () => {
+        const docs = await addCategoryAndRegexp(/^icon_.+_64x64\.png$/);
+        ids.categories.push(docs[0]._id);
         ids.regexps.push(docs[1]._id);
     });
 
@@ -59,7 +59,7 @@ describe("Goods E2E Api", () => {
 
         ids.goods.push(result._id);
         result.should.have.properties([
-            "_id", "originname", "categroy", "uploader"
+            "_id", "originname", "category", "uploader"
         ]);
         result.should.have.property("originname", path.basename(filepath));
     });
@@ -71,9 +71,9 @@ describe("Goods E2E Api", () => {
         result.should.have.properties([
             "_id", "createdAt", "updatedAt",
             "filename", "originname", "attributes", "tags", "active", "hidden",
-            "categroy", "uploader"
+            "category", "uploader"
         ]);
-        result.categroy.should.have.properties([
+        result.category.should.have.properties([
             "_id", "name", "attributes", "tags"
         ]);
         result.uploader.should.have.properties([

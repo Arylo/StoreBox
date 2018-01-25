@@ -36,10 +36,10 @@ export class GoodsController {
             fs.remove(file.path);
             throw new BadRequestException("Lost The Good Role");
         }
-        const catgroies = await RegexpModel.discern(req.file.originalname);
-        if (catgroies.length !== 1) {
+        const categories = await RegexpModel.discern(req.file.originalname);
+        if (categories.length !== 1) {
             fs.remove(file.path);
-            if (catgroies.length === 0) {
+            if (categories.length === 0) {
                 throw new BadRequestException("Lost Role for the file");
             } else {
                 throw new BadRequestException("Much Role for the file");
@@ -54,7 +54,7 @@ export class GoodsController {
             goodObj = await GoodsModels.create({
                 filename: file.filename,
                 originname: file.originalname,
-                categroy: catgroies[0]._id,
+                category: categories[0]._id,
                 uploader: session.loginUserId,
                 md5sum, sha256sum,
                 active: true
@@ -63,7 +63,7 @@ export class GoodsController {
             throw new BadRequestException(error.toString());
         }
         const newFilePath =
-            `${config.paths.upload}/${catgroies[0]._id}/${file.filename}`;
+            `${config.paths.upload}/${categories[0]._id}/${file.filename}`;
         fs.move(file.path, newFilePath);
         res.status(HttpStatus.CREATED).json(goodObj);
     }
@@ -78,7 +78,7 @@ export class GoodsController {
             obj = await GoodsModels.findById(id)
                 .populate("uploader", "nickname")
                 .populate("attributes")
-                .populate("categroy", "name attributes tags")
+                .populate("category", "name attributes tags")
                 .exec();
         } catch (error) {
             throw new BadRequestException(error.toString());

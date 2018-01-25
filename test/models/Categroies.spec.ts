@@ -1,4 +1,4 @@
-import { Model as CategroiesModel } from "@models/Categroy";
+import { Model as CategoriesModel } from "@models/Categroy";
 import { Model as ValuesModel } from "@models/Value";
 import db = require("../helpers/database");
 import faker = require("faker");
@@ -10,7 +10,7 @@ describe("Category Model", () => {
     });
 
     const ids = {
-        categroies: [ ]
+        categories: [ ]
     };
     after(() => {
         return db.drop(ids);
@@ -20,8 +20,8 @@ describe("Category Model", () => {
         const ctx = {
             name: faker.name.firstName()
         };
-        const obj = await CategroiesModel.create(ctx);
-        ids.categroies.push(obj._id);
+        const obj = await CategoriesModel.create(ctx);
+        ids.categories.push(obj._id);
         obj.toObject().should.have.properties({
             name: ctx.name,
             tags: [ ],
@@ -35,11 +35,11 @@ describe("Category Model", () => {
         before(async () => {
             cids = [];
             for (let i = 0; i < 10; i++) {
-                const result = await CategroiesModel.create({
+                const result = await CategoriesModel.create({
                     name: faker.name.firstName()
                 });
                 cids.push(result._id);
-                ids.categroies.push(result._id);
+                ids.categories.push(result._id);
             }
             // [parent, child]
             const initGroups = [
@@ -49,14 +49,14 @@ describe("Category Model", () => {
                 [8, 9]
             ];
             for (const set of initGroups) {
-                await CategroiesModel.moveCategroy(cids[set[1]], cids[set[0]]);
+                await CategoriesModel.moveCategory(cids[set[1]], cids[set[0]]);
             }
         });
 
         it("# 0", async () => {
             let err;
             try {
-                await CategroiesModel.moveCategroy(cids[2], cids[6]);
+                await CategoriesModel.moveCategory(cids[2], cids[6]);
             } catch (error) {
                 err = error;
             }

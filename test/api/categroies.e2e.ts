@@ -4,7 +4,7 @@ import faker = require("faker");
 import { connect, drop, newUser } from "../helpers/database";
 import { init } from "../helpers/server";
 
-describe("Categroies E2E Api", () => {
+describe("Categories E2E Api", () => {
 
     let request: supertest.SuperTest<supertest.Test>;
 
@@ -14,7 +14,7 @@ describe("Categroies E2E Api", () => {
 
     const ids = {
         users: [ ],
-        categroies: [ ],
+        categories: [ ],
         values: [ ]
     };
 
@@ -39,14 +39,14 @@ describe("Categroies E2E Api", () => {
             }).then();
     });
 
-    step("Add Categroy", async () => {
+    step("Add Category", async () => {
         const ctx = {
             name: faker.name.firstName()
         };
-        const { body: result } = await request.post("/api/v1/categroies")
+        const { body: result } = await request.post("/api/v1/categories")
             .send(ctx)
             .then();
-        ids.categroies.push(result._id);
+        ids.categories.push(result._id);
         result.should.have.properties({
             name: ctx.name,
             attributes: [ ],
@@ -54,7 +54,7 @@ describe("Categroies E2E Api", () => {
         });
     });
 
-    step("Add Categroy with Tags", async () => {
+    step("Add Category with Tags", async () => {
         const ctx = {
             name: faker.name.firstName(),
             tags: [
@@ -63,10 +63,10 @@ describe("Categroies E2E Api", () => {
                 faker.random.words()
             ]
         };
-        const { body: result } = await request.post("/api/v1/categroies")
+        const { body: result } = await request.post("/api/v1/categories")
             .send(ctx)
             .then();
-        ids.categroies.push(result._id);
+        ids.categories.push(result._id);
         result.should.have.properties({
             name: ctx.name,
             attributes: [ ],
@@ -74,7 +74,7 @@ describe("Categroies E2E Api", () => {
         });
     });
 
-    step("Add Categroy with Attributes", async () => {
+    step("Add Category with Attributes", async () => {
         const ctx = {
             name: faker.name.firstName(),
             attributes: [
@@ -90,10 +90,10 @@ describe("Categroies E2E Api", () => {
                 }
             ].map((item) => JSON.stringify(item))
         };
-        const { body: result } = await request.post("/api/v1/categroies")
+        const { body: result } = await request.post("/api/v1/categories")
             .send(ctx)
             .then();
-        ids.categroies.push(result._id);
+        ids.categories.push(result._id);
         for (const attrId of result.attributes) {
             ids.values.push(attrId);
         }

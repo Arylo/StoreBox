@@ -29,7 +29,7 @@ export class FilesController {
     @Get("/categories/:cid/goods/:id")
     // region Swagger Docs
     @ApiOperation({ title: "Download File" })
-    @ApiImplicitParam({ name: "cid", description: "Categroy ID" })
+    @ApiImplicitParam({ name: "cid", description: "Category ID" })
     @ApiImplicitParam({ name: "id", description: "Good ID" })
     // endregion Swagger Docs
     public async downloadFile(
@@ -38,7 +38,7 @@ export class FilesController {
         let obj: GoodDoc;
         try {
             obj = await GoodsModels
-                .findOne({_id: params.id, categroy: params.cid})
+                .findOne({_id: params.id, category: params.cid})
                 .exec();
         } catch (error) {
             throw new BadRequestException(error.toString());
