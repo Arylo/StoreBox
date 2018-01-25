@@ -15,7 +15,7 @@ import { LoginBodyDto, LoginQueryDto, LoginRespone } from "./auth.dto";
 @UseGuards(RolesGuard)
 @ApiUseTags("auth")
 @Controller("api/v1/auth")
-export class AuthController {
+export class AuthAdminController {
 
     @Post("login")
     @ApiOperation({ title: "Login System" })

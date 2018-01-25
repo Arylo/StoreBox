@@ -18,7 +18,7 @@ import { ParseIntPipe } from "@pipes/parse-int";
 @ApiUseTags("users")
 @ApiBearerAuth()
 // endregion Swagger Docs
-export class UsersController {
+export class UsersAdminController {
 
     @Roles("admin")
     @Get()

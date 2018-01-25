@@ -14,7 +14,7 @@ import { IGoodsRaw } from "@models/Good";
 
 @UseGuards(RolesGuard)
 @Controller("goods")
-@ApiUseTags("goods")
+@ApiUseTags("Good Download")
 export class GoodsController {
 
     @Roles("guest")

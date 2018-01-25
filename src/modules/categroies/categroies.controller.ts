@@ -26,7 +26,7 @@ import { PerPageDto, ListResponse } from "../../modules/common/dtos/page.dto";
 @ApiUseTags("categories")
 @ApiBearerAuth()
 // endregion Swagger Docs
-export class CategoriesController {
+export class CategoriesAdminController {
 
     @Roles("admin")
     @Get()

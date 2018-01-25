@@ -1,13 +1,13 @@
 import { Module, MiddlewaresConsumer, RequestMethod } from "@nestjs/common";
 import { DatabaseModule } from "./database/database.module";
 
-import { UsersController } from "./users/users.controller";
-import { AuthController } from "./users/auth.controller";
-import { RegexpsController } from "./regexps/regexps.controller";
-import { CategoriesController } from "./categroies/categroies.controller";
-import { GoodsController } from "./goods/goods.controller";
+import { UsersAdminController } from "./users/users.controller";
+import { AuthAdminController } from "./users/auth.controller";
+import { RegexpsAdminController } from "./regexps/regexps.controller";
+import { CategoriesAdminController } from "./categroies/categroies.controller";
+import { GoodsAdminController } from "./goods/goods.controller";
 import { FilesController } from "./files/files.controller";
-import { GoodsController as FGoodsController } from "./files/goods.controller";
+import { GoodsController } from "./files/goods.controller";
 
 import { UploadFileMiddleware } from "./common/middlewares/upload.middleware";
 import {
@@ -19,9 +19,9 @@ import {
 } from "./common/middlewares/reloadSession.middleware";
 
 export const controllers = [
-    FilesController, FGoodsController,
-    UsersController, AuthController,
-    RegexpsController, CategoriesController, GoodsController
+    FilesController, GoodsController,
+    UsersAdminController, AuthAdminController, RegexpsAdminController,
+    CategoriesAdminController, GoodsAdminController
 ];
 
 @Module({

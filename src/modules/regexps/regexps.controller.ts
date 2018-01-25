@@ -20,7 +20,7 @@ import { ParseIntPipe } from "@pipes/parse-int";
 @ApiUseTags("regexps")
 @ApiBearerAuth()
 // endregion Swagger Docs
-export class RegexpsController {
+export class RegexpsAdminController {
 
     @Roles("admin")
     @Get()

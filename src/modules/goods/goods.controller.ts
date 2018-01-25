@@ -24,7 +24,7 @@ import multer  = require("multer");
 @ApiUseTags("goods")
 @ApiBearerAuth()
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: "Unauthorized" })
-export class GoodsController {
+export class GoodsAdminController {
 
     @Roles("admin", "token")
     @Post()

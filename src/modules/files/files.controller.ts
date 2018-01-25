@@ -21,8 +21,8 @@ import { DownlaodDto } from "./files.dto";
 })();
 
 @UseGuards(RolesGuard)
-@ApiUseTags("files")
 @Controller("files")
+@ApiUseTags("Good Download")
 export class FilesController {
 
     @Roles("guest")
