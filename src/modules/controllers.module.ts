@@ -14,6 +14,9 @@ import {
     ApiLoggerMiddleware, DownloadLoggerMiddleware
 } from "./common/middlewares/logger.middleware";
 import { RolesMiddleware } from "./common/middlewares/roles.middleware";
+import {
+    ReloadSessionMiddleware
+} from "./common/middlewares/reloadSession.middleware";
 
 export const controllers = [
     FilesController, FGoodsController,
@@ -28,6 +31,8 @@ export class ControllersModule {
     public configure(consumer: MiddlewaresConsumer) {
         consumer
             .apply(RolesMiddleware)
+            .forRoutes(...controllers)
+            .apply(ReloadSessionMiddleware)
             .forRoutes(...controllers)
             .apply([ UploadFileMiddleware ])
             .forRoutes(

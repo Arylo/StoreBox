@@ -36,11 +36,6 @@ export class AuthController {
         }
         session.loginUser = user.toObject().username;
         session.loginUserId = user.toObject()._id;
-        // session.regenerate((err) => {
-        //     if (err) {
-        //         throw new GatewayTimeoutException(err.toString());
-        //     }
-        // });
         const obj = new LoginRespone();
         obj.expires = session.cookie.expires || session.cookie._expires;
         obj.username = user.toObject().username;
