@@ -1,11 +1,11 @@
 import { model, SchemaDefinition, Model as M, SchemaTypes } from "mongoose";
 import { Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS } from "@models/common";
 import { IValues, Flag as ValueFlag } from "@models/Value";
+import { PER_COUNT } from "@dtos/page";
 import { isArray } from "util";
 import { reduce, includes, difference } from "lodash";
 import { MongoError } from "mongodb";
 import Cache =  require("schedule-cache");
-import { PER_COUNT } from "../modules/common/dtos/page.dto";
 
 const cache = Cache.create();
 

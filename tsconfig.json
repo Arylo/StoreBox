@@ -28,6 +28,10 @@
       "@guards/*": [
         "./src/modules/common/guards/*.guard",
         "./dist/modules/common/guards/*.guard"
+      ],
+      "@dtos/*": [
+        "./src/modules/common/dtos/*.dto",
+        "./dist/modules/common/dtos/*.dto"
       ]
     }
   },

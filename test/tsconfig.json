@@ -22,7 +22,8 @@
       "@models/*": [ "./src/models/*", "./dist/models/*" ],
       "@decorators/*": [ "./src/modules/common/decorators/*.decorator" ],
       "@pipes/*": [ "./src/modules/common/pipes/*.pipe" ],
-      "@guards/*": [ "./src/modules/common/guards/*.guard" ]
+      "@guards/*": [ "./src/modules/common/guards/*.guard" ],
+      "@dtos/*": [ "./src/modules/common/dtos/*.dto" ]
     }
   },
   "include": [

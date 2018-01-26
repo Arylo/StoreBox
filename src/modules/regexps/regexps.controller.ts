@@ -11,7 +11,7 @@ import {
 } from "./regexps.dto";
 import { Roles } from "@decorators/roles";
 import { RolesGuard } from "@guards/roles";
-import { PerPageDto, ListResponse } from "../common/dtos/page.dto";
+import { PerPageDto, ListResponse } from "@dtos/page";
 import { ParseIntPipe } from "@pipes/parse-int";
 
 @UseGuards(RolesGuard)
@@ -55,6 +55,17 @@ export class RegexpsAdminController {
             throw new BadRequestException(error.toString());
         }
         res.status(HttpStatus.CREATED).json(regexp);
+    }
+
+    @Roles("admin")
+    @Get("/:id")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Edit RegExp" })
+    @ApiImplicitParam({ name: "id", description: "RegExp ID" })
+    // endregion Swagger Docs
+    public async getRegexp(@Param("id") id) {
+
     }
 
     @Roles("admin")

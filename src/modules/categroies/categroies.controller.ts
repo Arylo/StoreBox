@@ -10,15 +10,14 @@ import {
 } from "@models/Categroy";
 import { Model as ValuesModel, ValueDoc, IValues } from "@models/Value";
 import { Model as GoodsModels } from "@models/Good";
-
+import { Roles } from "@decorators/roles";
+import { RolesGuard } from "@guards/roles";
+import { ParseIntPipe } from "@pipes/parse-int";
+import { PerPageDto, ListResponse } from "@dtos/page";
 import md5 = require("md5");
 
 import { NewCategoryDto, EditCategoryDto } from "./categroies.dto";
 import { CreateValueDto, EditValueDto } from "../values/values.dto";
-import { Roles } from "@decorators/roles";
-import { RolesGuard } from "@guards/roles";
-import { ParseIntPipe } from "@pipes/parse-int";
-import { PerPageDto, ListResponse } from "../../modules/common/dtos/page.dto";
 
 @UseGuards(RolesGuard)
 @Controller("api/v1/categories")

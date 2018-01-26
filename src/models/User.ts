@@ -1,10 +1,10 @@
 import { model, SchemaDefinition, Model as M } from "mongoose";
 import * as md5 from "md5";
-import { Base, IDoc, IDocRaw, MODIFY_MOTHODS } from "./common";
 import { config } from "@utils/config";
 import { ObjectId } from "@models/common";
+import { PER_COUNT } from "@dtos/page";
 import Cache =  require("schedule-cache");
-import { PER_COUNT } from "../modules/common/dtos/page.dto";
+import { Base, IDoc, IDocRaw, MODIFY_MOTHODS } from "./common";
 
 const cache = Cache.create();
 

@@ -3,8 +3,8 @@ import { Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS } from "@models/common";
 import { IValues, Flag as ValueFlag } from "@models/Value";
 import { IUser, Flag as UserFlag } from "@models/User";
 import { ICategory, FLAG as CategoryFlag } from "@models/Categroy";
+import { PER_COUNT } from "@dtos/page";
 import Cache =  require("schedule-cache");
-import { PER_COUNT } from "../modules/common/dtos/page.dto";
 import { isArray } from "util";
 import { reduce } from "lodash";
 

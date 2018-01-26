@@ -1,8 +1,8 @@
 import { model, SchemaDefinition, Model as M, SchemaTypes } from "mongoose";
 import { Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS } from "@models/common";
 import { ICategory, FLAG as CF, Model as CM } from "@models/Categroy";
+import { PER_COUNT } from "@dtos/page";
 import Cache =  require("schedule-cache");
-import { PER_COUNT } from "../modules/common/dtos/page.dto";
 
 export const cache = Cache.create();
 
