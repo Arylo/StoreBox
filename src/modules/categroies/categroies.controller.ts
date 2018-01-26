@@ -54,8 +54,11 @@ export class CategoriesAdminController {
 
     @Roles("admin")
     @Post()
+    // region Swagger Docs
+    @HttpCode(HttpStatus.CREATED)
     @ApiOperation({ title: "Add Category" })
-    public async add(@Res() res, @Body() ctx: NewCategoryDto) {
+    // endregion Swagger Docs
+    public async add(@Body() ctx: NewCategoryDto) {
         if (ctx.pid && !(await CategoriesModel.findById(ctx.pid).exec())) {
             throw new BadRequestException("The Parent Category isnt exist!");
         }
@@ -96,7 +99,7 @@ export class CategoriesAdminController {
             });
             throw new BadRequestException(error.toString());
         }
-        res.status(HttpStatus.CREATED).send(result);
+        return result;
     }
 
     @Roles("admin")
@@ -133,7 +136,7 @@ export class CategoriesAdminController {
     @Roles("admin")
     @Post("/:cid/attributes")
     // region Swagger Docs
-    @HttpCode(HttpStatus.OK)
+    @HttpCode(HttpStatus.CREATED)
     @ApiOperation({ title: "Add Attribute" })
     // endregion Swagger Docs
     public async addAttr(
@@ -160,7 +163,7 @@ export class CategoriesAdminController {
         await CategoriesModel.findByIdAndUpdate(
             param.cid, { $push: { attributes: newAttr._id } }
         ).exec();
-        return { };
+        return newAttr;
     }
 
     @Roles("admin")
@@ -177,7 +180,7 @@ export class CategoriesAdminController {
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        return { };
+        return { statusCode: HttpStatus.OK };
     }
 
     @Roles("admin")
@@ -218,7 +221,7 @@ export class CategoriesAdminController {
             ).exec();
             throw new BadRequestException(error.toString());
         }
-        return { };
+        return { status: HttpStatus.OK };
     }
 
     @Roles("admin")
@@ -255,7 +258,7 @@ export class CategoriesAdminController {
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        return { };
+        return { status: HttpStatus.OK };
     }
 
     @Roles("admin")
@@ -286,6 +289,6 @@ export class CategoriesAdminController {
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        return { };
+        return { status: HttpStatus.OK };
     }
 }

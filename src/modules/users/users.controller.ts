@@ -47,6 +47,7 @@ export class UsersAdminController {
     @Roles("admin")
     @Post()
     // region Swagger Docs
+    @HttpCode(HttpStatus.CREATED)
     @ApiOperation({ title: "Add User" })
     @ApiResponse({
         status: HttpStatus.CREATED, description: "Add User Success"
@@ -55,13 +56,14 @@ export class UsersAdminController {
         status: HttpStatus.BAD_REQUEST, description: "Add User Fail"
     })
     // endregion Swagger Docs
-    public async addUser(@Res() res, @Body() user: CreateUserDto) {
+    public async addUser(@Body() user: CreateUserDto) {
+        let obj;
         try {
-            await UserModel.addUser(user.username, user.password);
+            obj = await UserModel.addUser(user.username, user.password);
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        res.status(HttpStatus.CREATED).json({ });
+        return obj;
     }
 
     @Roles("admin")
@@ -84,7 +86,7 @@ export class UsersAdminController {
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        return { };
+        return { statusCode: HttpStatus.OK };
     }
 
     @Roles("admin")
@@ -117,7 +119,7 @@ export class UsersAdminController {
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        return { };
+        return { statusCode: HttpStatus.OK };
     }
 
     @Roles("admin")
@@ -134,7 +136,7 @@ export class UsersAdminController {
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        return { };
+        return { statusCode: HttpStatus.OK };
     }
 
     @Roles("admin")
@@ -151,6 +153,6 @@ export class UsersAdminController {
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        return { };
+        return { statusCode: HttpStatus.OK };
     }
 }

@@ -29,8 +29,11 @@ export class GoodsAdminController {
 
     @Roles("admin", "token")
     @Post()
+    // region Swagger Docs
+    @HttpCode(HttpStatus.CREATED)
     @ApiOperation({ title: "Upload Good" })
-    public async add(@Req() req, @Res() res, @Session() session) {
+    // endregion Swagger Docs
+    public async add(@Req() req, @Session() session) {
         const file: Express.Multer.File = req.file;
         const regexpCount = (await RegexpModel.list()).length;
         if (regexpCount === 0) {
@@ -66,13 +69,16 @@ export class GoodsAdminController {
         const newFilePath =
             `${config.paths.upload}/${categories[0]._id}/${file.filename}`;
         fs.move(file.path, newFilePath);
-        res.status(HttpStatus.CREATED).json(goodObj);
+        return goodObj;
     }
 
     @Roles("admin")
     @Get("/:gid")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Get Good Info" })
-    public async get(@Res() res, @Param() param: GidDto) {
+    // endregion Swagger Docs
+    public async get(@Param() param: GidDto) {
         let obj;
         try {
             obj = await GoodsModels.findById(param.gid)
@@ -83,14 +89,17 @@ export class GoodsAdminController {
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        res.status(HttpStatus.OK).json(obj);
+        return obj;
     }
 
     @Roles("admin")
     @Post("/:gid/attributes")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.CREATED)
     @ApiOperation({ title: "Add Attributes" })
+    // endregion Swagger Docs
     public async addAttr(
-        @Res() res, @Param() param: GidDto, @Body() ctx: CreateValueDto
+        @Param() param: GidDto, @Body() ctx: CreateValueDto
     ) {
         const obj = await GoodsModels.findById(param.gid)
             .populate("attributes")
@@ -113,13 +122,15 @@ export class GoodsAdminController {
         await GoodsModels.findByIdAndUpdate(
             param.gid, { $push: { attributes: newAttr._id } }
         ).exec();
-        res.status(HttpStatus.CREATED).json({ });
+        return { statusCode: HttpStatus.CREATED };
     }
 
     @Roles("admin")
     @Post("/:gid/attributes/:aid")
+    // region Swagger Docs
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Edit Attribute" })
+    // endregion Swagger Docs
     public async editAttr(
         @Param() param: GoodAttributeParamDto, @Body() ctx: EditValueDto
     ) {
@@ -128,7 +139,7 @@ export class GoodsAdminController {
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        return { };
+        return { statusCode: HttpStatus.OK };
     }
 
     @Roles("admin")
@@ -169,7 +180,7 @@ export class GoodsAdminController {
             ).exec();
             throw new BadRequestException(error.toString());
         }
-        return { };
+        return { statusCode: HttpStatus.OK };
     }
 
 }

@@ -47,15 +47,16 @@ export class RegexpsAdminController {
 
     @Roles("admin")
     @Post()
+    @HttpCode(HttpStatus.CREATED)
     @ApiOperation({ title: "Add RegExp" })
-    public async add(@Res() res, @Body() ctx: NewRegexp) {
+    public async add(@Body() ctx: NewRegexp) {
         let regexp;
         try {
             regexp = await RegexpsModel.addRegexp(ctx.name, ctx.value);
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        res.status(HttpStatus.CREATED).json(regexp);
+        return regexp;
     }
 
     @Roles("admin")
@@ -94,7 +95,7 @@ export class RegexpsAdminController {
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        return { };
+        return { statusCode: HttpStatus.OK };
     }
 
     @Roles("admin")
@@ -125,7 +126,7 @@ export class RegexpsAdminController {
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        return { };
+        return { statusCode: HttpStatus.OK };
     }
 
 }
