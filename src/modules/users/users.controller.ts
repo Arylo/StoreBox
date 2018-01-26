@@ -10,8 +10,9 @@ import { Roles } from "@decorators/roles";
 import { RolesGuard } from "@guards/roles";
 import { PerPageDto, ListResponse } from "@dtos/page";
 import { ParseIntPipe } from "@pipes/parse-int";
+import { UidDto } from "@dtos/ids";
 
-import { CreateUserDto, ModifyPasswordDto, CommonUserDot } from "./users.dto";
+import { CreateUserDto, ModifyPasswordDto } from "./users.dto";
 
 @UseGuards(RolesGuard)
 @Controller("api/v1/users")
@@ -64,11 +65,10 @@ export class UsersAdminController {
     }
 
     @Roles("admin")
-    @Post("/:id/password")
+    @Post("/:uid/password")
     // region Swagger Docs
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Modify User Password" })
-    @ApiImplicitParam({ name: "id", description: "User ID" })
     @ApiResponse({
         status: HttpStatus.OK, description: "Modify Password Success"
     })
@@ -76,9 +76,11 @@ export class UsersAdminController {
         status: HttpStatus.BAD_REQUEST, description: "Modify Password Fail"
     })
     // endregion Swagger Docs
-    public async password(@Body() user: ModifyPasswordDto, @Param("id") id) {
+    public async password(
+        @Body() user: ModifyPasswordDto, @Param() param: UidDto
+    ) {
         try {
-            await UserModel.passwd(id, user.oldPassword, user.newPassword);
+            await UserModel.passwd(param.uid, user.oldPassword, user.newPassword);
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
@@ -86,34 +88,32 @@ export class UsersAdminController {
     }
 
     @Roles("admin")
-    @Delete("/:id")
+    @Delete("/:uid")
     // region Swagger Docs
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Delete User" })
-    @ApiImplicitParam({ name: "id", description: "User ID" })
     @ApiResponse({ status: HttpStatus.OK, description: "Delete User Success" })
     @ApiResponse({
         status: HttpStatus.BAD_REQUEST, description: "Delete User Fail"
     })
     // endregion Swagger Docs
-    public deleteByDelete(@Param() user: CommonUserDot) {
+    public deleteByDelete(@Param() user: UidDto) {
         return this.delete(user);
     }
 
     @Roles("admin")
-    @Get("/:id/delete")
+    @Get("/:uid/delete")
     // region Swagger Docs
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Delete User" })
-    @ApiImplicitParam({ name: "id", description: "User ID" })
     @ApiResponse({ status: HttpStatus.OK, description: "Delete User Success" })
     @ApiResponse({
         status: HttpStatus.BAD_REQUEST, description: "Delete User Fail"
     })
     // endregion Swagger Docs
-    public async delete(@Param() user: CommonUserDot) {
+    public async delete(@Param() user: UidDto) {
         try {
-            await UserModel.removeUser(user.id);
+            await UserModel.removeUser(user.uid);
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
@@ -121,17 +121,16 @@ export class UsersAdminController {
     }
 
     @Roles("admin")
-    @Get("/:id/ban")
+    @Get("/:uid/ban")
     // region Swagger Docs
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Ban User" })
-    @ApiImplicitParam({ name: "id", description: "User ID" })
     @ApiResponse({ status: HttpStatus.OK, description: "Ban Success" })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: "Ban Fail" })
     // endregion Swagger Docs
-    public async ban(@Param() user: CommonUserDot) {
+    public async ban(@Param() user: UidDto) {
         try {
-            await UserModel.ban(user.id);
+            await UserModel.ban(user.uid);
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
@@ -139,17 +138,16 @@ export class UsersAdminController {
     }
 
     @Roles("admin")
-    @Get("/:id/allow")
+    @Get("/:uid/allow")
     // region Swagger Docs
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Allow User" })
-    @ApiImplicitParam({ name: "id", description: "User ID" })
     @ApiResponse({ status: HttpStatus.OK, description: "Allow Success" })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: "Allow Fail" })
     // endregion Swagger Docs
-    public async allow(@Param() user: CommonUserDot) {
+    public async allow(@Param() user: UidDto) {
         try {
-            await UserModel.allow(user.id);
+            await UserModel.allow(user.uid);
         } catch (error) {
             throw new BadRequestException(error.toString());
         }

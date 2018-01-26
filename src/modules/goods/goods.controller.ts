@@ -10,14 +10,15 @@ import { IValues, Model as ValuesModel } from "@models/Value";
 import { Model as GoodsModels } from "@models/Good";
 import { Model as RegexpModel } from "@models/Regexp";
 import { config } from "@utils/config";
-
-import { CreateValueDto, EditValueDto } from "../values/values.dto";
+import { GidDto } from "@dtos/ids";
 import { Roles } from "@decorators/roles";
 import { RolesGuard } from "@guards/roles";
-
 import * as hasha from "hasha";
 import fs = require("fs-extra");
 import multer  = require("multer");
+
+import { CreateValueDto, EditValueDto } from "../values/values.dto";
+import { GoodAttributeParamDto } from "./goods.dto";
 
 @UseGuards(RolesGuard)
 @Controller("api/v1/goods")
@@ -69,13 +70,12 @@ export class GoodsAdminController {
     }
 
     @Roles("admin")
-    @Get("/:id")
+    @Get("/:gid")
     @ApiOperation({ title: "Get Good Info" })
-    @ApiImplicitParam({ name: "id", description: "Good ID" })
-    public async get(@Res() res, @Param("id") id) {
+    public async get(@Res() res, @Param() param: GidDto) {
         let obj;
         try {
-            obj = await GoodsModels.findById(id)
+            obj = await GoodsModels.findById(param.gid)
                 .populate("uploader", "nickname")
                 .populate("attributes")
                 .populate("category", "name attributes tags")
@@ -87,13 +87,12 @@ export class GoodsAdminController {
     }
 
     @Roles("admin")
-    @Post("/:id/attributes")
+    @Post("/:gid/attributes")
     @ApiOperation({ title: "Add Attributes" })
-    @ApiImplicitParam({ name: "id", description: "Good ID" })
     public async addAttr(
-        @Res() res, @Param("id") id, @Body() ctx: CreateValueDto
+        @Res() res, @Param() param: GidDto, @Body() ctx: CreateValueDto
     ) {
-        const obj = await GoodsModels.findById(id)
+        const obj = await GoodsModels.findById(param.gid)
             .populate("attributes")
             .exec();
         if (!obj) {
@@ -112,66 +111,61 @@ export class GoodsAdminController {
         }
         const newAttr = await ValuesModel.create(ctx);
         await GoodsModels.findByIdAndUpdate(
-            id, { $push: { attributes: newAttr._id } }
+            param.gid, { $push: { attributes: newAttr._id } }
         ).exec();
         res.status(HttpStatus.CREATED).json({ });
     }
 
     @Roles("admin")
-    @Post("/:id/attributes/:aid")
+    @Post("/:gid/attributes/:aid")
+    @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Edit Attribute" })
-    @ApiImplicitParam({ name: "id", description: "Good ID" })
-    @ApiImplicitParam({ name: "aid", description: "Attribute ID" })
     public async editAttr(
-        @Res() res, @Param("aid") aid, @Body() ctx: EditValueDto
+        @Param() param: GoodAttributeParamDto, @Body() ctx: EditValueDto
     ) {
         try {
-            await ValuesModel.findByIdAndUpdate(aid, ctx).exec();
+            await ValuesModel.findByIdAndUpdate(param.aid, ctx).exec();
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        res.status(HttpStatus.OK).json();
+        return { };
     }
 
     @Roles("admin")
-    @Delete("/:id/attributes/:aid")
+    @Delete("/:gid/attributes/:aid")
     // region Swagger Docs
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Delete Attribute" })
-    @ApiImplicitParam({ name: "id", description: "Good ID" })
-    @ApiImplicitParam({ name: "aid", description: "Attribute ID" })
     @ApiResponse({
         status: HttpStatus.OK, description: "Delete Attribute Success"
     })
     // endregion Swagger Docs
-    public deleteAttrByDelete(@Param("id") id, @Param("aid") aid) {
-        return this.deleteAttrByGet(id, aid);
+    public deleteAttrByDelete(@Param() param: GoodAttributeParamDto) {
+        return this.deleteAttrByGet(param);
     }
 
     @Roles("admin")
-    @Get("/:id/attributes/:aid/delete")
+    @Get("/:gid/attributes/:aid/delete")
     // region Swagger Docs
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Delete Attribute" })
-    @ApiImplicitParam({ name: "id", description: "Good ID" })
-    @ApiImplicitParam({ name: "aid", description: "Attribute ID" })
     @ApiResponse({
         status: HttpStatus.OK, description: "Delete Attribute Success"
     })
     // endregion Swagger Docs
-    public async deleteAttrByGet(@Param("id") id, @Param("aid") aid) {
+    public async deleteAttrByGet(@Param() param: GoodAttributeParamDto) {
         try {
-            await GoodsModels.findByIdAndUpdate(id, {
-                $pull: { attributes: aid}
+            await GoodsModels.findByIdAndUpdate(param.gid, {
+                $pull: { attributes: param.aid}
             }).exec();
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
         try {
-            await ValuesModel.findByIdAndRemove(aid).exec();
+            await ValuesModel.findByIdAndRemove(param.aid).exec();
         } catch (error) {
             await GoodsModels.findByIdAndUpdate(
-                id, { $push: { attributes: aid } }
+                param.gid, { $push: { attributes: param.aid } }
             ).exec();
             throw new BadRequestException(error.toString());
         }

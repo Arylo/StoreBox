@@ -12,6 +12,7 @@ import {
 import { Roles } from "@decorators/roles";
 import { RolesGuard } from "@guards/roles";
 import { PerPageDto, ListResponse } from "@dtos/page";
+import { RidDto } from "@dtos/ids";
 import { ParseIntPipe } from "@pipes/parse-int";
 
 @UseGuards(RolesGuard)
@@ -58,26 +59,24 @@ export class RegexpsAdminController {
     }
 
     @Roles("admin")
-    @Get("/:id")
+    @Get("/:rid")
     // region Swagger Docs
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Get RegExp Info" })
-    @ApiImplicitParam({ name: "id", description: "RegExp ID" })
     // endregion Swagger Docs
-    public getRegexp(@Param("id") id) {
-        return RegexpsModel.findById(id)
+    public getRegexp(@Param() param: RidDto) {
+        return RegexpsModel.findById(param.rid)
             .populate({ path: "link", populate: { path: "pid" } })
             .exec();
     }
 
     @Roles("admin")
-    @Post("/:id")
+    @Post("/:rid")
     // region Swagger Docs
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Edit RegExp" })
-    @ApiImplicitParam({ name: "id", description: "RegExp ID" })
     // endregion Swagger Docs
-    public async edit(@Body() ctx: EditRegexpDot, @Param("id") id) {
+    public async edit(@Body() ctx: EditRegexpDot, @Param() param: RidDto) {
         const data: EditRegexpRawDot = { };
         if (ctx.name) { data.name = ctx.name; }
         if (ctx.value) { data.value = ctx.value; }
@@ -87,7 +86,7 @@ export class RegexpsAdminController {
         }
         try {
             const regexp = await RegexpsModel.findByIdAndUpdate(
-                id, data, { runValidators: true }
+                param.rid, data, { runValidators: true }
             ).exec();
             if (!regexp) {
                 throw new BadRequestException("NonExist RegExp");
@@ -99,32 +98,30 @@ export class RegexpsAdminController {
     }
 
     @Roles("admin")
-    @Delete("/:id")
+    @Delete("/:rid")
     // region Swagger Docs
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Delete RegExp" })
-    @ApiImplicitParam({ name: "id", description: "RegExp ID" })
     @ApiResponse({
         status: HttpStatus.OK, description: "Delete RegExp Success"
     })
     // endregion Swagger Docs
-    public deleteByDelete(@Param("id") id) {
-        return this.deleteByGet(id);
+    public deleteByDelete(@Param() param: RidDto) {
+        return this.deleteByGet(param);
     }
 
     @Roles("admin")
-    @Get("/:id/delete")
+    @Get("/:rid/delete")
     // region Swagger Docs
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Delete RegExp" })
-    @ApiImplicitParam({ name: "id", description: "RegExp ID" })
     @ApiResponse({
         status: HttpStatus.OK, description: "Delete RegExp Success"
     })
     // endregion Swagger Docs
-    public async deleteByGet(@Param("id") id) {
+    public async deleteByGet(@Param() param: RidDto) {
         try {
-            await RegexpsModel.removeRegexp(id);
+            await RegexpsModel.removeRegexp(param.rid);
         } catch (error) {
             throw new BadRequestException(error.toString());
         }

@@ -3,6 +3,7 @@ import {
 } from "class-validator";
 import { ObjectId } from "@models/common";
 import { ApiModelProperty, ApiModelPropertyOptional } from "@nestjs/swagger";
+import { ICidDto, IAidDto } from "@dtos/ids";
 
 export class NewCategoryDto {
     @ApiModelProperty({ type: String })
@@ -50,4 +51,13 @@ export class EditCategoryDto {
     @IsOptional()
     @IsMongoId()
     public readonly pid: ObjectId;
+}
+
+export class CategoryAttributeParamDto implements ICidDto, IAidDto {
+    @ApiModelProperty({ type: String, description: "Category ID" })
+    @IsMongoId()
+    public readonly cid: ObjectId;
+    @ApiModelProperty({ type: String, description: "Attribute ID" })
+    @IsMongoId()
+    public readonly aid: ObjectId;
 }

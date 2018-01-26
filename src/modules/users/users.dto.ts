@@ -11,12 +11,6 @@ export class CreateUserDto {
     public readonly password: string;
 }
 
-export class CommonUserDot {
-    @ApiModelProperty({ type: String, description: "User ID" })
-    @IsMongoId()
-    public readonly id: ObjectId;
-}
-
 export class ModifyPasswordDto {
     @ApiModelProperty({ type: String, description: "Old Password" })
     @IsString()
