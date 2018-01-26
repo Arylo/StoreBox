@@ -6,7 +6,7 @@ import { PER_COUNT } from "@dtos/page";
 import Cache =  require("schedule-cache");
 import { Base, IDoc, IDocRaw, MODIFY_MOTHODS } from "./common";
 
-const cache = Cache.create();
+const cache = Cache.create(`${Date.now()}${Math.random()}`);
 
 export const Flag = "users";
 

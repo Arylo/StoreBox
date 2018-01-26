@@ -7,7 +7,7 @@ import { reduce, includes, difference } from "lodash";
 import { MongoError } from "mongodb";
 import Cache =  require("schedule-cache");
 
-const cache = Cache.create();
+const cache = Cache.create(`${Date.now()}${Math.random()}`);
 
 export const FLAG = "categories";
 export type CategoryDoc = IDoc<ICategory>;
