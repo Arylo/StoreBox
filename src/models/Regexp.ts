@@ -4,7 +4,7 @@ import { ICategory, FLAG as CF, Model as CM } from "@models/Categroy";
 import Cache =  require("schedule-cache");
 import { PER_COUNT } from "../modules/common/dtos/page.dto";
 
-export const cache = Cache.create();
+export const cache = Cache.create(`${Date.now()}${Math.random()}`);
 
 const Definition: SchemaDefinition = {
     name: { type: String, required: true, unique: true },

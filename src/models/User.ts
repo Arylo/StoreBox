@@ -6,7 +6,7 @@ import { ObjectId } from "@models/common";
 import Cache =  require("schedule-cache");
 import { PER_COUNT } from "../modules/common/dtos/page.dto";
 
-const cache = Cache.create();
+const cache = Cache.create(`${Date.now()}${Math.random()}`);
 
 export const Flag = "users";
 

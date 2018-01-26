@@ -8,7 +8,7 @@ import { PER_COUNT } from "../modules/common/dtos/page.dto";
 import { isArray } from "util";
 import { reduce } from "lodash";
 
-const cache = Cache.create();
+const cache = Cache.create(`${Date.now()}${Math.random()}`);
 
 export const FLAG = "goods";
 export type GoodDoc = IDoc<IGoods>;
