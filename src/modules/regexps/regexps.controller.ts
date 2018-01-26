@@ -61,11 +61,13 @@ export class RegexpsAdminController {
     @Get("/:id")
     // region Swagger Docs
     @HttpCode(HttpStatus.OK)
-    @ApiOperation({ title: "Edit RegExp" })
+    @ApiOperation({ title: "Get RegExp Info" })
     @ApiImplicitParam({ name: "id", description: "RegExp ID" })
     // endregion Swagger Docs
-    public async getRegexp(@Param("id") id) {
-
+    public getRegexp(@Param("id") id) {
+        return RegexpsModel.findById(id)
+            .populate({ path: "link", populate: { path: "pid" } })
+            .exec();
     }
 
     @Roles("admin")
