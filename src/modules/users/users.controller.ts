@@ -1,18 +1,21 @@
 import {
     Controller, Get, Post, Body, Res, HttpStatus, Req, BadRequestException,
-    Param, UseGuards, Query, Delete, HttpCode
+    Param, UseGuards, Query, Delete, HttpCode, Session, ForbiddenException
 } from "@nestjs/common";
 import {
     ApiBearerAuth, ApiUseTags, ApiResponse, ApiOperation, ApiImplicitParam
 } from "@nestjs/swagger";
 import { Model as UserModel, IUser, UserDoc } from "@models/User";
+import { Model as TokensModel } from "@models/Token";
 import { Roles } from "@decorators/roles";
 import { RolesGuard } from "@guards/roles";
-import { PerPageDto, ListResponse } from "@dtos/page";
 import { ParseIntPipe } from "@pipes/parse-int";
+import { PerPageDto, ListResponse } from "@dtos/page";
 import { UidDto } from "@dtos/ids";
 
-import { CreateUserDto, ModifyPasswordDto } from "./users.dto";
+import {
+    CreateUserDto, ModifyPasswordDto, UserTokenParamDto
+} from "./users.dto";
 
 @UseGuards(RolesGuard)
 @Controller("api/v1/users")
@@ -150,6 +153,76 @@ export class UsersAdminController {
     public async allow(@Param() user: UidDto) {
         try {
             await UserModel.allow(user.uid);
+        } catch (error) {
+            throw new BadRequestException(error.toString());
+        }
+        return { statusCode: HttpStatus.OK };
+    }
+
+    @Roles("admin")
+    @Get("/:uid/tokens")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Get User's Tokens" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Get User's Tokens List",
+        type: ListResponse
+    })
+    // endregion Swagger Docs
+    public async getTokens(@Param() param: UidDto, @Session() session) {
+        const data = new ListResponse();
+        data.current = data.total = 1;
+        data.data =
+            (await TokensModel
+                .find({ user: session.loginUserId })
+                .select("-user")
+                .exec()
+            )
+            .map((item) => item.toObject())
+            .map((item) => {
+                item.token = "...." + item.token.substr(-8);
+                return item;
+            });
+        return data;
+    }
+
+    @Roles("admin")
+    @Delete("/:uid/tokens/:tid")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Delete User's Token" })
+    @ApiResponse({ status: HttpStatus.OK, description: "Delete Token Success" })
+    @ApiResponse({
+        status: HttpStatus.BAD_REQUEST, description: "Delete Token Fail"
+    })
+    // endregion Swagger Docs
+    public deleteTokenByDelete(
+        @Param() param: UserTokenParamDto, @Session() session
+    ) {
+        return this.deleteTokenByGet(param, session);
+    }
+
+    @Roles("admin")
+    @Get("/:uid/tokens/:tid/delete")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Delete User's Token" })
+    @ApiResponse({ status: HttpStatus.OK, description: "Delete Token Success" })
+    @ApiResponse({
+        status: HttpStatus.BAD_REQUEST, description: "Delete Token Fail"
+    })
+    // endregion Swagger Docs
+    public async deleteTokenByGet(
+        @Param() param: UserTokenParamDto, @Session() session
+    ) {
+        if (session.loginUserId !== param.uid) {
+            throw new ForbiddenException("It isnt your token");
+        }
+        try {
+            await TokensModel.findOneAndRemove({
+                _id: param.tid,
+                user: param.uid
+            }).exec();
         } catch (error) {
             throw new BadRequestException(error.toString());
         }

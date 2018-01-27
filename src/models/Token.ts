@@ -19,8 +19,8 @@ const Definition: SchemaDefinition = {
 };
 
 export interface ITokens extends IDocRaw {
-    readonly token: string;
-    readonly user: ObjectId | IUser;
+    token: string;
+    user: ObjectId | IUser;
 }
 
 export interface ITokensRaw extends ITokens {
