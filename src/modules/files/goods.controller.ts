@@ -36,7 +36,7 @@ export class GoodsController {
         // const categories = categoryDocs.map((item) => item.toObject());
         const cids = Object.keys(categories);
         const goods =
-            (await GoodsModels.getGoods(cids, query.perNum, query.page))
+            (await GoodsModels.getGoodsByCids(cids, query.perNum, query.page))
             .map((doc) => {
                 const good = doc.toObject() as IGoodsRaw;
                 const category = categories[good.category.toString()];
@@ -50,7 +50,7 @@ export class GoodsController {
                 return good;
             });
         data.data = goods;
-        data.total = await GoodsModels.countGoods(cids, query.perNum);
+        data.total = await GoodsModels.countGoodsByCids(cids, query.perNum);
         return data;
     }
 }

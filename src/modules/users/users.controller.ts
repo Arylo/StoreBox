@@ -7,6 +7,8 @@ import {
 } from "@nestjs/swagger";
 import { Model as UserModel, IUser, UserDoc } from "@models/User";
 import { Model as TokensModel } from "@models/Token";
+import { Model as GoodsModels } from "@models/Good";
+import { ObjectId } from "@models/common";
 import { Roles } from "@decorators/roles";
 import { RolesGuard } from "@guards/roles";
 import { ParseIntPipe } from "@pipes/parse-int";
@@ -41,7 +43,7 @@ export class UsersAdminController {
         const data = new ListResponse<IUser | UserDoc>();
         data.current = curPage;
         data.total = totalPage;
-        if (totalPage >= (query.page || 1)) {
+        if (totalPage >= curPage) {
             data.data = await UserModel.list(query.perNum, query.page);
         }
         return data;
@@ -227,5 +229,52 @@ export class UsersAdminController {
             throw new BadRequestException(error.toString());
         }
         return { statusCode: HttpStatus.OK };
+    }
+
+    private async getGoodsRes(uid: ObjectId, query: PerPageDto) {
+        const curPage = query.page || 1;
+        const totalPage =
+            await GoodsModels.countGoodsByUids(uid, query.perNum);
+        const resData = new ListResponse();
+        resData.current = curPage;
+        resData.total = totalPage;
+        if (totalPage >= curPage) {
+            resData.data = await GoodsModels.getGoodsByUids(
+                uid, query.perNum, query.page
+            );
+        }
+        return resData;
+    }
+
+    @Roles("admin", "token")
+    @Get("/goods")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Get Self Goods List" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Self Goods List",
+        type: ListResponse
+    })
+    // endregion Swagger Docs
+    public getSelfGoods(@Session() session, @Query() query: PerPageDto) {
+        const userId: ObjectId = session.loginUserId;
+        return this.getGoodsRes(userId, query);
+    }
+
+    @Roles("admin")
+    @Get("/:uid/goods")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Get User's Goods List" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "User's Goods List",
+        type: ListResponse
+    })
+    // endregion Swagger Docs
+    public async getUserGoods(
+        @Param() param: UidDto, @Query() query: PerPageDto
+    ) {
+        const userId: ObjectId = param.uid;
+        return this.getGoodsRes(userId, query);
     }
 }
