@@ -37,7 +37,6 @@ export class AuthAdminController {
         session.loginUser = user.toObject().username;
         session.loginUserId = user.toObject()._id;
         const obj = new LoginRespone();
-        obj.expires = session.cookie.expires || session.cookie._expires;
         obj.username = user.toObject().username;
         obj.nickname = user.toObject().nickname;
         obj.id = user.toObject()._id;
@@ -50,6 +49,7 @@ export class AuthAdminController {
             }
             obj.token = token;
         }
+        obj.expires = session.cookie.expires || session.cookie._expires;
         return obj;
     }
 
