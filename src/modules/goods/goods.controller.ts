@@ -1,6 +1,6 @@
 import {
     Controller, Req, Res, Body, Get, Post, Param, Session,
-    HttpStatus, BadRequestException, UseGuards, Delete, HttpCode
+    HttpStatus, BadRequestException, UseGuards, Delete, HttpCode, Query
 } from "@nestjs/common";
 import {
     ApiBearerAuth, ApiUseTags, ApiResponse, ApiOperation, ApiImplicitParam,
@@ -9,10 +9,12 @@ import {
 import { IValues, Model as ValuesModel } from "@models/Value";
 import { Model as GoodsModels } from "@models/Good";
 import { Model as RegexpModel } from "@models/Regexp";
+import { ObjectId } from "@models/common";
 import { config } from "@utils/config";
 import { GidDto } from "@dtos/ids";
-import { Roles } from "@decorators/roles";
 import { RolesGuard } from "@guards/roles";
+import { Roles } from "@decorators/roles";
+import { PerPageDto, ListResponse } from "@dtos/page";
 import * as hasha from "hasha";
 import fs = require("fs-extra");
 import multer  = require("multer");
@@ -26,6 +28,31 @@ import { GoodAttributeParamDto } from "./goods.dto";
 @ApiBearerAuth()
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: "Unauthorized" })
 export class GoodsAdminController {
+
+    @Roles("admin")
+    @Get()
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Get Goods List" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Goods List",
+        type: ListResponse
+    })
+    // endregion Swagger Docs
+    public async getGoods(@Query() query: PerPageDto) {
+        const curPage = query.page || 1;
+        const totalPage =
+            await GoodsModels.countGoodsByUids([ ], query.perNum);
+        const resData = new ListResponse();
+        resData.current = curPage;
+        resData.total = totalPage;
+        if (totalPage >= curPage) {
+            resData.data = await GoodsModels.getGoodsByUids(
+                [ ], query.perNum, query.page
+            );
+        }
+        return resData;
+    }
 
     @Roles("admin", "token")
     @Post()

@@ -61,22 +61,83 @@ export interface IGoodsRaw extends IGoods {
 
 const GoodsSchema = new Base(Definition).createSchema();
 
+const getConditionsByUids = (uids: ObjectId[]) => {
+    let conditions;
+    switch (uids.length) {
+        case 0:
+            conditions = { };
+            break;
+        case 1:
+            conditions = {
+                uploader: uids[0]
+            };
+            break;
+        default:
+            conditions = {
+                $or: reduce(uids, (arr, uid) => {
+                    arr.push({ uploader: uid });
+                    return arr;
+                }, [])
+            };
+            break;
+    }
+    return conditions;
+};
+
 GoodsSchema.static(
-    "getGoods",
+    "getGoodsByUids",
+    (uids: ObjectId | ObjectId[], perNum = PER_COUNT[0], page = 1) => {
+        if (!isArray(uids)) {
+            uids = [ uids ];
+        }
+        const conditions = getConditionsByUids(uids);
+        return Model.find(conditions)
+            .skip((page - 1) * perNum).limit(perNum)
+            .select("-uploader")
+            .populate("attributes")
+            .sort({ updatedAt: -1 })
+            .exec();
+    }
+);
+
+GoodsSchema.static(
+    "countGoodsByUids",
+    async (uids: ObjectId | ObjectId[], perNum = PER_COUNT[0]) => {
+        if (!isArray(uids)) {
+            uids = [ uids ];
+        }
+        const flag = `count_uids_${uids.join("_")}`;
+        const count = cache.get(flag);
+        if (count) {
+            return count;
+        }
+        const conditions = getConditionsByUids(uids);
+        const total = await Model.count(conditions).exec();
+        cache.put(flag, Math.ceil(total / perNum));
+        return cache.get(flag);
+    }
+);
+
+const getConditionsByCids = (cids: ObjectId[]) => {
+    return cids.length === 1 ? {
+        category: cids[0],
+        active: true
+    } : {
+        $or: reduce(cids, (arr, cid) => {
+            arr.push({ category: { $in: [ cid ] } });
+            return arr;
+        }, []),
+        active: true
+    };
+};
+
+GoodsSchema.static(
+    "getGoodsByCids",
     (cids: ObjectId | ObjectId[], perNum = PER_COUNT[0], page = 1) => {
         if (!isArray(cids)) {
             cids = [ cids ];
         }
-        const conditions = cids.length === 1 ? {
-            category: cids[0],
-            active: true
-        } : {
-            $or: reduce(cids, (arr, cid) => {
-                arr.push({ category: { $in: [ cid ] } });
-                return arr;
-            }, []),
-            active: true
-        };
+        const conditions = getConditionsByCids(cids);
         return Model.find(conditions)
             .skip((page - 1) * perNum).limit(perNum)
             .populate("uploader attributes")
@@ -86,26 +147,20 @@ GoodsSchema.static(
 );
 
 GoodsSchema.static(
-    "countGoods",
+    "countGoodsByCids",
     async (cids: ObjectId | ObjectId[], perNum = PER_COUNT[0]) => {
         if (!isArray(cids)) {
             cids = [ cids ];
         }
-        const flag = `count_${cids.join("_")}`;
+        if (cids.length === 0) {
+            return [ ];
+        }
+        const flag = `count_cids_${cids.join("_")}`;
         const count = cache.get(flag);
         if (count) {
             return count;
         }
-        const conditions = cids.length === 1 ? {
-            category: cids[0],
-            active: true
-        } : {
-            $or: reduce(cids, (arr, cid) => {
-                arr.push({ category: { $in: [ cid ] } });
-                return arr;
-            }, []),
-            active: true
-        };
+        const conditions = getConditionsByCids(cids);
         const total = await Model.count(conditions).exec();
         cache.put(flag, Math.ceil(total / perNum));
         return cache.get(flag);
@@ -113,10 +168,18 @@ GoodsSchema.static(
 );
 
 export interface IGoodModel<T extends GoodDoc> extends M<T> {
-    getGoods(
+    // By UID
+    getGoodsByUids(
+        uids: ObjectId | ObjectId[], perNum?: number, page?: number
+    ): Promise<T[]>;
+    countGoodsByUids(
+        uids: ObjectId | ObjectId[], perNum?: number
+    ): Promise<number>;
+    // By CIDs
+    getGoodsByCids(
         cids: ObjectId | ObjectId[], perNum?: number, page?: number
     ): Promise<T[]>;
-    countGoods(
+    countGoodsByCids(
         cids: ObjectId | ObjectId[], perNum?: number
     ): Promise<number>;
 }
