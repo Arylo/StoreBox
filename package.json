@@ -88,6 +88,6 @@
     "schedule-cache": "^1.0.0",
     "useragent": "^2.2.1",
     "uuid": "^3.1.0",
-    "y-config": "github:arylo/y-config#develop"
+    "y-config": "^1.1.5"
   }
 }
