@@ -15,6 +15,7 @@ import { GidDto } from "@dtos/ids";
 import { RolesGuard } from "@guards/roles";
 import { Roles } from "@decorators/roles";
 import { PerPageDto, ListResponse } from "@dtos/page";
+import { ParseIntPipe } from "@pipes/parse-int";
 import * as hasha from "hasha";
 import fs = require("fs-extra");
 import multer  = require("multer");
@@ -39,7 +40,7 @@ export class GoodsAdminController {
         type: ListResponse
     })
     // endregion Swagger Docs
-    public async getGoods(@Query() query: PerPageDto) {
+    public async getGoods(@Query(new ParseIntPipe()) query: PerPageDto) {
         const curPage = query.page || 1;
         const totalPage =
             await GoodsModels.countGoodsByUids([ ], query.perNum);
