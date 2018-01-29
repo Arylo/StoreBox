@@ -30,7 +30,7 @@ export type RegexpDoc = IDoc<IRegexp>;
 const RegexpSchema = new Base(Definition).createSchema();
 
 // region static methods
-RegexpSchema.static("pageCount", async (perNum = PER_COUNT[0]) => {
+RegexpSchema.static("countRegexps", async (perNum = 1) => {
     const FLAG = `page_count_${perNum}`;
     if (cache.get(FLAG)) {
         return cache.get(FLAG);
@@ -137,7 +137,7 @@ interface IRegexpModel<T extends RegexpDoc> extends M<T> {
     /**
      * 返回总页数
      */
-    pageCount(perNum?: number): Promise<number>;
+    countRegexps(perNum?: number): Promise<number>;
 }
 
 // region Validators

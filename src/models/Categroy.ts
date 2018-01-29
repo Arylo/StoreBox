@@ -39,12 +39,13 @@ export interface ICategoryRaw extends ICategory {
 
 const CategorySchema = new Base(Definition).createSchema();
 
-CategorySchema.static("pageCount", async (perNum = PER_COUNT[0]) => {
+CategorySchema.static("countCategories", async (perNum = 1) => {
     const FLAG = `page_count_${perNum}`;
     if (cache.get(FLAG)) {
         return cache.get(FLAG);
     }
-    cache.put(FLAG, Math.ceil((await Model.count({ }).exec()) / perNum));
+    const count = Math.ceil((await Model.count({ }).exec()) / perNum);
+    cache.put(FLAG, count);
     return cache.get(FLAG);
 });
 
@@ -145,7 +146,7 @@ export interface ICategoryModel<T extends CategoryDoc> extends M<T> {
     /**
      * 返回总页数
      */
-    pageCount(perNum?: number): Promise<number>;
+    countCategories(perNum?: number): Promise<number>;
 }
 
 for (const method of MODIFY_MOTHODS) {

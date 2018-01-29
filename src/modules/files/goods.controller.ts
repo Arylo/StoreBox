@@ -3,14 +3,16 @@ import {
 } from "@nestjs/common";
 import { ApiUseTags, ApiOperation } from "@nestjs/swagger";
 import { Model as CategoriesModel } from "@models/Categroy";
+import { Model as GoodsModels } from "@models/Good";
+import { IUser } from "@models/User";
+import { IGoodsRaw } from "@models/Good";
 import { RolesGuard } from "@guards/roles";
 import { Roles } from "@decorators/roles";
 import { ParseIntPipe } from "@pipes/parse-int";
-import { GoodsQueryDto, GoodsResponseDto } from "./goods.dto";
-import { Model as GoodsModels } from "@models/Good";
-import { IUser } from "@models/User";
+import { ListResponse, PER_COUNT } from "@dtos/page";
 import { reduce } from "lodash";
-import { IGoodsRaw } from "@models/Good";
+
+import { GoodsQueryDto } from "./goods.dto";
 
 @UseGuards(RolesGuard)
 @Controller("goods")
@@ -24,7 +26,7 @@ export class GoodsController {
     @ApiOperation({ title: "Get Good List" })
     // endregion Swagger Docs
     public async getList(@Query(new ParseIntPipe()) query: GoodsQueryDto) {
-        const data = new GoodsResponseDto();
+        const data = new ListResponse<IGoodsRaw>();
         const categoryModels = await CategoriesModel.getCategories(query.tags);
         const categories = reduce(categoryModels, (obj, cate) => {
             obj[cate._id.toString()] = cate;
@@ -33,10 +35,11 @@ export class GoodsController {
         if (Object.keys(categories).length === 0) {
             return data;
         }
-        // const categories = categoryDocs.map((item) => item.toObject());
+        const perNum = query.perNum || PER_COUNT[0];
+
         const cids = Object.keys(categories);
         const goods =
-            (await GoodsModels.getGoodsByCids(cids, query.perNum, query.page))
+            (await GoodsModels.getGoodsByCids(cids, perNum, query.page))
             .map((doc) => {
                 const good = doc.toObject() as IGoodsRaw;
                 const category = categories[good.category.toString()];
@@ -50,7 +53,8 @@ export class GoodsController {
                 return good;
             });
         data.data = goods;
-        data.total = await GoodsModels.countGoodsByCids(cids, query.perNum);
+        data.totalPages = await GoodsModels.countGoodsByCids(cids, perNum);
+        data.total = await GoodsModels.countGoodsByCids(cids);
         return data;
     }
 }

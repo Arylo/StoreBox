@@ -102,11 +102,11 @@ GoodsSchema.static(
 
 GoodsSchema.static(
     "countGoodsByUids",
-    async (uids: ObjectId | ObjectId[], perNum = PER_COUNT[0]) => {
+    async (uids: ObjectId | ObjectId[], perNum = 1) => {
         if (!isArray(uids)) {
             uids = [ uids ];
         }
-        const flag = `count_uids_${uids.join("_")}`;
+        const flag = `count_uids_${uids.join("_")}_${perNum}`;
         const count = cache.get(flag);
         if (count) {
             return count;
@@ -148,14 +148,14 @@ GoodsSchema.static(
 
 GoodsSchema.static(
     "countGoodsByCids",
-    async (cids: ObjectId | ObjectId[], perNum = PER_COUNT[0]) => {
+    async (cids: ObjectId | ObjectId[], perNum = 1) => {
         if (!isArray(cids)) {
             cids = [ cids ];
         }
         if (cids.length === 0) {
             return [ ];
         }
-        const flag = `count_cids_${cids.join("_")}`;
+        const flag = `count_cids_${cids.join("_")}_${perNum}`;
         const count = cache.get(flag);
         if (count) {
             return count;

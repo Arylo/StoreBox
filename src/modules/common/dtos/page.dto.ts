@@ -15,7 +15,11 @@ export class ListResponse<T> {
     @ApiModelProperty({
         type: Number, description: "Total Page Count"
     })
-    public total: number;
+    public totalPages: number;
+    @ApiModelProperty({
+        type: Number, description: "Total Item Count"
+    })
+    public total = 0;
 }
 
 export class PerPageDto {

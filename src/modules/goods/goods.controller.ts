@@ -42,12 +42,15 @@ export class GoodsAdminController {
     // endregion Swagger Docs
     public async getGoods(@Query(new ParseIntPipe()) query: PerPageDto) {
         const curPage = query.page || 1;
-        const totalPage =
+        const totalPages =
             await GoodsModels.countGoodsByUids([ ], query.perNum);
+        const totalCount = await GoodsModels.countGoodsByUids([ ]);
+
         const resData = new ListResponse();
         resData.current = curPage;
-        resData.total = totalPage;
-        if (totalPage >= curPage) {
+        resData.totalPages = totalPages;
+        resData.total = totalCount;
+        if (totalPages >= curPage) {
             resData.data = await GoodsModels.getGoodsByUids(
                 [ ], query.perNum, query.page
             );

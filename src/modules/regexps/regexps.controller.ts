@@ -35,11 +35,14 @@ export class RegexpsAdminController {
     // endregion Swagger Docs
     public async list(@Query(new ParseIntPipe()) query: PerPageDto) {
         const curPage = query.page || 1;
-        const totalPage = await RegexpsModel.pageCount(query.perNum);
+        const totalPages = await RegexpsModel.countRegexps(query.perNum);
+        const totalCount = await RegexpsModel.countRegexps();
+
         const data = new ListResponse<IRegexp | RegexpDoc>();
         data.current = curPage;
-        data.total = totalPage;
-        if (totalPage >= curPage) {
+        data.totalPages = totalPages;
+        data.total = totalCount;
+        if (totalPages >= curPage) {
             data.data = await RegexpsModel.list(query.perNum, query.page);
         }
         return data;

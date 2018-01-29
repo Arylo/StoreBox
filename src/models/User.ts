@@ -32,7 +32,7 @@ const encryptStr = (pwd: string) => {
 };
 
 // region static methods
-UsersSchema.static("pageCount", async (perNum = PER_COUNT[0]) => {
+UsersSchema.static("countUsers", async (perNum = 1) => {
     const FLAG = `page_count_${perNum}`;
     if (cache.get(FLAG)) {
         return cache.get(FLAG);
@@ -183,7 +183,7 @@ interface IUserModel<T extends UserDoc> extends M<T> {
     /**
      * 返回总页数
      */
-    pageCount(perNum?: number): Promise<number>;
+    countUsers(perNum?: number): Promise<number>;
 }
 
 // region Validators

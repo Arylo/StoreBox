@@ -9,14 +9,3 @@ export class GoodsQueryDto extends PerPageDto {
     })
     public readonly tags: string[];
 }
-
-export class GoodsResponseDto {
-    @ApiModelPropertyOptional({ type: Date })
-    public latest: Date;
-    @ApiModelProperty({ type: Array })
-    public data: any[] = [ ];
-    @ApiModelProperty({ type: Number })
-    public current: number = 1;
-    @ApiModelProperty({ type: Number })
-    public total: number = 0;
-}

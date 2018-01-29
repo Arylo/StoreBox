@@ -12,7 +12,7 @@ import { ObjectId } from "@models/common";
 import { Roles } from "@decorators/roles";
 import { RolesGuard } from "@guards/roles";
 import { ParseIntPipe } from "@pipes/parse-int";
-import { PerPageDto, ListResponse } from "@dtos/page";
+import { PerPageDto, ListResponse, PER_COUNT } from "@dtos/page";
 import { UidDto } from "@dtos/ids";
 
 import {
@@ -39,11 +39,14 @@ export class UsersAdminController {
     // endregion Swagger Docs
     public async findAll(@Query(new ParseIntPipe()) query: PerPageDto) {
         const curPage = query.page || 1;
-        const totalPage = await UserModel.pageCount(query.perNum);
+        const totalPages = await UserModel.countUsers(query.perNum);
+        const totalCount = await UserModel.countUsers();
+
         const data = new ListResponse<IUser | UserDoc>();
         data.current = curPage;
-        data.total = totalPage;
-        if (totalPage >= curPage) {
+        data.totalPages = totalPages;
+        data.total = totalCount;
+        if (totalPages >= curPage) {
             data.data = await UserModel.list(query.perNum, query.page);
         }
         return data;
@@ -173,7 +176,7 @@ export class UsersAdminController {
     // endregion Swagger Docs
     public async getTokens(@Param() param: UidDto, @Session() session) {
         const data = new ListResponse();
-        data.current = data.total = 1;
+        data.current = data.totalPages = 1;
         data.data =
             (await TokensModel
                 .find({ user: session.loginUserId })
@@ -185,6 +188,7 @@ export class UsersAdminController {
                 item.token = "...." + item.token.substr(-8);
                 return item;
             });
+        data.total = data.data.length;
         return data;
     }
 
@@ -233,12 +237,16 @@ export class UsersAdminController {
 
     private async getGoodsRes(uid: ObjectId, query: PerPageDto) {
         const curPage = query.page || 1;
-        const totalPage =
+        const perNum = query.perNum || PER_COUNT[0];
+        const totalPages =
             await GoodsModels.countGoodsByUids(uid, query.perNum);
+        const totalCount = await GoodsModels.countGoodsByUids(uid);
+
         const resData = new ListResponse();
         resData.current = curPage;
-        resData.total = totalPage;
-        if (totalPage >= curPage) {
+        resData.totalPages = totalPages;
+        resData.total = totalCount;
+        if (totalPages >= curPage) {
             resData.data = await GoodsModels.getGoodsByUids(
                 uid, query.perNum, query.page
             );

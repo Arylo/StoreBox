@@ -88,52 +88,78 @@ describe("the E2E Api of display item count Per page", () => {
 
         step("have 4 pages by 25 per page", async () => {
             let req;
+            // Page 1
             req = await request.get(`${URL}?page=1&perNum=25`).then();
-            req.body.total.should.have.aboveOrEqual(4);
+            req.body.totalPages.should.have.aboveOrEqual(4);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.should.have.length(25);
+            // Page 2
             req = await request.get(`${URL}?page=2&perNum=25`).then();
-            req.body.total.should.have.aboveOrEqual(4);
+            req.body.totalPages.should.have.aboveOrEqual(4);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.should.have.length(25);
+            // Page 3
             req = await request.get(`${URL}?page=3&perNum=25`).then();
-            req.body.total.should.have.aboveOrEqual(4);
+            req.body.totalPages.should.have.aboveOrEqual(4);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.should.have.length(25);
+            // Page 4
             req = await request.get(`${URL}?page=4&perNum=25`).then();
-            req.body.total.should.have.aboveOrEqual(4);
+            req.body.totalPages.should.have.aboveOrEqual(4);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.should.have.length(25);
+            // Page 5
             req = await request.get(`${URL}?page=5&perNum=25`).then();
-            req.body.total.should.have.aboveOrEqual(4);
+            req.body.totalPages.should.have.aboveOrEqual(4);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.length.should.have.aboveOrEqual(0);
+            // Page 6
             req = await request.get(`${URL}?page=6&perNum=25`).then();
-            req.body.total.should.have.aboveOrEqual(4);
+            req.body.totalPages.should.have.aboveOrEqual(4);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.should.have.length(0);
         });
 
         step("have 2 pages by 50 per page", async () => {
             let req;
+            // Page 1
             req = await request.get(`${URL}?page=1&perNum=50`).then();
-            req.body.total.should.have.aboveOrEqual(2);
+            req.body.totalPages.should.have.aboveOrEqual(2);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.should.have.length(50);
+            // Page 2
             req = await request.get(`${URL}?page=2&perNum=50`).then();
-            req.body.total.should.have.aboveOrEqual(2);
+            req.body.totalPages.should.have.aboveOrEqual(2);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.should.have.length(50);
+            // Page 3
             req = await request.get(`${URL}?page=3&perNum=50`).then();
-            req.body.total.should.have.aboveOrEqual(2);
+            req.body.totalPages.should.have.aboveOrEqual(2);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.length.should.have.aboveOrEqual(0);
+            // Page 4
             req = await request.get(`${URL}?page=4&perNum=50`).then();
-            req.body.total.should.have.aboveOrEqual(2);
+            req.body.totalPages.should.have.aboveOrEqual(2);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.should.have.length(0);
         });
 
         step("have 2 pages by 75 per page", async () => {
             let req;
+            // Page 1
             req = await request.get(`${URL}?page=1&perNum=75`).then();
-            req.body.total.should.have.aboveOrEqual(2);
+            req.body.totalPages.should.have.aboveOrEqual(2);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.should.have.length(75);
+            // Page 2
             req = await request.get(`${URL}?page=2&perNum=75`).then();
-            req.body.total.should.have.aboveOrEqual(2);
+            req.body.totalPages.should.have.aboveOrEqual(2);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.length.should.have.aboveOrEqual(25);
+            // Page 3
             req = await request.get(`${URL}?page=3&perNum=75`).then();
-            req.body.total.should.have.aboveOrEqual(2);
+            req.body.totalPages.should.have.aboveOrEqual(2);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.should.have.length(0);
         });
 
@@ -190,52 +216,78 @@ describe("the E2E Api of display item count Per page", () => {
 
         step("have 4 pages by 25 per page", async () => {
             let req;
+            // Page 1
             req = await request.get(`${URL}?page=1&perNum=25`).then();
-            req.body.total.should.have.aboveOrEqual(4);
+            req.body.totalPages.should.have.aboveOrEqual(4);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.should.have.length(25);
+            // Page 2
             req = await request.get(`${URL}?page=2&perNum=25`).then();
-            req.body.total.should.have.aboveOrEqual(4);
+            req.body.totalPages.should.have.aboveOrEqual(4);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.should.have.length(25);
+            // Page 3
             req = await request.get(`${URL}?page=3&perNum=25`).then();
-            req.body.total.should.have.aboveOrEqual(4);
+            req.body.totalPages.should.have.aboveOrEqual(4);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.should.have.length(25);
+            // Page 4
             req = await request.get(`${URL}?page=4&perNum=25`).then();
-            req.body.total.should.have.aboveOrEqual(4);
+            req.body.totalPages.should.have.aboveOrEqual(4);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.should.have.length(25);
+            // Page 5
             req = await request.get(`${URL}?page=5&perNum=25`).then();
-            req.body.total.should.have.aboveOrEqual(4);
+            req.body.totalPages.should.have.aboveOrEqual(4);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.length.should.have.aboveOrEqual(0);
+            // Page 6
             req = await request.get(`${URL}?page=6&perNum=25`).then();
-            req.body.total.should.have.aboveOrEqual(4);
+            req.body.totalPages.should.have.aboveOrEqual(4);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.should.have.length(0);
         });
 
         step("have 2 pages by 50 per page", async () => {
             let req;
+            // Page 1
             req = await request.get(`${URL}?page=1&perNum=50`).then();
-            req.body.total.should.have.aboveOrEqual(2);
+            req.body.totalPages.should.have.aboveOrEqual(2);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.should.have.length(50);
+            // Page 2
             req = await request.get(`${URL}?page=2&perNum=50`).then();
-            req.body.total.should.have.aboveOrEqual(2);
+            req.body.totalPages.should.have.aboveOrEqual(2);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.should.have.length(50);
+            // Page 3
             req = await request.get(`${URL}?page=3&perNum=50`).then();
-            req.body.total.should.have.aboveOrEqual(2);
+            req.body.totalPages.should.have.aboveOrEqual(2);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.length.should.have.aboveOrEqual(0);
+            // Page 4
             req = await request.get(`${URL}?page=4&perNum=50`).then();
-            req.body.total.should.have.aboveOrEqual(2);
+            req.body.totalPages.should.have.aboveOrEqual(2);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.should.have.length(0);
         });
 
         step("have 2 pages by 75 per page", async () => {
             let req;
+            // Page 1
             req = await request.get(`${URL}?page=1&perNum=75`).then();
-            req.body.total.should.have.aboveOrEqual(2);
+            req.body.totalPages.should.have.aboveOrEqual(2);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.should.have.length(75);
+            // Page 2
             req = await request.get(`${URL}?page=2&perNum=75`).then();
-            req.body.total.should.have.aboveOrEqual(2);
+            req.body.totalPages.should.have.aboveOrEqual(2);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.length.should.have.aboveOrEqual(0);
+            // Page 3
             req = await request.get(`${URL}?page=3&perNum=75`).then();
-            req.body.total.should.have.aboveOrEqual(2);
+            req.body.totalPages.should.have.aboveOrEqual(2);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.should.have.length(0);
         });
     });
@@ -288,52 +340,78 @@ describe("the E2E Api of display item count Per page", () => {
 
         step("have 4 pages by 25 per page", async () => {
             let req;
+            // Page 1
             req = await request.get(`${URL}?page=1&perNum=25`).then();
-            req.body.total.should.have.aboveOrEqual(4);
+            req.body.totalPages.should.have.aboveOrEqual(4);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.should.have.length(25);
+            // Page 2
             req = await request.get(`${URL}?page=2&perNum=25`).then();
-            req.body.total.should.have.aboveOrEqual(4);
+            req.body.totalPages.should.have.aboveOrEqual(4);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.should.have.length(25);
+            // Page 3
             req = await request.get(`${URL}?page=3&perNum=25`).then();
-            req.body.total.should.have.aboveOrEqual(4);
+            req.body.totalPages.should.have.aboveOrEqual(4);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.should.have.length(25);
+            // Page 4
             req = await request.get(`${URL}?page=4&perNum=25`).then();
-            req.body.total.should.have.aboveOrEqual(4);
+            req.body.totalPages.should.have.aboveOrEqual(4);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.should.have.length(25);
+            // Page 5
             req = await request.get(`${URL}?page=5&perNum=25`).then();
-            req.body.total.should.have.aboveOrEqual(4);
+            req.body.totalPages.should.have.aboveOrEqual(4);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.length.should.have.aboveOrEqual(0);
+            // Page 6
             req = await request.get(`${URL}?page=6&perNum=25`).then();
-            req.body.total.should.have.aboveOrEqual(4);
+            req.body.totalPages.should.have.aboveOrEqual(4);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.should.have.length(0);
         });
 
         step("have 2 pages by 50 per page", async () => {
             let req;
+            // Page 1
             req = await request.get(`${URL}?page=1&perNum=50`).then();
-            req.body.total.should.have.aboveOrEqual(2);
+            req.body.totalPages.should.have.aboveOrEqual(2);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.should.have.length(50);
+            // Page 2
             req = await request.get(`${URL}?page=2&perNum=50`).then();
-            req.body.total.should.have.aboveOrEqual(2);
+            req.body.totalPages.should.have.aboveOrEqual(2);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.should.have.length(50);
+            // Page 3
             req = await request.get(`${URL}?page=3&perNum=50`).then();
-            req.body.total.should.have.aboveOrEqual(2);
+            req.body.totalPages.should.have.aboveOrEqual(2);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.length.should.have.aboveOrEqual(0);
+            // Page 4
             req = await request.get(`${URL}?page=4&perNum=50`).then();
-            req.body.total.should.have.aboveOrEqual(2);
+            req.body.totalPages.should.have.aboveOrEqual(2);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.should.have.length(0);
         });
 
         step("have 2 pages by 75 per page", async () => {
             let req;
+            // Page 1
             req = await request.get(`${URL}?page=1&perNum=75`).then();
-            req.body.total.should.have.aboveOrEqual(2);
+            req.body.totalPages.should.have.aboveOrEqual(2);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.should.have.length(75);
+            // Page 2
             req = await request.get(`${URL}?page=2&perNum=75`).then();
-            req.body.total.should.have.aboveOrEqual(2);
+            req.body.totalPages.should.have.aboveOrEqual(2);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.length.should.have.aboveOrEqual(25);
+            // Page 3
             req = await request.get(`${URL}?page=3&perNum=75`).then();
-            req.body.total.should.have.aboveOrEqual(2);
+            req.body.totalPages.should.have.aboveOrEqual(2);
+            req.body.total.should.have.aboveOrEqual(100);
             req.body.data.should.have.length(0);
         });
 

@@ -42,11 +42,14 @@ export class CategoriesAdminController {
     // endregion Swagger Docs
     public async list(@Query(new ParseIntPipe()) query: PerPageDto) {
         const curPage = query.page || 1;
-        const totalPage = await CategoriesModel.pageCount(query.perNum);
+        const totalPages = await CategoriesModel.countCategories(query.perNum);
+        const totalCount = await CategoriesModel.countCategories();
+
         const data = new ListResponse<ICategory | CategoryDoc>();
         data.current = curPage;
-        data.total = totalPage;
-        if (totalPage >= curPage) {
+        data.totalPages = totalPages;
+        data.total = totalCount;
+        if (totalPages >= curPage) {
             data.data = await CategoriesModel.list(query.perNum, query.page);
         }
         return data;
