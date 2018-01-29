@@ -1,0 +1,28 @@
+# System Cache Files
+.DS_Store
+Thumbs.db
+
+# App Config File
+src/config/*
+!src/config/*.default.*
+
+# App Cache Folder
+node_modules
+dist
+log
+upload
+backup
+temp
+tmp
+
+# Project Folder
+.git
+.vscode
+
+# Docker Folder
+docker
+
+# Test Folder
+test
+.nyc_output
+coverage
