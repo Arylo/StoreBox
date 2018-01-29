@@ -6,10 +6,7 @@ import {
 } from "../helpers/database";
 import { init } from "../helpers/server";
 
-/**
- * Fix [Issus 22](https://github.com/Arylo/StoreBox/issues/22)
- */
-describe("Fix Issuses", () => {
+describe("User's Goods E2E Api", () => {
 
     let request: supertest.SuperTest<supertest.Test>;
 
@@ -29,11 +26,12 @@ describe("Fix Issuses", () => {
         request = await init();
     });
 
-    describe("Github 22", () => {
+    describe("Self Goods", () => {
 
         const user = {
             name: faker.name.firstName(),
-            pass: faker.random.words()
+            pass: faker.random.words(),
+            id: ""
         };
         step("Login", async () => {
             const doc = await newUser(user.name, user.pass);
@@ -44,24 +42,44 @@ describe("Fix Issuses", () => {
                 }).then();
         });
 
-        step("Status Code isnt 500 #0", async () => {
+        step("Status Code isnt 500", async () => {
+            const url = `/api/v1/users/goods?page=1&perNum=25`;
             const {
                 body: result, status
-            } = await request.get("/api/v1/goods?page=1&perNum=25")
+            } = await request.get(url).send({
+                username: user.name, password: user.pass
+            }).then();
+            status.should.be.not.eql(500);
+            result.data.should.be.an.Array();
+        });
+    });
+
+    describe("User's Goods", () => {
+
+        const user = {
+            name: faker.name.firstName(),
+            pass: faker.random.words(),
+            id: ""
+        };
+        step("Login", async () => {
+            const doc = await newUser(user.name, user.pass);
+            ids.users.push(doc._id);
+            user.id = doc._id;
+            await request.post("/api/v1/auth/login")
                 .send({
                     username: user.name, password: user.pass
                 }).then();
-            status.should.be.not.eql(500);
         });
 
-        step("Status Code isnt 500 #1", async () => {
+        step("Status Code isnt 500", async () => {
+            const url = `/api/v1/users/${user.id}/goods?page=1&perNum=25`;
             const {
                 body: result, status
-            } = await request.get("/api/v1/goods?perNum=25&page=1")
-                .send({
-                    username: user.name, password: user.pass
-                }).then();
+            } = await request.get(url).send({
+                username: user.name, password: user.pass
+            }).then();
             status.should.be.not.eql(500);
+            result.data.should.be.an.Array();
         });
 
     });

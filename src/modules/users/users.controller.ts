@@ -256,7 +256,9 @@ export class UsersAdminController {
         type: ListResponse
     })
     // endregion Swagger Docs
-    public getSelfGoods(@Session() session, @Query() query: PerPageDto) {
+    public getSelfGoods(
+        @Session() session, @Query(new ParseIntPipe()) query: PerPageDto
+    ) {
         const userId: ObjectId = session.loginUserId;
         return this.getGoodsRes(userId, query);
     }
@@ -272,7 +274,7 @@ export class UsersAdminController {
     })
     // endregion Swagger Docs
     public async getUserGoods(
-        @Param() param: UidDto, @Query() query: PerPageDto
+        @Param() param: UidDto, @Query(new ParseIntPipe()) query: PerPageDto
     ) {
         const userId: ObjectId = param.uid;
         return this.getGoodsRes(userId, query);
