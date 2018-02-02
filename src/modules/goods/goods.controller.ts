@@ -9,6 +9,7 @@ import {
 import { IValues, Model as ValuesModel } from "@models/Value";
 import { Model as GoodsModels } from "@models/Good";
 import { Model as RegexpModel } from "@models/Regexp";
+import { Model as TokensModel } from "@models/Token";
 import { ObjectId } from "@models/common";
 import { config } from "@utils/config";
 import { GidDto } from "@dtos/ids";
@@ -87,12 +88,13 @@ export class GoodsAdminController {
                 hasha.fromFileSync(file.path, { algorithm: "md5" });
             const sha256sum =
                 hasha.fromFileSync(file.path, { algorithm: "sha256" });
+            const uploader = session.loginUserId ||
+                (await TokensModel.findOne({ token: req.user.token }))._id;
             goodObj = await GoodsModels.create({
                 filename: file.filename,
                 originname: file.originalname,
                 category: categories[0]._id,
-                uploader: session.loginUserId,
-                md5sum, sha256sum,
+                uploader, md5sum, sha256sum,
                 active: true
             });
         } catch (error) {
