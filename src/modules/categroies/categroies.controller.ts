@@ -1,40 +1,69 @@
 import {
     Controller, Post, Res, Body, Get, HttpStatus, HttpCode, Param,
-    BadRequestException
+    BadRequestException, UseGuards, Delete, Query
 } from "@nestjs/common";
-import {
-    Model as CategroiesModel, CategroyDoc, ICategroy
-} from "@models/Categroy";
-import { Model as ValuesModel, ValueDoc, IValues } from "@models/Value";
-import { NewCategroyDto, EditCategroyDto } from "./categroies.dto";
-import { CreateValueDto, EditValueDto } from "../values/values.dto";
-import { Model as GoodsModels } from "@models/Good";
 import {
     ApiBearerAuth, ApiUseTags, ApiResponse, ApiImplicitParam, ApiOperation
 } from "@nestjs/swagger";
-
+import {
+    Model as CategoriesModel, CategoryDoc, ICategory
+} from "@models/Categroy";
+import { Model as ValuesModel, ValueDoc, IValues } from "@models/Value";
+import { Model as GoodsModels } from "@models/Good";
+import { Roles } from "@decorators/roles";
+import { RolesGuard } from "@guards/roles";
+import { ParseIntPipe } from "@pipes/parse-int";
+import { PerPageDto, ListResponse } from "@dtos/page";
+import { CidDto } from "@dtos/ids";
 import md5 = require("md5");
 
-@Controller("api/v1/categroies")
-@ApiUseTags("categroies")
-@ApiBearerAuth()
-@ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: "Unauthorized" })
-export class CategroiesController {
+import {
+    NewCategoryDto, EditCategoryDto, CategoryAttributeParamDto
+} from "./categroies.dto";
+import { CreateValueDto, EditValueDto } from "../values/values.dto";
 
+@UseGuards(RolesGuard)
+@Controller("api/v1/categories")
+// region Swagger Docs
+@ApiUseTags("categories")
+@ApiBearerAuth()
+// endregion Swagger Docs
+export class CategoriesAdminController {
+
+    @Roles("admin")
     @Get()
+    // region Swagger Docs
     @HttpCode(HttpStatus.OK)
-    @ApiOperation({ title: "Get Categroy List" })
-    public async list() {
-        return await CategroiesModel.find()
-            .select("-attributes")
-            .exec();
+    @ApiOperation({ title: "Get Category List" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Category List",
+        type: ListResponse
+    })
+    // endregion Swagger Docs
+    public async list(@Query(new ParseIntPipe()) query: PerPageDto) {
+        const curPage = query.page || 1;
+        const totalPages = await CategoriesModel.countCategories(query.perNum);
+        const totalCount = await CategoriesModel.countCategories();
+
+        const data = new ListResponse<ICategory | CategoryDoc>();
+        data.current = curPage;
+        data.totalPages = totalPages;
+        data.total = totalCount;
+        if (totalPages >= curPage) {
+            data.data = await CategoriesModel.list(query.perNum, query.page);
+        }
+        return data;
     }
 
+    @Roles("admin")
     @Post()
-    @ApiOperation({ title: "Add Categroy" })
-    public async add(@Res() res, @Body() ctx: NewCategroyDto) {
-        if (ctx.pid && !(await CategroiesModel.findById(ctx.pid).exec())) {
-            throw new BadRequestException("The Parent Categroy isnt exist!");
+    // region Swagger Docs
+    @HttpCode(HttpStatus.CREATED)
+    @ApiOperation({ title: "Add Category" })
+    // endregion Swagger Docs
+    public async add(@Body() ctx: NewCategoryDto) {
+        if (ctx.pid && !(await CategoriesModel.findById(ctx.pid).exec())) {
+            throw new BadRequestException("The Parent Category isnt exist!");
         }
         let attrsIds = [ ];
         if (ctx.attributes) {
@@ -61,7 +90,7 @@ export class CategroiesController {
         }
         let result;
         try {
-            result = await CategroiesModel.create({
+            result = await CategoriesModel.create({
                 name: ctx.name,
                 tags: ctx.tags,
                 attributes: attrsIds,
@@ -73,16 +102,19 @@ export class CategroiesController {
             });
             throw new BadRequestException(error.toString());
         }
-        res.status(HttpStatus.CREATED).send(result);
+        return result;
     }
 
-    @Get("/:id")
-    @ApiOperation({ title: "Get Categroy Info" })
-    @ApiImplicitParam({ name: "id", description: "Categroy ID" })
-    public async get(@Res() res, @Param("id") id) {
-        let obj: ICategroy;
+    @Roles("admin")
+    @Get("/:cid")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Get Category Info" })
+    // endregion Swagger Docs
+    public async get(@Param() param: CidDto) {
+        let obj: ICategory;
         try {
-            const doc = await CategroiesModel.findById(id)
+            const doc = await CategoriesModel.findById(param.cid)
                 .populate("attributes")
                 .populate({
                     path: "pid", populate: { path: "pid" }
@@ -93,27 +125,30 @@ export class CategroiesController {
             throw new BadRequestException(error.toString());
         }
         obj.goods = (
-            await GoodsModels.find({ categroy: obj._id })
+            await GoodsModels.find({ category: obj._id })
                 .populate("uploader")
                 .populate("attributes")
-                .select("-categroy")
+                .select("-category")
                 .exec()
         ).map((doc) => {
             return doc.toObject();
         });
-        res.status(HttpStatus.OK).send(obj);
+        return obj;
     }
 
-    @Post("/:id/attributes")
+    @Roles("admin")
+    @Post("/:cid/attributes")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.CREATED)
     @ApiOperation({ title: "Add Attribute" })
-    @ApiImplicitParam({ name: "id", description: "Categroy ID" })
+    // endregion Swagger Docs
     public async addAttr(
-        @Res() res, @Param("id") id, @Body() ctx: CreateValueDto
+        @Param() param: CidDto, @Body() ctx: CreateValueDto
     ) {
-        const curCategroy = (
-            await CategroiesModel.findById(id).populate("attributes").exec()
+        const curCategory = (
+            await CategoriesModel.findById(param.cid).populate("attributes").exec()
         ).toObject();
-        const attributes = curCategroy.attributes as IValues[];
+        const attributes = curCategory.attributes as IValues[];
         if (attributes.length !== 0) {
             const attrSet = new Set<string>();
             attributes.reduce((set, cur) => {
@@ -128,93 +163,135 @@ export class CategroiesController {
             }
         }
         const newAttr = await ValuesModel.create(ctx);
-        await CategroiesModel.findByIdAndUpdate(
-            id, { $push: { attributes: newAttr._id } }
+        await CategoriesModel.findByIdAndUpdate(
+            param.cid, { $push: { attributes: newAttr._id } }
         ).exec();
-        res.status(HttpStatus.CREATED).json({ });
+        return newAttr;
     }
 
-    @Post("/:id/attributes/:aid")
-    @ApiOperation({ title: "Edit Categroy" })
-    @ApiImplicitParam({ name: "id", description: "Categroy ID" })
-    @ApiImplicitParam({ name: "aid", description: "Attribute ID" })
+    @Roles("admin")
+    @Post("/:cid/attributes/:aid")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Edit Category" })
+    // endregion Swagger Docs
     public async editAttr(
-        @Res() res, @Param("aid") aid, @Body() ctx: EditValueDto
+        @Param() param: CategoryAttributeParamDto, @Body() ctx: EditValueDto
     ) {
         try {
-            await ValuesModel.findByIdAndUpdate(aid, ctx).exec();
+            await ValuesModel.findByIdAndUpdate(param.aid, ctx).exec();
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        res.status(HttpStatus.OK).json();
+        return { statusCode: HttpStatus.OK };
     }
 
-    @Get("/:id/attributes/:aid/delete")
-    @ApiOperation({ title: "Delete Categroy" })
-    @ApiImplicitParam({ name: "id", description: "Categroy ID" })
-    @ApiImplicitParam({ name: "aid", description: "Attribute ID" })
-    public async deleteAttr(@Param("id") id, @Param("aid") aid) {
+    @Roles("admin")
+    @Delete("/:cid/attributes/:aid")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Delete Category" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Delete Attribute Success"
+    })
+    // endregion Swagger Docs
+    public deleteAttrByDelete(@Param() param: CategoryAttributeParamDto) {
+        return this.deleteAttrByGet(param);
+    }
+
+    @Roles("admin")
+    @Get("/:cid/attributes/:aid/delete")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Delete Category" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Delete Attribute Success"
+    })
+    // endregion Swagger Docs
+    public async deleteAttrByGet(@Param() param: CategoryAttributeParamDto) {
         try {
-            await CategroiesModel.findByIdAndUpdate(id, {
-                $pull: { attributes: aid}
+            await CategoriesModel.findByIdAndUpdate(param.cid, {
+                $pull: { attributes: param.aid}
             }).exec();
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
         try {
-            await ValuesModel.findByIdAndRemove(aid).exec();
+            await ValuesModel.findByIdAndRemove(param.aid).exec();
         } catch (error) {
-            await CategroiesModel.findByIdAndUpdate(
-                id, { $push: { attributes: aid } }
+            await CategoriesModel.findByIdAndUpdate(
+                param.cid, { $push: { attributes: param.aid } }
             ).exec();
             throw new BadRequestException(error.toString());
         }
-        return { };
+        return { status: HttpStatus.OK };
     }
 
-    @Post("/:id")
-    @ApiOperation({ title: "Edit Categroy" })
-    @ApiImplicitParam({ name: "id", description: "Categroy ID" })
+    @Roles("admin")
+    @Post("/:cid")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Edit Category" })
+    // endregion Swagger Docs
     public async edit(
-        @Res() res, @Param("id") id, @Body() ctx: EditCategroyDto
+        @Param() param: CidDto, @Body() ctx: EditCategoryDto
     ) {
-        const curCategroy = (
-            await CategroiesModel.findById(id)
+        const curCategory = (
+            await CategoriesModel.findById(param.cid)
                 .populate("attributes")
                 .populate({
                     path: "pid", populate: { path: "pid" }
                 }).exec()
         ).toObject();
-        let parentCategroy;
+        let parentCategory;
         if (ctx.pid) {
-            parentCategroy = await CategroiesModel.findById(ctx.pid)
+            parentCategory = await CategoriesModel.findById(ctx.pid)
                 .populate("attributes")
                 .populate({
                     path: "pid", populate: { path: "pid" }
                 }).exec();
-            if (!parentCategroy) {
+            if (!parentCategory) {
                 throw new BadRequestException(
-                    "The Parent Categroy isnt exist!"
+                    "The Parent Category isnt exist!"
                 );
             }
         }
         try {
-            await CategroiesModel.findByIdAndUpdate(id, ctx).exec();
+            await CategoriesModel.findByIdAndUpdate(param.cid, ctx).exec();
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        res.status(HttpStatus.OK).json();
+        return { status: HttpStatus.OK };
     }
 
-    @Get("/:id/delete")
-    @ApiOperation({ title: "Delete Categroy" })
-    @ApiImplicitParam({ name: "id", description: "Categroy ID" })
-    public async delete(@Res() res, @Param("id") id) {
+    @Roles("admin")
+    @Delete("/:cid")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Delete Category" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Delete Category Success"
+    })
+    // endregion Swagger Docs
+    public deleteByDelete(@Param() param: CidDto) {
+        return this.deleteByGet(param);
+    }
+
+    @Roles("admin")
+    @Get("/:cid/delete")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Delete Category" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Delete Category Success"
+    })
+    // endregion Swagger Docs
+    public async deleteByGet(@Param() param: CidDto) {
         try {
-            await CategroiesModel.findByIdAndRemove(id).exec();
+            await CategoriesModel.findByIdAndRemove(param.cid).exec();
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        res.status(HttpStatus.OK).json();
+        return { status: HttpStatus.OK };
     }
 }

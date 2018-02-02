@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "types": [
+      "mongoose",
+      "node",
+      "mocha",
+      "mocha-steps",
+      "should"
+    ],
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "pretty": true,
+    "sourceMap": true,
+    "newLine": "LF",
+    "outDir": "../dist",
+    "baseUrl": "../",
+    "paths": {
+      "@utils/*": [ "./src/utils/*", "./dist/utils/*" ],
+      "@models/*": [ "./src/models/*", "./dist/models/*" ],
+      "@decorators/*": [ "./src/modules/common/decorators/*.decorator" ],
+      "@pipes/*": [ "./src/modules/common/pipes/*.pipe" ],
+      "@guards/*": [ "./src/modules/common/guards/*.guard" ],
+      "@dtos/*": [ "./src/modules/common/dtos/*.dto" ]
+    }
+  },
+  "include": [
+    "../src/**/*", "./**/*"
+  ],
+  "exclude": [
+    "dist"
+  ]
+}

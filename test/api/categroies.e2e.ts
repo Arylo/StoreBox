@@ -1,10 +1,10 @@
 import supertest = require("supertest");
-import { connect, drop } from "../helpers/database";
 import faker = require("faker");
 
+import { connect, drop, newUser } from "../helpers/database";
 import { init } from "../helpers/server";
 
-describe("Categroies Api", () => {
+describe("Categories E2E Api", () => {
 
     let request: supertest.SuperTest<supertest.Test>;
 
@@ -12,21 +12,41 @@ describe("Categroies Api", () => {
         return connect();
     });
 
+    const ids = {
+        users: [ ],
+        categories: [ ],
+        values: [ ]
+    };
+
     after(() => {
-        return drop();
+        return drop(ids);
     });
 
     before(async () => {
         request = await init();
     });
 
-    it("Add Categroy", async () => {
+    const user = {
+        name: faker.name.firstName(),
+        pass: faker.random.words()
+    };
+    step("Login", async () => {
+        const doc = await newUser(user.name, user.pass);
+        ids.users.push(doc._id);
+        await request.post("/api/v1/auth/login")
+            .send({
+                username: user.name, password: user.pass
+            }).then();
+    });
+
+    step("Add Category", async () => {
         const ctx = {
             name: faker.name.firstName()
         };
-        const { body: result } = await request.post("/api/v1/categroies")
+        const { body: result } = await request.post("/api/v1/categories")
             .send(ctx)
             .then();
+        ids.categories.push(result._id);
         result.should.have.properties({
             name: ctx.name,
             attributes: [ ],
@@ -34,7 +54,7 @@ describe("Categroies Api", () => {
         });
     });
 
-    it("Add Categroy with Tags", async () => {
+    step("Add Category with Tags", async () => {
         const ctx = {
             name: faker.name.firstName(),
             tags: [
@@ -43,18 +63,18 @@ describe("Categroies Api", () => {
                 faker.random.words()
             ]
         };
-        const { body: result } = await request.post("/api/v1/categroies")
+        const { body: result } = await request.post("/api/v1/categories")
             .send(ctx)
             .then();
+        ids.categories.push(result._id);
         result.should.have.properties({
             name: ctx.name,
             attributes: [ ],
             tags: ctx.tags
         });
-
     });
 
-    it("Add Categroy with Attributes", async () => {
+    step("Add Category with Attributes", async () => {
         const ctx = {
             name: faker.name.firstName(),
             attributes: [
@@ -70,9 +90,13 @@ describe("Categroies Api", () => {
                 }
             ].map((item) => JSON.stringify(item))
         };
-        const { body: result } = await request.post("/api/v1/categroies")
+        const { body: result } = await request.post("/api/v1/categories")
             .send(ctx)
             .then();
+        ids.categories.push(result._id);
+        for (const attrId of result.attributes) {
+            ids.values.push(attrId);
+        }
         result.should.have.properties({
             name: ctx.name,
             tags: [ ]

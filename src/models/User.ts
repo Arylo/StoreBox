@@ -1,8 +1,12 @@
 import { model, SchemaDefinition, Model as M } from "mongoose";
 import * as md5 from "md5";
-import { Base, IDoc, IDocRaw } from "./common";
 import { config } from "@utils/config";
 import { ObjectId } from "@models/common";
+import { DEF_PER_COUNT } from "@dtos/page";
+import Cache =  require("schedule-cache");
+import { Base, IDoc, IDocRaw, MODIFY_MOTHODS } from "./common";
+
+const cache = Cache.create(`${Date.now()}${Math.random()}`);
 
 export const Flag = "users";
 
@@ -23,19 +27,19 @@ export type UserDoc = IDoc<IUser>;
 
 const UsersSchema = new Base(Definition).createSchema();
 
-UsersSchema.path("username").validate({
-    isAsync: true,
-    validator: (val, respond) => {
-        Model.findOne({ username: val }).exec().then((result) => {
-            respond(result ? false : true);
-        });
-    },
-    message: "The username is existed"
-});
-
 const encryptStr = (pwd: string) => {
     return md5(md5(pwd) + config.db.salt);
 };
+
+// region static methods
+UsersSchema.static("countUsers", async (perNum = 1) => {
+    const FLAG = `page_count_${perNum}`;
+    if (cache.get(FLAG)) {
+        return cache.get(FLAG);
+    }
+    cache.put(FLAG, Math.ceil((await Model.count({ }).exec()) / perNum));
+    return cache.get(FLAG);
+});
 
 UsersSchema.static("addUser", (username: string, password: string) => {
     const newObj = {
@@ -55,8 +59,9 @@ UsersSchema.static("removeUser", (id: ObjectId) => {
     });
 });
 
-UsersSchema.static("list", () => {
+UsersSchema.static("list", (perNum = DEF_PER_COUNT, page = 1) => {
     return Model.find().select("-password")
+        .skip((page - 1) * perNum).limit(perNum)
         .exec();
 });
 
@@ -118,6 +123,7 @@ UsersSchema.static("isVaild", (username: string, password: string) => {
             });
         });
 });
+// endregion static methods
 
 interface IUserModel<T extends UserDoc> extends M<T> {
     /**
@@ -138,9 +144,11 @@ interface IUserModel<T extends UserDoc> extends M<T> {
     /**
      * 获取用户列表
      *
+     * @param  perNum {number} 每页数量
+     * @param  page {number} 页数
      * @return {Promise}
      */
-    list(): Promise<T[]>;
+    list(perNum?: number, page?: number): Promise<T[]>;
     /**
      * 修改用户密码
      *
@@ -172,6 +180,28 @@ interface IUserModel<T extends UserDoc> extends M<T> {
      * @return {Promise}
      */
     isVaild(username: string, password: string): Promise<T>;
+    /**
+     * 返回总页数
+     */
+    countUsers(perNum?: number): Promise<number>;
+}
+
+// region Validators
+UsersSchema.path("username").validate({
+    isAsync: true,
+    validator: (val, respond) => {
+        Model.findOne({ username: val }).exec().then((result) => {
+            respond(result ? false : true);
+        });
+    },
+    message: "The username is existed"
+});
+// endregion Validators
+
+for (const method of MODIFY_MOTHODS) {
+    UsersSchema.post(method, () => {
+        cache.clear();
+    });
 }
 
 export const Model = model(Flag, UsersSchema) as IUserModel<UserDoc>;

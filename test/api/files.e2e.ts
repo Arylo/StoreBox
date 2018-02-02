@@ -2,15 +2,13 @@ import supertest = require("supertest");
 import path = require("path");
 import faker = require("faker");
 import { HttpStatus } from "@nestjs/common";
-import { Model as UsersModel } from "@models/User";
 
-import { connect, drop } from "../helpers/database";
+import { connect, drop, addCategoryAndRegexp, newUser } from "../helpers/database";
 import { uploadFile } from "../helpers/files";
-import { addCategroyAndRegexp } from "../helpers/categroies";
 import { sleep } from "../helpers/utils";
 import { init, initWithAuth } from "../helpers/server";
 
-describe("Files Api", () => {
+describe("Files E2E Api", () => {
 
     let request: supertest.SuperTest<supertest.Test>;
 
@@ -18,48 +16,69 @@ describe("Files Api", () => {
         connect();
     });
 
-    afterEach(() => {
-        return drop();
+    const ids = {
+        users: [ ],
+        regexps: [ ],
+        categories: [ ],
+        goods: [ ]
+    };
+
+    after(() => {
+        return drop(ids);
     });
 
     before(async () => {
-        request = await initWithAuth();
-    });
-
-    before(async () => {
-        const user = {
-            name: faker.name.firstName(),
-            pass: faker.random.words()
-        };
-        const obj = await UsersModel.addUser(user.name, user.pass);
-        const { body: result } = await request.post("/api/v1/auth/login")
-            .send({
-                username: user.name, password: user.pass
-            }).then();
+        request = await init();
     });
 
     const getFileUrl = (cid: string, id: string) => {
         return `/files/categories/${cid}/goods/${id}`;
     };
 
-    it("Download File", async () => {
-        const filepath = `${__dirname}/../files/icon_pandorabox_64x64.png`;
-        const filename = path.basename(filepath);
-        const cid = (await addCategroyAndRegexp(/^icon_.+64x64\.png$/))[0]._id;
-        const id = (await uploadFile(request, filepath)).body._id;
+    const user = {
+        name: faker.name.firstName(),
+        pass: faker.random.words()
+    };
+    step("Login", async () => {
+        const doc = await newUser(user.name, user.pass);
+        ids.users.push(doc._id);
+        await request.post("/api/v1/auth/login")
+            .send({
+                username: user.name, password: user.pass
+            }).then();
+    });
 
-        await sleep(1000);
+    let cid = "";
+    let id = "";
+    const uploadFilepath = `${__dirname}/../files/icon_pandorabox_64x64.png`;
+    step("Upload File", async () => {
+        const docs = await addCategoryAndRegexp(/^icon_.+64x64\.png$/);
+        cid = docs[0]._id;
+        const uploadInfo = await uploadFile(request, uploadFilepath);
+        id = uploadInfo.body._id;
+        ids.categories.push(docs[0]._id);
+        ids.regexps.push(docs[1]._id);
+        ids.goods.push(id);
+        await sleep(50);
+    });
+
+    step("Logout", () => {
+        return request.get("/api/v1/auth/logout").then();
+    });
+
+    step("Download File", async () => {
+        const filename = path.basename(uploadFilepath);
 
         const url = getFileUrl(cid, id);
-        const { status, header } = await request.get(url).then();
+        const { status, header, body } = await request.get(url).then();
 
-        status.should.eql( HttpStatus.OK);
+        status.should.eql(HttpStatus.OK);
         header.should.match({
             "content-disposition": new RegExp(`filename=['"]${filename}['"]`)
         });
     });
 
-    it("Download Nonexist File", async () => {
+    step("Download Nonexist File", async () => {
         const cid = "5a44d78fec77afe7c8aa3eca";
         const id = "5a44d78fec77afe7c8aa3eca";
         const url = getFileUrl(cid, id);
@@ -68,7 +87,7 @@ describe("Files Api", () => {
         result.should.have.property("status", HttpStatus.NOT_FOUND);
     });
 
-    it("Download Wrong ID File #0", async () => {
+    step("Download Wrong ID File #0", async () => {
         const cid = "5a44d78fec77afe7c8aa3eca";
         const id = "1111";
         const url = getFileUrl(cid, id);
@@ -77,7 +96,7 @@ describe("Files Api", () => {
         result.should.have.property("status", HttpStatus.BAD_REQUEST);
     });
 
-    it("Download Wrong ID File #1", async () => {
+    step("Download Wrong ID File #1", async () => {
         const cid = "1111";
         const id = "5a44d78fec77afe7c8aa3eca";
         const url = getFileUrl(cid, id);

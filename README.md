@@ -6,7 +6,38 @@ Store PandoraBox Firmware Images and its packages
 [![Coveralls](https://img.shields.io/coveralls/github/Arylo/StoreBox.svg?style=flat-square)](https://coveralls.io/github/Arylo/StoreBox)
 [![license](https://img.shields.io/github/license/Arylo/StoreBox.svg?style=flat-square)](https://github.com/Arylo/storebox)
 
-# Api Docs
+# Usage
+
+## Docker Edition
+
+```bash
+docker pull arylo/storebox
+docker run -p 9000:9000 arylo/storebox
+```
+
+or
+
+```bash
+docker build -t arylo/storebox .
+docker run -p 9000:9000 arylo/storebox
+```
+
+### Docker-compose
+
+in `./docker`
+
+```bash
+docker-compose up -d
+```
+
+## Nodejs Edition
+
+```bash
+npm install
+npm run start:prod
+```
+
+### Get Api Docs
 
 1. Run command on your shell
 

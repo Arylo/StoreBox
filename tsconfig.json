@@ -4,9 +4,7 @@
     "module": "commonjs",
     "types": [
       "mongoose",
-      "node",
-      "mocha",
-      "should"
+      "node"
     ],
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
@@ -18,7 +16,23 @@
     "baseUrl": ".",
     "paths": {
       "@utils/*": [ "./src/utils/*", "./dist/utils/*" ],
-      "@models/*": [ "./src/models/*", "./dist/models/*" ]
+      "@models/*": [ "./src/models/*", "./dist/models/*" ],
+      "@decorators/*": [
+        "./src/modules/common/decorators/*.decorator",
+        "./dist/modules/common/decorators/*.decorator"
+      ],
+      "@pipes/*": [
+        "./src/modules/common/pipes/*.pipe",
+        "./dist/modules/common/pipes/*.pipe"
+      ],
+      "@guards/*": [
+        "./src/modules/common/guards/*.guard",
+        "./dist/modules/common/guards/*.guard"
+      ],
+      "@dtos/*": [
+        "./src/modules/common/dtos/*.dto",
+        "./dist/modules/common/dtos/*.dto"
+      ]
     }
   },
   "include": [

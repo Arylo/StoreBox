@@ -45,3 +45,9 @@ export class Base {
         return new Schema(this.definition, this.options);
     }
 }
+
+export const MODIFY_MOTHODS = [
+    "save", "remove", "update",
+    "findOneAndRemove", "findOneAndUpdate",
+    "insertMany"
+];

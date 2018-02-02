@@ -1,40 +1,81 @@
 import {
     Controller, Req, Res, Body, Get, Post, Param, Session,
-    HttpStatus, BadRequestException
+    HttpStatus, BadRequestException, UseGuards, Delete, HttpCode, Query
 } from "@nestjs/common";
 import {
     ApiBearerAuth, ApiUseTags, ApiResponse, ApiOperation, ApiImplicitParam,
     ApiImplicitBody
 } from "@nestjs/swagger";
-import { CreateValueDto, EditValueDto } from "../values/values.dto";
 import { IValues, Model as ValuesModel } from "@models/Value";
 import { Model as GoodsModels } from "@models/Good";
 import { Model as RegexpModel } from "@models/Regexp";
+import { ObjectId } from "@models/common";
 import { config } from "@utils/config";
-
+import { GidDto } from "@dtos/ids";
+import { RolesGuard } from "@guards/roles";
+import { Roles } from "@decorators/roles";
+import { PerPageDto, ListResponse } from "@dtos/page";
+import { ParseIntPipe } from "@pipes/parse-int";
 import * as hasha from "hasha";
 import fs = require("fs-extra");
 import multer  = require("multer");
 
+import { CreateValueDto, EditValueDto } from "../values/values.dto";
+import { GoodAttributeParamDto } from "./goods.dto";
+
+@UseGuards(RolesGuard)
 @Controller("api/v1/goods")
 @ApiUseTags("goods")
 @ApiBearerAuth()
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: "Unauthorized" })
-export class GoodsController {
+export class GoodsAdminController {
 
+    @Roles("admin")
+    @Get()
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Get Goods List" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Goods List",
+        type: ListResponse
+    })
+    // endregion Swagger Docs
+    public async getGoods(@Query(new ParseIntPipe()) query: PerPageDto) {
+        const curPage = query.page || 1;
+        const totalPages =
+            await GoodsModels.countGoodsByUids([ ], query.perNum);
+        const totalCount = await GoodsModels.countGoodsByUids([ ]);
+
+        const resData = new ListResponse();
+        resData.current = curPage;
+        resData.totalPages = totalPages;
+        resData.total = totalCount;
+        if (totalPages >= curPage) {
+            resData.data = await GoodsModels.getGoodsByUids(
+                [ ], query.perNum, query.page
+            );
+        }
+        return resData;
+    }
+
+    @Roles("admin", "token")
     @Post()
+    // region Swagger Docs
+    @HttpCode(HttpStatus.CREATED)
     @ApiOperation({ title: "Upload Good" })
-    public async add(@Req() req, @Res() res, @Session() session) {
+    @ApiImplicitBody({ name: "file", type: String, description: "File" })
+    // endregion Swagger Docs
+    public async add(@Req() req, @Session() session) {
         const file: Express.Multer.File = req.file;
         const regexpCount = (await RegexpModel.list()).length;
         if (regexpCount === 0) {
             fs.remove(file.path);
             throw new BadRequestException("Lost The Good Role");
         }
-        const catgroies = await RegexpModel.discern(req.file.originalname);
-        if (catgroies.length !== 1) {
+        const categories = await RegexpModel.discern(req.file.originalname);
+        if (categories.length !== 1) {
             fs.remove(file.path);
-            if (catgroies.length === 0) {
+            if (categories.length === 0) {
                 throw new BadRequestException("Lost Role for the file");
             } else {
                 throw new BadRequestException("Much Role for the file");
@@ -49,7 +90,7 @@ export class GoodsController {
             goodObj = await GoodsModels.create({
                 filename: file.filename,
                 originname: file.originalname,
-                categroy: catgroies[0]._id,
+                category: categories[0]._id,
                 uploader: session.loginUserId,
                 md5sum, sha256sum,
                 active: true
@@ -58,35 +99,41 @@ export class GoodsController {
             throw new BadRequestException(error.toString());
         }
         const newFilePath =
-            `${config.paths.upload}/${catgroies[0]._id}/${file.filename}`;
+            `${config.paths.upload}/${categories[0]._id}/${file.filename}`;
         fs.move(file.path, newFilePath);
-        res.status(HttpStatus.CREATED).json(goodObj);
+        return goodObj;
     }
 
-    @Get("/:id")
+    @Roles("admin")
+    @Get("/:gid")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Get Good Info" })
-    @ApiImplicitParam({ name: "id", description: "Good ID" })
-    public async get(@Res() res, @Param("id") id) {
+    // endregion Swagger Docs
+    public async get(@Param() param: GidDto) {
         let obj;
         try {
-            obj = await GoodsModels.findById(id)
+            obj = await GoodsModels.findById(param.gid)
                 .populate("uploader", "nickname")
                 .populate("attributes")
-                .populate("categroy", "name attributes tags")
+                .populate("category", "name attributes tags")
                 .exec();
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        res.status(HttpStatus.OK).json(obj);
+        return obj;
     }
 
-    @Post("/:id/attributes")
+    @Roles("admin")
+    @Post("/:gid/attributes")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.CREATED)
     @ApiOperation({ title: "Add Attributes" })
-    @ApiImplicitParam({ name: "id", description: "Good ID" })
+    // endregion Swagger Docs
     public async addAttr(
-        @Res() res, @Param("id") id, @Body() ctx: CreateValueDto
+        @Param() param: GidDto, @Body() ctx: CreateValueDto
     ) {
-        const obj = await GoodsModels.findById(id)
+        const obj = await GoodsModels.findById(param.gid)
             .populate("attributes")
             .exec();
         if (!obj) {
@@ -105,47 +152,67 @@ export class GoodsController {
         }
         const newAttr = await ValuesModel.create(ctx);
         await GoodsModels.findByIdAndUpdate(
-            id, { $push: { attributes: newAttr._id } }
+            param.gid, { $push: { attributes: newAttr._id } }
         ).exec();
-        res.status(HttpStatus.CREATED).json({ });
+        return { statusCode: HttpStatus.CREATED };
     }
 
-    @Post("/:id/attributes/:aid")
+    @Roles("admin")
+    @Post("/:gid/attributes/:aid")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Edit Attribute" })
-    @ApiImplicitParam({ name: "id", description: "Good ID" })
-    @ApiImplicitParam({ name: "aid", description: "Attribute ID" })
+    // endregion Swagger Docs
     public async editAttr(
-        @Res() res, @Param("aid") aid, @Body() ctx: EditValueDto
+        @Param() param: GoodAttributeParamDto, @Body() ctx: EditValueDto
     ) {
         try {
-            await ValuesModel.findByIdAndUpdate(aid, ctx).exec();
+            await ValuesModel.findByIdAndUpdate(param.aid, ctx).exec();
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        res.status(HttpStatus.OK).json();
+        return { statusCode: HttpStatus.OK };
     }
 
-    @Get("/:id/attributes/:aid/delete")
+    @Roles("admin")
+    @Delete("/:gid/attributes/:aid")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Delete Attribute" })
-    @ApiImplicitParam({ name: "id", description: "Good ID" })
-    @ApiImplicitParam({ name: "aid", description: "Attribute ID" })
-    public async deleteAttr(@Param("id") id, @Param("aid") aid) {
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Delete Attribute Success"
+    })
+    // endregion Swagger Docs
+    public deleteAttrByDelete(@Param() param: GoodAttributeParamDto) {
+        return this.deleteAttrByGet(param);
+    }
+
+    @Roles("admin")
+    @Get("/:gid/attributes/:aid/delete")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Delete Attribute" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Delete Attribute Success"
+    })
+    // endregion Swagger Docs
+    public async deleteAttrByGet(@Param() param: GoodAttributeParamDto) {
         try {
-            await GoodsModels.findByIdAndUpdate(id, {
-                $pull: { attributes: aid}
+            await GoodsModels.findByIdAndUpdate(param.gid, {
+                $pull: { attributes: param.aid}
             }).exec();
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
         try {
-            await ValuesModel.findByIdAndRemove(aid).exec();
+            await ValuesModel.findByIdAndRemove(param.aid).exec();
         } catch (error) {
             await GoodsModels.findByIdAndUpdate(
-                id, { $push: { attributes: aid } }
+                param.gid, { $push: { attributes: param.aid } }
             ).exec();
             throw new BadRequestException(error.toString());
         }
-        return { };
+        return { statusCode: HttpStatus.OK };
     }
 
 }

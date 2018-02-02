@@ -3,7 +3,7 @@ import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 import { config } from "@utils/config";
 import { initExpress } from "./express";
 import { ApplicationModule } from "./modules/app.module";
-import { ValidationPipe } from "./modules/common/pipes/validation.pipe";
+import { ValidationPipe } from "@pipes/validation";
 import { systemLogger } from "./modules/common/helper/log";
 import { isDevelopment } from "./modules/common/helper/env";
 
@@ -13,7 +13,7 @@ const bootstrap = async () => {
     const app = await NestFactory.create(ApplicationModule, server);
     app.useGlobalPipes(new ValidationPipe());
 
-    if (isDevelopment()) {
+    if (isDevelopment) {
         const options = new DocumentBuilder()
             .setTitle("StoreBox Apis")
             .setVersion("1.0.0")

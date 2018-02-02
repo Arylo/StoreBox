@@ -7,6 +7,7 @@ import { error } from "./modules/common/middlewares/logger.middleware";
 let server: express.Express;
 
 export const initExpress = () => {
+    /* istanbul ignore if */
     if (server) {
         return server;
     }
@@ -22,7 +23,7 @@ export const initExpress = () => {
         secret: "storebox",
         resave: false,
         saveUninitialized: true,
-        cookie: { secure: false, maxAge: 1800 * 1000 }
+        cookie: { secure: false, maxAge: 7200 * 1000 }
     }));
     mServer.use(error);
 

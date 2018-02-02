@@ -15,8 +15,11 @@ describe("User Model", () => {
         return db.connect();
     });
 
+    const ids = {
+        users: [ ]
+    };
     after(() => {
-        return db.drop();
+        return db.drop(ids);
     });
 
     beforeEach(() => {
@@ -25,6 +28,7 @@ describe("User Model", () => {
         return UsersModel.addUser(user.username, user.password)
             .then((result) => {
                 user.id = result._id.toString();
+                ids.users.push(user.id);
             }).catch(console.log);
     });
 
@@ -43,6 +47,7 @@ describe("User Model", () => {
         // 添加测试用户
         result = await UsersModel.addUser(user.username, user.password);
         const id = result._id;
+        ids.users.push(id);
         // 测试
         result = await UsersModel.findOne({ username: user.username }).exec();
         should(result).be.not.empty();

@@ -1,14 +1,12 @@
 import supertest = require("supertest");
 import path = require("path");
 import faker = require("faker");
-import { Model as UsersModel } from "@models/User";
 
-import { connect, drop } from "../helpers/database";
+import { connect, drop, addCategoryAndRegexp, newUser } from "../helpers/database";
 import { uploadFile } from "../helpers/files";
-import { addCategroyAndRegexp } from "../helpers/categroies";
 import { init } from "../helpers/server";
 
-describe("Goods Api", () => {
+describe("Goods E2E Api", () => {
 
     let request: supertest.SuperTest<supertest.Test>;
 
@@ -21,47 +19,61 @@ describe("Goods Api", () => {
         connect();
     });
 
-    afterEach(() => {
-        return drop();
+    const ids = {
+        users: [ ],
+        categories: [ ],
+        values: [ ],
+        regexps: [ ],
+        goods: [ ]
+    };
+
+    after(() => {
+        return drop(ids);
     });
 
     before(async () => {
         request = await init();
     });
 
-    before(async () => {
-        const obj = await UsersModel.addUser(user.name, user.pass);
+    step("Login", async () => {
+        const doc = await newUser(user.name, user.pass);
+        ids.users.push(doc._id);
         const { body: result } = await request.post("/api/v1/auth/login")
             .send({
                 username: user.name, password: user.pass
             }).then();
     });
 
-    beforeEach(async () => {
-        await addCategroyAndRegexp(/^icon_.+64x64\.png$/);
+    step("Add Category", async () => {
+        const docs = await addCategoryAndRegexp(/^icon_.+_64x64\.png$/);
+        ids.categories.push(docs[0]._id);
+        ids.regexps.push(docs[1]._id);
     });
 
-    it("Upload File", async () => {
+    let result;
+    step("Upload File", async () => {
         const filepath = `${__dirname}/../files/icon_pandorabox_64x64.png`;
-        let result;
         // Create
         result = await uploadFile(request, filepath);
         result = result.body;
 
+        ids.goods.push(result._id);
         result.should.have.properties([
-            "_id", "originname", "categroy", "uploader"
+            "_id", "originname", "category", "uploader"
         ]);
         result.should.have.property("originname", path.basename(filepath));
+    });
 
+    step("Get Good Info", async () => {
         // Get
         result = await request.get(`/api/v1/goods/${result._id}`).then();
         result = result.body;
         result.should.have.properties([
             "_id", "createdAt", "updatedAt",
             "filename", "originname", "attributes", "tags", "active", "hidden",
-            "categroy", "uploader"
+            "category", "uploader"
         ]);
-        result.categroy.should.have.properties([
+        result.category.should.have.properties([
             "_id", "name", "attributes", "tags"
         ]);
         result.uploader.should.have.properties([
