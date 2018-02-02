@@ -12,7 +12,7 @@ import { ObjectId } from "@models/common";
 import { Roles } from "@decorators/roles";
 import { RolesGuard } from "@guards/roles";
 import { ParseIntPipe } from "@pipes/parse-int";
-import { PerPageDto, ListResponse, PER_COUNT } from "@dtos/page";
+import { PerPageDto, ListResponse, DEF_PER_COUNT } from "@dtos/page";
 import { UidDto } from "@dtos/ids";
 
 import {
@@ -237,7 +237,7 @@ export class UsersAdminController {
 
     private async getGoodsRes(uid: ObjectId, query: PerPageDto) {
         const curPage = query.page || 1;
-        const perNum = query.perNum || PER_COUNT[0];
+        const perNum = query.perNum || DEF_PER_COUNT;
         const totalPages =
             await GoodsModels.countGoodsByUids(uid, query.perNum);
         const totalCount = await GoodsModels.countGoodsByUids(uid);

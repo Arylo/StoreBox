@@ -3,7 +3,7 @@ import { Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS } from "@models/common";
 import { IValues, Flag as ValueFlag } from "@models/Value";
 import { IUser, Flag as UserFlag } from "@models/User";
 import { ICategory, FLAG as CategoryFlag } from "@models/Categroy";
-import { PER_COUNT } from "@dtos/page";
+import { DEF_PER_COUNT } from "@dtos/page";
 import Cache =  require("schedule-cache");
 import { isArray } from "util";
 import { reduce } from "lodash";
@@ -86,7 +86,7 @@ const getConditionsByUids = (uids: ObjectId[]) => {
 
 GoodsSchema.static(
     "getGoodsByUids",
-    (uids: ObjectId | ObjectId[], perNum = PER_COUNT[0], page = 1) => {
+    (uids: ObjectId | ObjectId[], perNum = DEF_PER_COUNT, page = 1) => {
         if (!isArray(uids)) {
             uids = [ uids ];
         }
@@ -133,7 +133,7 @@ const getConditionsByCids = (cids: ObjectId[]) => {
 
 GoodsSchema.static(
     "getGoodsByCids",
-    (cids: ObjectId | ObjectId[], perNum = PER_COUNT[0], page = 1) => {
+    (cids: ObjectId | ObjectId[], perNum = DEF_PER_COUNT, page = 1) => {
         if (!isArray(cids)) {
             cids = [ cids ];
         }

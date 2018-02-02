@@ -61,14 +61,14 @@ describe("the E2E Api of display item count Per page", () => {
             result.data.should.be.an.Array().which.length(0);
         });
 
-        step("No in `perNum` choice # 0", async () => {
+        xstep("No in `perNum` choice # 0", async () => {
             const {
                 body: result, status: status
             } = await request.get(`${URL}?perNum=30`).then();
             status.should.be.eql(400);
         });
 
-        step("No in `perNum` choice # 1", async () => {
+        xstep("No in `perNum` choice # 1", async () => {
             const {
                 body: result, status: status
             } = await request.get(`${URL}?perNum=20`).then();
@@ -187,14 +187,14 @@ describe("the E2E Api of display item count Per page", () => {
             result.data.should.have.length(0);
         });
 
-        step("No in `perNum` choice # 0", async () => {
+        xstep("No in `perNum` choice # 0", async () => {
             const {
                 body: result, status: status
             } = await request.get(`${URL}?perNum=30`).then();
             status.should.be.eql(400);
         });
 
-        step("No in `perNum` choice # 1", async () => {
+        xstep("No in `perNum` choice # 1", async () => {
             const {
                 body: result, status: status
             } = await request.get(`${URL}?perNum=20`).then();
@@ -314,14 +314,14 @@ describe("the E2E Api of display item count Per page", () => {
             result.data.should.be.an.Array().which.length(0);
         });
 
-        step("No in `perNum` choice # 0", async () => {
+        xstep("No in `perNum` choice # 0", async () => {
             const {
                 body: result, status: status
             } = await request.get(`${URL}?perNum=30`).then();
             status.should.be.eql(400);
         });
 
-        step("No in `perNum` choice # 1", async () => {
+        xstep("No in `perNum` choice # 1", async () => {
             const {
                 body: result, status: status
             } = await request.get(`${URL}?perNum=20`).then();

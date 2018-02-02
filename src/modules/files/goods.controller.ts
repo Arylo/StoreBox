@@ -9,7 +9,7 @@ import { IGoodsRaw } from "@models/Good";
 import { RolesGuard } from "@guards/roles";
 import { Roles } from "@decorators/roles";
 import { ParseIntPipe } from "@pipes/parse-int";
-import { ListResponse, PER_COUNT } from "@dtos/page";
+import { ListResponse, DEF_PER_COUNT } from "@dtos/page";
 import { reduce } from "lodash";
 
 import { GoodsQueryDto } from "./goods.dto";
@@ -35,7 +35,7 @@ export class GoodsController {
         if (Object.keys(categories).length === 0) {
             return data;
         }
-        const perNum = query.perNum || PER_COUNT[0];
+        const perNum = query.perNum || DEF_PER_COUNT;
 
         const cids = Object.keys(categories);
         const goods =

@@ -1,7 +1,7 @@
 import { model, SchemaDefinition, Model as M, SchemaTypes } from "mongoose";
 import { Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS } from "@models/common";
 import { ICategory, FLAG as CF, Model as CM } from "@models/Categroy";
-import { PER_COUNT } from "@dtos/page";
+import { DEF_PER_COUNT } from "@dtos/page";
 import Cache =  require("schedule-cache");
 
 export const cache = Cache.create(`${Date.now()}${Math.random()}`);
@@ -65,7 +65,7 @@ RegexpSchema.static("link", (id: ObjectId, linkId: ObjectId | false) => {
     }
 });
 
-RegexpSchema.static("list", (perNum = PER_COUNT[0], page = 1) => {
+RegexpSchema.static("list", (perNum = DEF_PER_COUNT, page = 1) => {
     const FLAG_LIST = `list_${perNum}_${page}`;
     if (cache.get(FLAG_LIST)) {
         return cache.get(FLAG_LIST);

@@ -1,7 +1,7 @@
 import { model, SchemaDefinition, Model as M, SchemaTypes } from "mongoose";
 import { Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS } from "@models/common";
 import { IValues, Flag as ValueFlag } from "@models/Value";
-import { PER_COUNT } from "@dtos/page";
+import { DEF_PER_COUNT } from "@dtos/page";
 import { isArray } from "util";
 import { reduce, includes, difference } from "lodash";
 import { MongoError } from "mongodb";
@@ -49,7 +49,7 @@ CategorySchema.static("countCategories", async (perNum = 1) => {
     return cache.get(FLAG);
 });
 
-CategorySchema.static("list", (perNum = PER_COUNT[0], page = 1) => {
+CategorySchema.static("list", (perNum = DEF_PER_COUNT, page = 1) => {
     const FLAG_LIST = `list_${perNum}_${page}`;
     if (cache.get(FLAG_LIST)) {
         return cache.get(FLAG_LIST);

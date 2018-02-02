@@ -1,7 +1,7 @@
-import { IsIn, IsOptional, IsNumberString } from "class-validator";
+import { IsOptional, IsNumberString, Matches } from "class-validator";
 import { ApiModelPropertyOptional, ApiModelProperty } from "@nestjs/swagger";
 
-export const PER_COUNT = [ 25, 50, 75 ];
+export const DEF_PER_COUNT = 25;
 
 export class ListResponse<T> {
     @ApiModelProperty({
@@ -24,11 +24,11 @@ export class ListResponse<T> {
 
 export class PerPageDto {
     @ApiModelPropertyOptional({
-        type: Number, default: PER_COUNT[0],
-        description: `Display items count[${PER_COUNT.join(", ")}] per page`
+        type: Number, default: DEF_PER_COUNT,
+        description: `Display items count[1...100] per page`
     })
-    @IsIn([...PER_COUNT].map((num) => "" + num)) // Because it is NumberString
     @IsNumberString()
+    @Matches(/^[1-9]\d{0,2}$/)
     @IsOptional()
     public readonly perNum: number;
     @ApiModelPropertyOptional({

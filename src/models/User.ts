@@ -2,7 +2,7 @@ import { model, SchemaDefinition, Model as M } from "mongoose";
 import * as md5 from "md5";
 import { config } from "@utils/config";
 import { ObjectId } from "@models/common";
-import { PER_COUNT } from "@dtos/page";
+import { DEF_PER_COUNT } from "@dtos/page";
 import Cache =  require("schedule-cache");
 import { Base, IDoc, IDocRaw, MODIFY_MOTHODS } from "./common";
 
@@ -59,7 +59,7 @@ UsersSchema.static("removeUser", (id: ObjectId) => {
     });
 });
 
-UsersSchema.static("list", (perNum = PER_COUNT[0], page = 1) => {
+UsersSchema.static("list", (perNum = DEF_PER_COUNT, page = 1) => {
     return Model.find().select("-password")
         .skip((page - 1) * perNum).limit(perNum)
         .exec();
