@@ -63,6 +63,7 @@ export class GoodsAdminController {
     // region Swagger Docs
     @HttpCode(HttpStatus.CREATED)
     @ApiOperation({ title: "Upload Good" })
+    @ApiImplicitBody({ name: "file", type: String, description: "File" })
     // endregion Swagger Docs
     public async add(@Req() req, @Session() session) {
         const file: Express.Multer.File = req.file;

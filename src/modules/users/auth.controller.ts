@@ -49,7 +49,7 @@ export class AuthAdminController {
             }
             obj.token = token;
         }
-        obj.expires = session.cookie.expires || session.cookie._expires;
+        obj.expires = session.cookie.maxAge || session.cookie.originalMaxAge;
         return obj;
     }
 
