@@ -138,7 +138,11 @@ export class UsersAdminController {
     @ApiResponse({ status: HttpStatus.OK, description: "Ban Success" })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: "Ban Fail" })
     // endregion Swagger Docs
-    public async ban(@Param() user: UidDto) {
+    public async ban(@Session() session, @Param() user: UidDto) {
+        const curUserId = session.loginUserId;
+        if (curUserId === user.uid) {
+            throw new BadRequestException("Cant ban yourself account");
+        }
         try {
             await UserModel.ban(user.uid);
         } catch (error) {
