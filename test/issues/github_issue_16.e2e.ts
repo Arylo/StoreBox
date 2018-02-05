@@ -7,9 +7,9 @@ import {
 import { init } from "../helpers/server";
 
 /**
- * Fix [Issus 16](https://github.com/Arylo/StoreBox/issues/16)
+ * Fix [Issue 16](https://github.com/Arylo/StoreBox/issues/16)
  */
-describe("Fix Issuses", () => {
+describe("Fix Issues", () => {
 
     let request: supertest.SuperTest<supertest.Test>;
 

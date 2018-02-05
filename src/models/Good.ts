@@ -61,6 +61,28 @@ export interface IGoodsRaw extends IGoods {
 
 const GoodsSchema = new Base(Definition).createSchema();
 
+// region validators
+GoodsSchema.path("md5sum").validate({
+    isAsync: true,
+    validator: (val, respond) => {
+        Model.findOne({ md5sum: val }).exec().then((result) => {
+            respond(result ? false : true);
+        });
+    },
+    message: "The file is existed"
+});
+
+GoodsSchema.path("sha256sum").validate({
+    isAsync: true,
+    validator: (val, respond) => {
+        Model.findOne({ sha256sum: val }).exec().then((result) => {
+            respond(result ? false : true);
+        });
+    },
+    message: "The file is existed"
+});
+// endregion validators
+
 const getConditionsByUids = (uids: ObjectId[]) => {
     let conditions;
     switch (uids.length) {
