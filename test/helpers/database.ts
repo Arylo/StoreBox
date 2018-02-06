@@ -21,6 +21,9 @@ interface IIds {
     tokens?: ObjectId[];
 }
 
+/**
+ * 连接数据库
+ */
 export const connect = connectDatabase;
 
 export const drop = async (ids?: IIds) => {

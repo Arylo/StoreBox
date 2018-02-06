@@ -3,6 +3,7 @@ import { Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS } from "@models/common";
 import { ICategory, FLAG as CF, Model as CM } from "@models/Categroy";
 import { DEF_PER_COUNT } from "@dtos/page";
 import Cache =  require("schedule-cache");
+import isRegExp = require("@utils/isRegExp");
 
 export const cache = Cache.create(`${Date.now()}${Math.random()}`);
 
@@ -148,6 +149,14 @@ RegexpSchema.path("name").validate({
         return !result;
     },
     message: "The name is exist"
+});
+
+RegexpSchema.path("value").validate({
+    isAsync: true,
+    validator: (value, respond) => {
+        return isRegExp(value);
+    },
+    message: "The value isnt Regexp"
 });
 
 RegexpSchema.path("value").validate({
