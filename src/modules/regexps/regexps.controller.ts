@@ -7,7 +7,7 @@ import {
 } from "@nestjs/swagger";
 import { Model as RegexpsModel, IRegexp, RegexpDoc } from "@models/Regexp";
 import {
-    NewRegexp, EditRegexpDot, CommonRegexpDot, EditRegexpRawDot
+    NewRegexp, EditRegexpDot, EditRegexpRawDot
 } from "./regexps.dto";
 import { Roles } from "@decorators/roles";
 import { RolesGuard } from "@guards/roles";
@@ -55,7 +55,8 @@ export class RegexpsAdminController {
     public async add(@Body() ctx: NewRegexp) {
         let regexp;
         try {
-            regexp = await RegexpsModel.addRegexp(ctx.name, ctx.value);
+            regexp =
+                await RegexpsModel.addRegexp(ctx.name, ctx.value, ctx.link);
         } catch (error) {
             throw new BadRequestException(error.toString());
         }

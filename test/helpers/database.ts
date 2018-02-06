@@ -59,8 +59,7 @@ export const addCategoryAndRegexp = async (regexp: RegExp) => {
     const category = await CategoriesModel.create({
         name: faker.name.findName()
     });
-    const reg = await newRegexp(faker.random.word(), regexp);
-    await RegexpsModel.link(reg._id, category._id);
+    const reg = await newRegexp(faker.random.word(), regexp, category._id);
     return [category, reg];
 };
 
@@ -68,8 +67,8 @@ export const newUser = (username: string, password: string) => {
     return UsersModel.addUser(username, password);
 };
 
-export const newRegexp = (name: string, value: RegExp) => {
-    return RegexpsModel.addRegexp(name, value.source);
+export const newRegexp = (name: string, value: RegExp, link?) => {
+    return RegexpsModel.addRegexp(name, value.source, link);
 };
 
 export const newCategory = (obj: object) => {
