@@ -11,7 +11,7 @@ export class ListResponse<T> {
     @ApiModelProperty({
         type: Number, description: "Current Page"
     })
-    public current: number;
+    public current = 1;
     @ApiModelProperty({
         type: Number, description: "Total Page Count"
     })
@@ -22,7 +22,12 @@ export class ListResponse<T> {
     public total = 0;
 }
 
-export class PerPageDto {
+export interface IPerPage {
+    readonly perNum: number;
+    readonly page: number;
+}
+
+export class PerPageDto implements IPerPage {
     @ApiModelPropertyOptional({
         type: Number, default: DEF_PER_COUNT,
         description: `Display items count[1...100] per page`

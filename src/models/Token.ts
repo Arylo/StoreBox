@@ -1,6 +1,6 @@
 import { model, SchemaDefinition, Model as M, SchemaTypes } from "mongoose";
 import { Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS } from "@models/common";
-import { IUser, Flag as UserFlag } from "@models/User";
+import { IUser, FLAG as UserFlag } from "@models/User";
 
 import Cache =  require("schedule-cache");
 
