@@ -8,7 +8,7 @@ import { Base, IDoc, IDocRaw, MODIFY_MOTHODS } from "./common";
 
 const cache = Cache.create(`${Date.now()}${Math.random()}`);
 
-export const Flag = "users";
+export const FLAG = "users";
 
 const Definition: SchemaDefinition = {
     username: { type: String, required: true, trim: true },
@@ -204,4 +204,4 @@ for (const method of MODIFY_MOTHODS) {
     });
 }
 
-export const Model = model(Flag, UsersSchema) as IUserModel<UserDoc>;
+export const Model = model(FLAG, UsersSchema) as IUserModel<UserDoc>;

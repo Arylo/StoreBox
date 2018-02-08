@@ -1,7 +1,7 @@
 import { model, SchemaDefinition, Model as M, SchemaTypes } from "mongoose";
 import { Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS } from "@models/common";
 import { IValues, Flag as ValueFlag } from "@models/Value";
-import { IUser, Flag as UserFlag } from "@models/User";
+import { IUser, FLAG as UserFlag } from "@models/User";
 import { ICategory, FLAG as CategoryFlag } from "@models/Categroy";
 import { DEF_PER_COUNT } from "@dtos/page";
 import Cache =  require("schedule-cache");

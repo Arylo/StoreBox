@@ -4,19 +4,24 @@ import {
 } from "@nestjs/common";
 import {
     ApiBearerAuth, ApiUseTags, ApiResponse, ApiOperation, ApiImplicitParam,
-    ApiImplicitBody
+    ApiImplicitBody, ApiConsumes
 } from "@nestjs/swagger";
 import { IValues, Model as ValuesModel } from "@models/Value";
-import { Model as GoodsModels } from "@models/Good";
+import { Model as GoodsModels, IGoods } from "@models/Good";
 import { Model as RegexpModel } from "@models/Regexp";
 import { Model as TokensModel } from "@models/Token";
+import { Model as CollectionsModel } from "@models/Collection";
 import { ObjectId } from "@models/common";
 import { config } from "@utils/config";
-import { GidDto } from "@dtos/ids";
 import { RolesGuard } from "@guards/roles";
 import { Roles } from "@decorators/roles";
+import { File, Files, User } from "@decorators/route";
+import { GidDto } from "@dtos/ids";
+import { IReqUser } from "@dtos/req";
 import { PerPageDto, ListResponse } from "@dtos/page";
+import { RegexpCountCheckPipe } from "@pipes/regexp-count-check";
 import { ParseIntPipe } from "@pipes/parse-int";
+import { CollectionsService } from "@services/collections";
 import * as hasha from "hasha";
 import fs = require("fs-extra");
 import multer  = require("multer");
@@ -30,6 +35,16 @@ import { GoodAttributeParamDto } from "./goods.dto";
 @ApiBearerAuth()
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: "Unauthorized" })
 export class GoodsAdminController {
+
+    constructor(private readonly collectionsSvr: CollectionsService) { }
+
+    private toMd5sum(filepath: string) {
+        return  hasha.fromFileSync(filepath, { algorithm: "md5" });
+    }
+
+    private toSha256sum(filepath: string) {
+        return  hasha.fromFileSync(filepath, { algorithm: "sha256" });
+    }
 
     @Roles("admin")
     @Get()
@@ -59,51 +74,116 @@ export class GoodsAdminController {
         return resData;
     }
 
-    @Roles("admin", "token")
-    @Post()
-    // region Swagger Docs
-    @HttpCode(HttpStatus.CREATED)
-    @ApiOperation({ title: "Upload Good" })
-    @ApiImplicitBody({ name: "file", type: String, description: "File" })
-    // endregion Swagger Docs
-    public async add(@Req() req, @Session() session) {
-        const file: Express.Multer.File = req.file;
-        const regexpCount = (await RegexpModel.list()).length;
-        if (regexpCount === 0) {
-            fs.remove(file.path);
-            throw new BadRequestException("Lost The Good Role");
-        }
-        const categories = await RegexpModel.discern(req.file.originalname);
+    private async fileProcess(
+        file: Express.Multer.File, uploader: string,
+        cb?: (type: "Categories" | "Good", error) => void
+    ) {
+        const categories = await RegexpModel.discern(file.originalname);
         if (categories.length !== 1) {
             fs.remove(file.path);
-            if (categories.length === 0) {
-                throw new BadRequestException("Lost Role for the file");
-            } else {
-                throw new BadRequestException("Much Role for the file");
+            if (cb) {
+                cb("Categories", categories.length);
             }
+            return;
         }
-        let goodObj;
+        let goodObj: IGoods;
         try {
-            const md5sum =
-                hasha.fromFileSync(file.path, { algorithm: "md5" });
-            const sha256sum =
-                hasha.fromFileSync(file.path, { algorithm: "sha256" });
-            const uploader = session.loginUserId ||
-                (await TokensModel.findOne({ token: req.user.token }))._id;
-            goodObj = await GoodsModels.create({
+            const md5sum = this.toMd5sum(file.path);
+            const sha256sum = this.toSha256sum(file.path);
+            goodObj = (await GoodsModels.create({
                 filename: file.filename,
                 originname: file.originalname,
                 category: categories[0]._id,
                 uploader, md5sum, sha256sum,
                 active: true
-            });
+            })).toObject();
         } catch (error) {
-            throw new BadRequestException(error.toString());
+            if (cb) {
+                cb("Good", error);
+            }
+            return;
         }
         const newFilePath =
             `${config.paths.upload}/${categories[0]._id}/${file.filename}`;
         fs.move(file.path, newFilePath);
         return goodObj;
+    }
+
+    @Roles("admin", "token")
+    @Post()
+    // region Swagger Docs
+    @HttpCode(HttpStatus.CREATED)
+    @ApiOperation({ title: "上传单个文件" })
+    @ApiConsumes("multipart/form-data")
+    @ApiImplicitBody({
+        name: "file", type: String, description: "File"
+    })
+    // endregion Swagger Docs
+    public async addGood(
+        @File(new RegexpCountCheckPipe()) file: Express.Multer.File,
+        @User() user: IReqUser, @Session() session
+    ) {
+        const uploader = session.loginUserId ||
+            (await TokensModel.findOne({ token: user.token }))._id;
+        return await this.fileProcess(file, uploader, (type, error) => {
+            if (type === "Categories") {
+                if (error === 0) {
+                    throw new BadRequestException("Lost Role for the file");
+                } else {
+                    throw new BadRequestException("Much Role for the file");
+                }
+            }
+            if (type === "Good") {
+                throw new BadRequestException(error.toString());
+            }
+        });
+    }
+
+    @Roles("admin", "token")
+    @Post("/collections")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.CREATED)
+    @ApiOperation({ title: "上传多个文件并形成文件集" })
+    @ApiConsumes("multipart/form-data")
+    @ApiImplicitBody({
+        name: "files", type: String, description: "Files"
+    })
+    // endregion Swagger Docs
+    public async addGoods(
+        @Files(new RegexpCountCheckPipe()) files: Express.Multer.File[],
+        @User() user: IReqUser, @Session() session
+    ) {
+        const uploader = session.loginUserId ||
+            (await TokensModel.findOne({ token: user.token }))._id;
+
+        const goods: IGoods[] = [ ];
+        for (const file of files) {
+            const goodObj = await this.fileProcess(file, uploader);
+            if (!goodObj) {
+                fs.remove(file.path);
+                continue;
+            }
+            goods.push(goodObj);
+        }
+        if (goods.length === 0) {
+            throw new BadRequestException("The Collection no good");
+        } else {
+            try {
+                const collection = await this.collectionsSvr.create({
+                    goods: goods.reduce((arr, good) => {
+                        arr.push(good._id);
+                        return arr;
+                    }, []),
+                    creator: uploader
+                });
+                return CollectionsModel
+                    .findById(collection._id)
+                    .populate("goods")
+                    .exec();
+            } catch (error) {
+                throw new BadRequestException(error.toString());
+            }
+        }
     }
 
     @Roles("admin")

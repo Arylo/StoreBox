@@ -27,8 +27,9 @@ export class RolesMiddleware implements NestMiddleware {
                     return;
                 }
             }
-            if ((req as any).session.loginUser) {
-                user.account = (req as any).session.loginUser;
+            const session = (req as any).session;
+            if (session && session.loginUser) {
+                user.account = session.loginUser;
                 user.roles.push("admin");
                 // throw new UnauthorizedException();
             }

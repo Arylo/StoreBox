@@ -32,6 +32,10 @@
       "@dtos/*": [
         "./src/modules/common/dtos/*.dto",
         "./dist/modules/common/dtos/*.dto"
+      ],
+      "@services/*": [
+        "./src/modules/common/services/*.service",
+        "./dist/modules/common/services/*.service"
       ]
     }
   },

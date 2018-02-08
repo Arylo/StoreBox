@@ -8,6 +8,7 @@ import { Model as GoodsModels } from "@models/Good";
 import { Model as RegexpsModel } from "@models/Regexp";
 import { Model as UsersModel } from "@models/User";
 import { Model as TokensModel } from "@models/Token";
+import { Model as CollectionsModel } from "@models/Collection";
 import { Model as CategoriesModel, CategoryDoc } from "@models/Categroy";
 
 config.db.database = "storebox-test";
@@ -19,6 +20,7 @@ interface IIds {
     users?: ObjectId[];
     categories?: ObjectId[];
     tokens?: ObjectId[];
+    collections?: ObjectId[];
 }
 
 /**
@@ -52,6 +54,9 @@ export const drop = async (ids?: IIds) => {
     }
     for (const id of (ids.categories || [ ])) {
         await CategoriesModel.findByIdAndRemove(id).exec();
+    }
+    for (const id of (ids.collections || [ ])) {
+        await CollectionsModel.findByIdAndRemove(id).exec();
     }
 };
 

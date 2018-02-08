@@ -8,6 +8,7 @@ import {
 import { Model as UserModel, IUser, UserDoc } from "@models/User";
 import { Model as TokensModel } from "@models/Token";
 import { Model as GoodsModels } from "@models/Good";
+import { CollectionDoc } from "@models/Collection";
 import { ObjectId } from "@models/common";
 import { Roles } from "@decorators/roles";
 import { RolesGuard } from "@guards/roles";
@@ -18,6 +19,7 @@ import { UidDto } from "@dtos/ids";
 import {
     CreateUserDto, ModifyPasswordDto, UserTokenParamDto
 } from "./users.dto";
+import { CollectionsService } from "@services/collections";
 
 @UseGuards(RolesGuard)
 @Controller("api/v1/users")
@@ -26,6 +28,8 @@ import {
 @ApiBearerAuth()
 // endregion Swagger Docs
 export class UsersAdminController {
+
+    constructor(private readonly collectionsSvr: CollectionsService) { }
 
     @Roles("admin")
     @Get()
@@ -291,4 +295,63 @@ export class UsersAdminController {
         const userId: ObjectId = param.uid;
         return this.getGoodsRes(userId, query);
     }
+
+    /////////////////////////
+    // region Collections
+    /////////////////////////
+
+    private async getCollectionsRes(uid: ObjectId, query: PerPageDto) {
+        const curPage = query.page || 1;
+        const perNum = query.perNum || DEF_PER_COUNT;
+        const totalPages =
+            await this.collectionsSvr.countPage(uid, query.perNum);
+        const totalCount = await this.collectionsSvr.count(uid);
+
+        const resData = new ListResponse<CollectionDoc>();
+        resData.current = curPage;
+        resData.totalPages = totalPages;
+        resData.total = totalCount;
+        if (totalPages >= curPage) {
+            resData.data = await this.collectionsSvr.list(uid, query);
+        }
+        return resData;
+    }
+
+    @Roles("admin", "token")
+    @Get("/collections")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Get Self Collection List" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Self Collection List",
+        type: ListResponse
+    })
+    // endregion Swagger Docs
+    public getSelfCollections(
+        @Session() session, @Query(new ParseIntPipe()) query: PerPageDto
+    ) {
+        const userId: ObjectId = session.loginUserId;
+        return this.getCollectionsRes(userId, query);
+    }
+
+    @Roles("admin")
+    @Get("/:uid/collections")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Get User's Collection List" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "User's Collection List",
+        type: ListResponse
+    })
+    // endregion Swagger Docs
+    public async getCollections(
+        @Param() param: UidDto, @Query(new ParseIntPipe()) query: PerPageDto
+    ) {
+        const userId: ObjectId = param.uid;
+        return this.getCollectionsRes(userId, query);
+    }
+
+    /////////////////////////
+    // endregion Collections
+    /////////////////////////
 }
