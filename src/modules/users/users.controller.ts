@@ -13,13 +13,15 @@ import { ObjectId } from "@models/common";
 import { Roles } from "@decorators/roles";
 import { RolesGuard } from "@guards/roles";
 import { ParseIntPipe } from "@pipes/parse-int";
+import { CollectionsService } from "@services/collections";
+import { UsersService } from "@services/users";
 import { PerPageDto, ListResponse, DEF_PER_COUNT } from "@dtos/page";
 import { UidDto } from "@dtos/ids";
+import { DefResDto } from "@dtos/res";
 
 import {
-    CreateUserDto, ModifyPasswordDto, UserTokenParamDto
+    CreateUserDto, ModifyPasswordDto, UserTokenParamDto, EditUserDto
 } from "./users.dto";
-import { CollectionsService } from "@services/collections";
 
 @UseGuards(RolesGuard)
 @Controller("api/v1/users")
@@ -29,7 +31,10 @@ import { CollectionsService } from "@services/collections";
 // endregion Swagger Docs
 export class UsersAdminController {
 
-    constructor(private readonly collectionsSvr: CollectionsService) { }
+    constructor(
+        private readonly collectionsSvr: CollectionsService,
+        private readonly usersSvr: UsersService
+    ) { }
 
     @Roles("admin")
     @Get()
@@ -79,12 +84,30 @@ export class UsersAdminController {
     }
 
     @Roles("admin")
+    @Post("/:uid")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Edit User" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Edit User Success", type: DefResDto
+    })
+    @ApiResponse({
+        status: HttpStatus.BAD_REQUEST, description: "Edit User Fail"
+    })
+    // endregion Swagger Docs
+    public async edit(@Param() param: UidDto, @Body() body: EditUserDto) {
+        await this.usersSvr.modify(param.uid, body);
+        return new DefResDto();
+    }
+
+    @Roles("admin")
     @Post("/:uid/password")
     // region Swagger Docs
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Modify User Password" })
     @ApiResponse({
-        status: HttpStatus.OK, description: "Modify Password Success"
+        status: HttpStatus.OK, description: "Modify Password Success",
+        type: DefResDto
     })
     @ApiResponse({
         status: HttpStatus.BAD_REQUEST, description: "Modify Password Fail"
@@ -98,7 +121,7 @@ export class UsersAdminController {
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        return { statusCode: HttpStatus.OK };
+        return new DefResDto();
     }
 
     @Roles("admin")
@@ -120,7 +143,10 @@ export class UsersAdminController {
     // region Swagger Docs
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Delete User" })
-    @ApiResponse({ status: HttpStatus.OK, description: "Delete User Success" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Delete User Success",
+        type: DefResDto
+    })
     @ApiResponse({
         status: HttpStatus.BAD_REQUEST, description: "Delete User Fail"
     })
@@ -131,7 +157,7 @@ export class UsersAdminController {
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        return { statusCode: HttpStatus.OK };
+        return new DefResDto();
     }
 
     @Roles("admin")
@@ -139,20 +165,19 @@ export class UsersAdminController {
     // region Swagger Docs
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Ban User" })
-    @ApiResponse({ status: HttpStatus.OK, description: "Ban Success" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Ban Success",
+        type: DefResDto
+    })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: "Ban Fail" })
     // endregion Swagger Docs
-    public async ban(@Session() session, @Param() user: UidDto) {
+    public async ban(@Session() session, @Param() param: UidDto) {
         const curUserId = session.loginUserId;
-        if (curUserId === user.uid) {
+        if (curUserId === param.uid) {
             throw new BadRequestException("Cant ban yourself account");
         }
-        try {
-            await UserModel.ban(user.uid);
-        } catch (error) {
-            throw new BadRequestException(error.toString());
-        }
-        return { statusCode: HttpStatus.OK };
+        await this.usersSvr.modify(param.uid, { active: false });
+        return new DefResDto();
     }
 
     @Roles("admin")
@@ -160,16 +185,15 @@ export class UsersAdminController {
     // region Swagger Docs
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Allow User" })
-    @ApiResponse({ status: HttpStatus.OK, description: "Allow Success" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Allow Success",
+        type: DefResDto
+    })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: "Allow Fail" })
     // endregion Swagger Docs
-    public async allow(@Param() user: UidDto) {
-        try {
-            await UserModel.allow(user.uid);
-        } catch (error) {
-            throw new BadRequestException(error.toString());
-        }
-        return { statusCode: HttpStatus.OK };
+    public async allow(@Param() param: UidDto) {
+        await this.usersSvr.modify(param.uid, { active: true });
+        return new DefResDto();
     }
 
     @Roles("admin")
@@ -221,7 +245,10 @@ export class UsersAdminController {
     // region Swagger Docs
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Delete User's Token" })
-    @ApiResponse({ status: HttpStatus.OK, description: "Delete Token Success" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Delete Token Success",
+        type: DefResDto
+    })
     @ApiResponse({
         status: HttpStatus.BAD_REQUEST, description: "Delete Token Fail"
     })
@@ -240,7 +267,7 @@ export class UsersAdminController {
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        return { statusCode: HttpStatus.OK };
+        return new DefResDto();
     }
 
     private async getGoodsRes(uid: ObjectId, query: PerPageDto) {
@@ -354,4 +381,16 @@ export class UsersAdminController {
     /////////////////////////
     // endregion Collections
     /////////////////////////
+
+    @Roles("admin")
+    @Get("/:uid")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Get User Info" })
+    @ApiResponse({ status: HttpStatus.OK, description: "Get User Info" })
+    // endregion Swagger Docs
+    public get(@Param() param: UidDto) {
+        return UserModel.findById(param.uid).exec();
+    }
+
 }

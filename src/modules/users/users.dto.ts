@@ -12,6 +12,12 @@ export class CreateUserDto {
     public readonly password: string;
 }
 
+export class EditUserDto {
+    @ApiModelProperty({ type: String, description: "Nickname" })
+    @IsString()
+    public readonly nickname: string;
+}
+
 export class ModifyPasswordDto {
     @ApiModelProperty({ type: String, description: "Old Password" })
     @IsString()

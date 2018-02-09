@@ -30,6 +30,7 @@ import {
 
 // region Services
 import { CollectionsService } from "@services/collections";
+import { UsersService } from "@services/users";
 // endregion Services
 
 export const controllers = [
@@ -41,7 +42,7 @@ export const controllers = [
 
 @Module({
     controllers,
-    components: [ CollectionsService ]
+    components: [ CollectionsService, UsersService ]
 })
 export class ControllersModule {
     private uploadFileMethod = {

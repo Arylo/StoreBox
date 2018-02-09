@@ -27,6 +27,35 @@ export type UserDoc = IDoc<IUser>;
 
 const UsersSchema = new Base(Definition).createSchema();
 
+// region validators
+
+UsersSchema.path("username").validate({
+    isAsync: true,
+    validator: async function usernameModifyValidator(val, respond) {
+        if (!this.isNew) {
+            const id = this.getQuery()._id;
+            const col = await Model.findById(id).exec();
+            return respond(col.toObject().username === val);
+        }
+        return respond(true);
+    },
+    message: "The username cannt modify"
+});
+
+UsersSchema.path("username").validate({
+    isAsync: true,
+    validator: async function usernameExistValidator(val, respond) {
+        if (!this.isNew) {
+            return respond(true);
+        }
+        const result = await Model.findOne({ username: val }).exec();
+        respond(result ? false : true);
+    },
+    message: "The username is existed"
+});
+
+// endregion validators
+
 const encryptStr = (pwd: string) => {
     return md5(md5(pwd) + config.db.salt);
 };
@@ -82,24 +111,6 @@ UsersSchema.static("passwd", (id: ObjectId, oldP: string, newP: string) => {
                 password: encryptStr(newP)
             }).select("-password").exec();
         });
-});
-
-UsersSchema.static("ban", (id: ObjectId) => {
-    return Model.count({ active: true }).exec()
-        .then((num) => {
-            if (num === 1) {
-                return Promise.reject("Must have one active user");
-            }
-            return Model.findByIdAndUpdate(id, { active: false })
-                .select("-password")
-                .exec();
-        });
-});
-
-UsersSchema.static("allow", (id: ObjectId) => {
-    return Model.findByIdAndUpdate(id, { active: true })
-        .select("-password")
-        .exec();
 });
 
 UsersSchema.static("isVaild", (username: string, password: string) => {
@@ -158,20 +169,6 @@ interface IUserModel<T extends UserDoc> extends M<T> {
      * @return {Promise}
      */
     passwd(id: ObjectId, oldPass: string, newPass: string): Promise<T>;
-    /**
-     * 禁用某个用户
-     *
-     * @param  id {ObjectID} 用户名ID
-     * @return {Promise}
-     */
-    ban(id: ObjectId): Promise<T>;
-    /**
-     * 取消禁用某个用户
-     *
-     * @param  id {ObjectID} 用户名ID
-     * @return {Promise}
-     */
-    allow(id: ObjectId): Promise<T>;
     /**
      * 验证用户是否存在
      *
