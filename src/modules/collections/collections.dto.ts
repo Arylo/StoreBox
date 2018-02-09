@@ -12,6 +12,15 @@ export interface ICollection {
 
 const NAME_REGEXP = /^[\da-z]\w{2,}[\da-z]$/i;
 
+export class GetCollectionNameDto {
+    @ApiModelProperty({
+        type: String,
+        description: `Collection Name[${NAME_REGEXP}]`
+    })
+    @Matches(NAME_REGEXP)
+    public readonly name: string;
+}
+
 export class CreateCollectionDto implements IEditCollection {
     @ApiModelPropertyOptional({
         type: String,

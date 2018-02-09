@@ -9,9 +9,10 @@ import { CategoriesAdminController } from "./categroies/categroies.controller";
 import { GoodsAdminController } from "./goods/goods.controller";
 import { FilesController } from "./files/files.controller";
 import { GoodsController } from "./files/goods.controller";
+import { CollectionsController } from "./collections/collections.controller";
 import {
     CollectionsAdminController
-} from "./collections/collections.controller";
+} from "./collections/collections.admin.controller";
 // endregion Controllers
 
 // region Middlewares
@@ -34,7 +35,8 @@ import { CollectionsService } from "@services/collections";
 export const controllers = [
     FilesController, GoodsController,
     UsersAdminController, AuthAdminController, RegexpsAdminController,
-    CategoriesAdminController, GoodsAdminController, CollectionsAdminController
+    CategoriesAdminController, GoodsAdminController,
+    CollectionsController, CollectionsAdminController
 ];
 
 @Module({

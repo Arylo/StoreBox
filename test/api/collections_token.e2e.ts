@@ -100,6 +100,7 @@ describe("Token to Upload Files Api", () => {
         return request.post("/api/v1/auth/logout").then();
     });
 
+    let name = "";
     step("Upload Files", async () => {
         const {
             body: result, status
@@ -107,6 +108,13 @@ describe("Token to Upload Files Api", () => {
         ids.collections.push(result._id);
         status.should.be.eql(201);
         result.should.have.properties("name", "_id", "goods");
+        name = result.name;
+    });
+
+    step("Get Collection", async () => {
+        const {
+            body: result
+        } = await request.get(`/collections/${name}`).then();
     });
 
 });
