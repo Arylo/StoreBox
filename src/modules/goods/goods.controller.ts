@@ -28,6 +28,7 @@ import multer  = require("multer");
 
 import { CreateValueDto, EditValueDto } from "../values/values.dto";
 import { GoodAttributeParamDto } from "./goods.dto";
+import { isArray } from "util";
 
 @UseGuards(RolesGuard)
 @Controller("api/v1/goods")
@@ -169,13 +170,15 @@ export class GoodsAdminController {
             throw new BadRequestException("The Collection no good");
         } else {
             try {
-                const collection = await this.collectionsSvr.create({
+                const collections = await this.collectionsSvr.create({
                     goods: goods.reduce((arr, good) => {
                         arr.push(good._id);
                         return arr;
                     }, []),
                     creator: uploader
                 });
+                const collection =
+                    isArray(collections) ? collections[0] : collections;
                 return CollectionsModel
                     .findById(collection._id)
                     .populate("goods")
