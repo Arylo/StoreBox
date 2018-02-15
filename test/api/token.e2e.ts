@@ -1,6 +1,6 @@
 import supertest = require("supertest");
 import faker = require("faker");
-import { Model as TokensModel } from "@models/Token";
+import { TokensService } from "@services/tokens";
 
 import { connect, drop, newUser } from "../helpers/database";
 import { init } from "../helpers/server";
@@ -8,6 +8,7 @@ import { init } from "../helpers/server";
 describe("Token E2E Test", () => {
 
     let request: supertest.SuperTest<supertest.Test>;
+    const tokensSvr = new TokensService();
 
     before(() => {
         return connect();
@@ -53,9 +54,7 @@ describe("Token E2E Test", () => {
             .send({
                 username: user.name, password: user.pass
             }).then();
-        ids.tokens.push(
-            (await TokensModel.findOne({ token: result.token}).exec())._id
-        );
+        ids.tokens.push(await tokensSvr.getIdByToken(result.token));
         status.should.be.eql(201);
         result.should.have.properties(["token", "id", "nickname", "username"]);
         token = result.token;
@@ -79,7 +78,7 @@ describe("Token E2E Test", () => {
         await request.get("/api/v1/auth/logout").then();
     });
 
-    step("Only One Tokens for User 1", async () => {
+    step("Nonexist Tokens for User 1", async () => {
         const user = users[1];
         await request.post("/api/v1/auth/login")
             .send({
@@ -94,7 +93,7 @@ describe("Token E2E Test", () => {
         await request.get("/api/v1/auth/logout").then();
     });
 
-    step("Two Login with Token by User 1", async () => {
+    step("Login twice with Token by User 1", async () => {
         const user = users[1];
         for (let i = 0; i < 2; i++) {
             const {
@@ -103,9 +102,7 @@ describe("Token E2E Test", () => {
                 .send({
                     username: user.name, password: user.pass
                 }).then();
-            ids.tokens.push(
-                (await TokensModel.findOne({ token: result.token }).exec())._id
-            );
+            ids.tokens.push(await tokensSvr.getIdByToken(result.token));
         }
     });
 
@@ -118,6 +115,78 @@ describe("Token E2E Test", () => {
         const {
             body: result, status
         } = await request.get(`/api/v1/users/${user.id}/tokens`).then();
+        status.should.eql(200);
+        result.data.should.be.an.Array()
+            .which.have.length(2);
+        result.data.should.matchEach((item) => {
+            item.should.have.properties(["token", "updatedAt", "createdAt"]);
+        });
+        await request.get("/api/v1/auth/logout").then();
+    });
+
+    step("Only One Tokens for User 0 by `/tokens`", async () => {
+        const user = users[0];
+        await request.post("/api/v1/auth/login")
+            .send({
+                username: user.name, password: user.pass
+            }).then();
+        const {
+            body: result, status
+        } = await request.get(`/api/v1/tokens`).then();
+        status.should.eql(200);
+        result.data.should.be.an.Array()
+            .which.have.length(1);
+        result.data.should.matchEach((item) => {
+            item.should.have.properties(["token", "updatedAt", "createdAt"]);
+        });
+        await request.get("/api/v1/auth/logout").then();
+    });
+
+    step("Only One Tokens for User 0 by `/users/tokens`", async () => {
+        const user = users[0];
+        await request.post("/api/v1/auth/login")
+            .send({
+                username: user.name, password: user.pass
+            }).then();
+        const {
+            body: result, status
+        } = await request.get(`/api/v1/users/tokens`).then();
+        status.should.eql(200);
+        result.data.should.be.an.Array()
+            .which.have.length(1);
+        result.data.should.matchEach((item) => {
+            item.should.have.properties(["token", "updatedAt", "createdAt"]);
+        });
+        await request.get("/api/v1/auth/logout").then();
+    });
+
+    step("Only Two Tokens for User 1 by `/tokens`", async () => {
+        const user = users[1];
+        await request.post("/api/v1/auth/login")
+            .send({
+                username: user.name, password: user.pass
+            }).then();
+        const {
+            body: result, status
+        } = await request.get(`/api/v1/tokens`).then();
+        status.should.eql(200);
+        result.data.should.be.an.Array()
+            .which.have.length(2);
+        result.data.should.matchEach((item) => {
+            item.should.have.properties(["token", "updatedAt", "createdAt"]);
+        });
+        await request.get("/api/v1/auth/logout").then();
+    });
+
+    step("Only Two Tokens for User 1 by `/users/tokens`", async () => {
+        const user = users[1];
+        await request.post("/api/v1/auth/login")
+            .send({
+                username: user.name, password: user.pass
+            }).then();
+        const {
+            body: result, status
+        } = await request.get(`/api/v1/users/tokens`).then();
         status.should.eql(200);
         result.data.should.be.an.Array()
             .which.have.length(2);
@@ -157,7 +226,7 @@ describe("Token E2E Test", () => {
             }).then();
 
         const { status } = await request.get(
-            `/api/v1/users/${user.id}/tokens/${ids.tokens[1]}/delete`
+            `/api/v1/tokens/${ids.tokens[1]}/delete`
         ).then();
         status.should.eql(200);
 
@@ -177,7 +246,7 @@ describe("Token E2E Test", () => {
             }).then();
 
         const { status } = await request.delete(
-            `/api/v1/users/${user.id}/tokens/${ids.tokens[2]}`
+            `/api/v1/tokens/${ids.tokens[2]}`
         ).then();
         status.should.eql(200);
 

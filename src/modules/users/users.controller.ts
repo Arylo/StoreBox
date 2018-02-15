@@ -13,6 +13,7 @@ import { ObjectId } from "@models/common";
 import { Roles } from "@decorators/roles";
 import { RolesGuard } from "@guards/roles";
 import { ParseIntPipe } from "@pipes/parse-int";
+import { TokensService } from "@services/tokens";
 import { CollectionsService } from "@services/collections";
 import { UsersService } from "@services/users";
 import { PerPageDto, ListResponse, DEF_PER_COUNT } from "@dtos/page";
@@ -20,7 +21,7 @@ import { UidDto } from "@dtos/ids";
 import { DefResDto } from "@dtos/res";
 
 import {
-    CreateUserDto, ModifyPasswordDto, UserTokenParamDto, EditUserDto
+    CreateUserDto, ModifyPasswordDto, EditUserDto
 } from "./users.dto";
 
 @UseGuards(RolesGuard)
@@ -32,6 +33,7 @@ import {
 export class UsersAdminController {
 
     constructor(
+        private readonly tokensSvr: TokensService,
         private readonly collectionsSvr: CollectionsService,
         private readonly usersSvr: UsersService
     ) { }
@@ -196,6 +198,28 @@ export class UsersAdminController {
         return new DefResDto();
     }
 
+    ////////////////////////////////////////
+    // region Token Methods
+    ////////////////////////////////////////
+
+    @Roles("admin")
+    @Get("/tokens")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Get Self Tokens" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Get Self Tokens List",
+        type: ListResponse
+    })
+    // endregion Swagger Docs
+    public async getSelfTokens(@Session() session) {
+        const data = new ListResponse();
+        data.current = data.totalPages = 1;
+        data.data = await this.tokensSvr.getTokens(session.loginUserId);
+        data.total = data.data.length;
+        return data;
+    }
+
     @Roles("admin")
     @Get("/:uid/tokens")
     // region Swagger Docs
@@ -209,66 +233,18 @@ export class UsersAdminController {
     public async getTokens(@Param() param: UidDto, @Session() session) {
         const data = new ListResponse();
         data.current = data.totalPages = 1;
-        data.data =
-            (await TokensModel
-                .find({ user: session.loginUserId })
-                .select("-user")
-                .exec()
-            )
-            .map((item) => item.toObject())
-            .map((item) => {
-                item.token = "...." + item.token.substr(-8);
-                return item;
-            });
+        data.data = await this.tokensSvr.getTokens(param.uid);
         data.total = data.data.length;
         return data;
     }
 
-    @Roles("admin")
-    @Delete("/:uid/tokens/:tid")
-    // region Swagger Docs
-    @HttpCode(HttpStatus.OK)
-    @ApiOperation({ title: "Delete User's Token" })
-    @ApiResponse({ status: HttpStatus.OK, description: "Delete Token Success" })
-    @ApiResponse({
-        status: HttpStatus.BAD_REQUEST, description: "Delete Token Fail"
-    })
-    // endregion Swagger Docs
-    public deleteTokenByDelete(
-        @Param() param: UserTokenParamDto, @Session() session
-    ) {
-        return this.deleteTokenByGet(param, session);
-    }
+    ////////////////////////////////////////
+    // endregion Token Methods
+    ////////////////////////////////////////
 
-    @Roles("admin")
-    @Get("/:uid/tokens/:tid/delete")
-    // region Swagger Docs
-    @HttpCode(HttpStatus.OK)
-    @ApiOperation({ title: "Delete User's Token" })
-    @ApiResponse({
-        status: HttpStatus.OK, description: "Delete Token Success",
-        type: DefResDto
-    })
-    @ApiResponse({
-        status: HttpStatus.BAD_REQUEST, description: "Delete Token Fail"
-    })
-    // endregion Swagger Docs
-    public async deleteTokenByGet(
-        @Param() param: UserTokenParamDto, @Session() session
-    ) {
-        if (session.loginUserId !== param.uid) {
-            throw new ForbiddenException("It isnt your token");
-        }
-        try {
-            await TokensModel.findOneAndRemove({
-                _id: param.tid,
-                user: param.uid
-            }).exec();
-        } catch (error) {
-            throw new BadRequestException(error.toString());
-        }
-        return new DefResDto();
-    }
+    ////////////////////////////////////////
+    // region Good Methods
+    ////////////////////////////////////////
 
     private async getGoodsRes(uid: ObjectId, query: PerPageDto) {
         const curPage = query.page || 1;
@@ -323,9 +299,13 @@ export class UsersAdminController {
         return this.getGoodsRes(userId, query);
     }
 
-    /////////////////////////
-    // region Collections
-    /////////////////////////
+    ////////////////////////////////////////
+    // endregion Good Methods
+    ////////////////////////////////////////
+
+    ////////////////////////////////////////
+    // region Collection Methods
+    ////////////////////////////////////////
 
     private async getCollectionsRes(uid: ObjectId, query: PerPageDto) {
         const curPage = query.page || 1;
@@ -378,9 +358,9 @@ export class UsersAdminController {
         return this.getCollectionsRes(userId, query);
     }
 
-    /////////////////////////
-    // endregion Collections
-    /////////////////////////
+    ////////////////////////////////////////
+    // endregion Collection Methods
+    ////////////////////////////////////////
 
     @Roles("admin")
     @Get("/:uid")

@@ -21,14 +21,15 @@ import { IReqUser } from "@dtos/req";
 import { PerPageDto, ListResponse } from "@dtos/page";
 import { RegexpCountCheckPipe } from "@pipes/regexp-count-check";
 import { ParseIntPipe } from "@pipes/parse-int";
+import { TokensService } from "@services/tokens";
 import { CollectionsService } from "@services/collections";
 import * as hasha from "hasha";
 import fs = require("fs-extra");
 import multer  = require("multer");
+import { isArray } from "util";
 
 import { CreateValueDto, EditValueDto } from "../values/values.dto";
 import { GoodAttributeParamDto } from "./goods.dto";
-import { isArray } from "util";
 
 @UseGuards(RolesGuard)
 @Controller("api/v1/goods")
@@ -37,7 +38,10 @@ import { isArray } from "util";
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: "Unauthorized" })
 export class GoodsAdminController {
 
-    constructor(private readonly collectionsSvr: CollectionsService) { }
+    constructor(
+        private readonly tokensSvr: TokensService,
+        private readonly collectionsSvr: CollectionsService
+    ) { }
 
     private toMd5sum(filepath: string) {
         return  hasha.fromFileSync(filepath, { algorithm: "md5" });
@@ -124,9 +128,10 @@ export class GoodsAdminController {
         @File(new RegexpCountCheckPipe()) file: Express.Multer.File,
         @User() user: IReqUser, @Session() session
     ) {
-        const uploader = session.loginUserId ||
-            (await TokensModel.findOne({ token: user.token }))._id;
-        return await this.fileProcess(file, uploader, (type, error) => {
+        const uploaderId = session.loginUserId ||
+            await this.tokensSvr.getIdByToken(user.token);
+
+        return await this.fileProcess(file, uploaderId, (type, error) => {
             if (type === "Categories") {
                 if (error === 0) {
                     throw new BadRequestException("Lost Role for the file");
@@ -154,12 +159,12 @@ export class GoodsAdminController {
         @Files(new RegexpCountCheckPipe()) files: Express.Multer.File[],
         @User() user: IReqUser, @Session() session
     ) {
-        const uploader = session.loginUserId ||
-            (await TokensModel.findOne({ token: user.token }))._id;
+        const uploaderId = session.loginUserId ||
+            await this.tokensSvr.getIdByToken(user.token);
 
         const goods: IGoods[] = [ ];
         for (const file of files) {
-            const goodObj = await this.fileProcess(file, uploader);
+            const goodObj = await this.fileProcess(file, uploaderId);
             if (!goodObj) {
                 fs.remove(file.path);
                 continue;
@@ -175,7 +180,7 @@ export class GoodsAdminController {
                         arr.push(good._id);
                         return arr;
                     }, []),
-                    creator: uploader
+                    creator: uploaderId
                 });
                 const collection =
                     isArray(collections) ? collections[0] : collections;
