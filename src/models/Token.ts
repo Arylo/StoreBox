@@ -1,10 +1,10 @@
 import { model, SchemaDefinition, Model as M, SchemaTypes } from "mongoose";
 import { Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS } from "@models/common";
-import { IUser, Flag as UserFlag } from "@models/User";
+import { IUser, FLAG as UserFlag } from "@models/User";
 
 import Cache =  require("schedule-cache");
 
-const cache = Cache.create(`${Date.now()}${Math.random()}`);
+export const cache = Cache.create(`${Date.now()}${Math.random()}`);
 
 export const Flag = "tokens";
 
@@ -51,31 +51,13 @@ TokensSchema.path("user").validate({
 });
 // endregion validators
 
-TokensSchema.static("isVaild", async (username: string, tokenStr: string) => {
-    const FLAG = `token[${username}][${tokenStr}]`;
-    if (cache.get(FLAG)) {
-        return cache.get(FLAG);
-    }
-    const token = await Model.findOne({ token: tokenStr })
-        .populate("user", "username").exec();
-    const tokenOwn = token.toObject().user as IUser;
-    if (tokenOwn.username === username) {
-        cache.put(FLAG, true);
-    }
-    return cache.get(FLAG);
-});
-
 for (const method of MODIFY_MOTHODS) {
     TokensSchema.post(method, () => {
         cache.clear();
     });
 }
 
-interface ITokenModel<T extends TokenDoc> extends M<T> {
-    isVaild(username: string, tokenStr: string): Promise<boolean>;
-}
-
-export const Model = model(Flag, TokensSchema) as ITokenModel<TokenDoc>;
+export const Model = model(Flag, TokensSchema) as M<TokenDoc>;
 
 const getCount = async (userId: ObjectId): Promise<number> => {
     if (cache.get(userId.toString())) {

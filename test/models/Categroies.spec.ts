@@ -36,7 +36,7 @@ describe("Category Model", () => {
             cids = [];
             for (let i = 0; i < 10; i++) {
                 const result = await CategoriesModel.create({
-                    name: faker.name.firstName()
+                    name: faker.name.firstName() + i
                 });
                 cids.push(result._id);
                 ids.categories.push(result._id);

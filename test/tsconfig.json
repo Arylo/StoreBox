@@ -23,7 +23,8 @@
       "@decorators/*": [ "./src/modules/common/decorators/*.decorator" ],
       "@pipes/*": [ "./src/modules/common/pipes/*.pipe" ],
       "@guards/*": [ "./src/modules/common/guards/*.guard" ],
-      "@dtos/*": [ "./src/modules/common/dtos/*.dto" ]
+      "@dtos/*": [ "./src/modules/common/dtos/*.dto" ],
+      "@services/*": [ "./src/modules/common/services/*.service" ]
     }
   },
   "include": [

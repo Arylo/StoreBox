@@ -8,15 +8,20 @@ import {
 import { Model as UserModel, IUser, UserDoc } from "@models/User";
 import { Model as TokensModel } from "@models/Token";
 import { Model as GoodsModels } from "@models/Good";
+import { CollectionDoc } from "@models/Collection";
 import { ObjectId } from "@models/common";
 import { Roles } from "@decorators/roles";
 import { RolesGuard } from "@guards/roles";
 import { ParseIntPipe } from "@pipes/parse-int";
+import { TokensService } from "@services/tokens";
+import { CollectionsService } from "@services/collections";
+import { UsersService } from "@services/users";
 import { PerPageDto, ListResponse, DEF_PER_COUNT } from "@dtos/page";
 import { UidDto } from "@dtos/ids";
+import { DefResDto } from "@dtos/res";
 
 import {
-    CreateUserDto, ModifyPasswordDto, UserTokenParamDto
+    CreateUserDto, ModifyPasswordDto, EditUserDto
 } from "./users.dto";
 
 @UseGuards(RolesGuard)
@@ -26,6 +31,12 @@ import {
 @ApiBearerAuth()
 // endregion Swagger Docs
 export class UsersAdminController {
+
+    constructor(
+        private readonly tokensSvr: TokensService,
+        private readonly collectionsSvr: CollectionsService,
+        private readonly usersSvr: UsersService
+    ) { }
 
     @Roles("admin")
     @Get()
@@ -75,12 +86,30 @@ export class UsersAdminController {
     }
 
     @Roles("admin")
+    @Post("/:uid")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Edit User" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Edit User Success", type: DefResDto
+    })
+    @ApiResponse({
+        status: HttpStatus.BAD_REQUEST, description: "Edit User Fail"
+    })
+    // endregion Swagger Docs
+    public async edit(@Param() param: UidDto, @Body() body: EditUserDto) {
+        await this.usersSvr.modify(param.uid, body);
+        return new DefResDto();
+    }
+
+    @Roles("admin")
     @Post("/:uid/password")
     // region Swagger Docs
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Modify User Password" })
     @ApiResponse({
-        status: HttpStatus.OK, description: "Modify Password Success"
+        status: HttpStatus.OK, description: "Modify Password Success",
+        type: DefResDto
     })
     @ApiResponse({
         status: HttpStatus.BAD_REQUEST, description: "Modify Password Fail"
@@ -94,7 +123,7 @@ export class UsersAdminController {
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        return { statusCode: HttpStatus.OK };
+        return new DefResDto();
     }
 
     @Roles("admin")
@@ -116,7 +145,10 @@ export class UsersAdminController {
     // region Swagger Docs
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Delete User" })
-    @ApiResponse({ status: HttpStatus.OK, description: "Delete User Success" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Delete User Success",
+        type: DefResDto
+    })
     @ApiResponse({
         status: HttpStatus.BAD_REQUEST, description: "Delete User Fail"
     })
@@ -127,7 +159,7 @@ export class UsersAdminController {
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        return { statusCode: HttpStatus.OK };
+        return new DefResDto();
     }
 
     @Roles("admin")
@@ -135,16 +167,19 @@ export class UsersAdminController {
     // region Swagger Docs
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Ban User" })
-    @ApiResponse({ status: HttpStatus.OK, description: "Ban Success" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Ban Success",
+        type: DefResDto
+    })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: "Ban Fail" })
     // endregion Swagger Docs
-    public async ban(@Param() user: UidDto) {
-        try {
-            await UserModel.ban(user.uid);
-        } catch (error) {
-            throw new BadRequestException(error.toString());
+    public async ban(@Session() session, @Param() param: UidDto) {
+        const curUserId = session.loginUserId;
+        if (curUserId === param.uid) {
+            throw new BadRequestException("Cant ban yourself account");
         }
-        return { statusCode: HttpStatus.OK };
+        await this.usersSvr.modify(param.uid, { active: false });
+        return new DefResDto();
     }
 
     @Roles("admin")
@@ -152,16 +187,37 @@ export class UsersAdminController {
     // region Swagger Docs
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Allow User" })
-    @ApiResponse({ status: HttpStatus.OK, description: "Allow Success" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Allow Success",
+        type: DefResDto
+    })
     @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: "Allow Fail" })
     // endregion Swagger Docs
-    public async allow(@Param() user: UidDto) {
-        try {
-            await UserModel.allow(user.uid);
-        } catch (error) {
-            throw new BadRequestException(error.toString());
-        }
-        return { statusCode: HttpStatus.OK };
+    public async allow(@Param() param: UidDto) {
+        await this.usersSvr.modify(param.uid, { active: true });
+        return new DefResDto();
+    }
+
+    ////////////////////////////////////////
+    // region Token Methods
+    ////////////////////////////////////////
+
+    @Roles("admin")
+    @Get("/tokens")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Get Self Tokens" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Get Self Tokens List",
+        type: ListResponse
+    })
+    // endregion Swagger Docs
+    public async getSelfTokens(@Session() session) {
+        const data = new ListResponse();
+        data.current = data.totalPages = 1;
+        data.data = await this.tokensSvr.getTokens(session.loginUserId);
+        data.total = data.data.length;
+        return data;
     }
 
     @Roles("admin")
@@ -177,63 +233,18 @@ export class UsersAdminController {
     public async getTokens(@Param() param: UidDto, @Session() session) {
         const data = new ListResponse();
         data.current = data.totalPages = 1;
-        data.data =
-            (await TokensModel
-                .find({ user: session.loginUserId })
-                .select("-user")
-                .exec()
-            )
-            .map((item) => item.toObject())
-            .map((item) => {
-                item.token = "...." + item.token.substr(-8);
-                return item;
-            });
+        data.data = await this.tokensSvr.getTokens(param.uid);
         data.total = data.data.length;
         return data;
     }
 
-    @Roles("admin")
-    @Delete("/:uid/tokens/:tid")
-    // region Swagger Docs
-    @HttpCode(HttpStatus.OK)
-    @ApiOperation({ title: "Delete User's Token" })
-    @ApiResponse({ status: HttpStatus.OK, description: "Delete Token Success" })
-    @ApiResponse({
-        status: HttpStatus.BAD_REQUEST, description: "Delete Token Fail"
-    })
-    // endregion Swagger Docs
-    public deleteTokenByDelete(
-        @Param() param: UserTokenParamDto, @Session() session
-    ) {
-        return this.deleteTokenByGet(param, session);
-    }
+    ////////////////////////////////////////
+    // endregion Token Methods
+    ////////////////////////////////////////
 
-    @Roles("admin")
-    @Get("/:uid/tokens/:tid/delete")
-    // region Swagger Docs
-    @HttpCode(HttpStatus.OK)
-    @ApiOperation({ title: "Delete User's Token" })
-    @ApiResponse({ status: HttpStatus.OK, description: "Delete Token Success" })
-    @ApiResponse({
-        status: HttpStatus.BAD_REQUEST, description: "Delete Token Fail"
-    })
-    // endregion Swagger Docs
-    public async deleteTokenByGet(
-        @Param() param: UserTokenParamDto, @Session() session
-    ) {
-        if (session.loginUserId !== param.uid) {
-            throw new ForbiddenException("It isnt your token");
-        }
-        try {
-            await TokensModel.findOneAndRemove({
-                _id: param.tid,
-                user: param.uid
-            }).exec();
-        } catch (error) {
-            throw new BadRequestException(error.toString());
-        }
-        return { statusCode: HttpStatus.OK };
-    }
+    ////////////////////////////////////////
+    // region Good Methods
+    ////////////////////////////////////////
 
     private async getGoodsRes(uid: ObjectId, query: PerPageDto) {
         const curPage = query.page || 1;
@@ -287,4 +298,79 @@ export class UsersAdminController {
         const userId: ObjectId = param.uid;
         return this.getGoodsRes(userId, query);
     }
+
+    ////////////////////////////////////////
+    // endregion Good Methods
+    ////////////////////////////////////////
+
+    ////////////////////////////////////////
+    // region Collection Methods
+    ////////////////////////////////////////
+
+    private async getCollectionsRes(uid: ObjectId, query: PerPageDto) {
+        const curPage = query.page || 1;
+        const perNum = query.perNum || DEF_PER_COUNT;
+        const totalPages =
+            await this.collectionsSvr.countPage(uid, query.perNum);
+        const totalCount = await this.collectionsSvr.count(uid);
+
+        const resData = new ListResponse<CollectionDoc>();
+        resData.current = curPage;
+        resData.totalPages = totalPages;
+        resData.total = totalCount;
+        if (totalPages >= curPage) {
+            resData.data = await this.collectionsSvr.list(uid, query);
+        }
+        return resData;
+    }
+
+    @Roles("admin", "token")
+    @Get("/collections")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Get Self Collection List" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Self Collection List",
+        type: ListResponse
+    })
+    // endregion Swagger Docs
+    public getSelfCollections(
+        @Session() session, @Query(new ParseIntPipe()) query: PerPageDto
+    ) {
+        const userId: ObjectId = session.loginUserId;
+        return this.getCollectionsRes(userId, query);
+    }
+
+    @Roles("admin")
+    @Get("/:uid/collections")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Get User's Collection List" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "User's Collection List",
+        type: ListResponse
+    })
+    // endregion Swagger Docs
+    public async getCollections(
+        @Param() param: UidDto, @Query(new ParseIntPipe()) query: PerPageDto
+    ) {
+        const userId: ObjectId = param.uid;
+        return this.getCollectionsRes(userId, query);
+    }
+
+    ////////////////////////////////////////
+    // endregion Collection Methods
+    ////////////////////////////////////////
+
+    @Roles("admin")
+    @Get("/:uid")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Get User Info" })
+    @ApiResponse({ status: HttpStatus.OK, description: "Get User Info" })
+    // endregion Swagger Docs
+    public get(@Param() param: UidDto) {
+        return UserModel.findById(param.uid).exec();
+    }
+
 }

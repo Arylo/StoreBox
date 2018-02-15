@@ -5,10 +5,13 @@ import {
 import { Request, Response } from "express";
 import basicAuth = require("basic-auth");
 import { Model as TokensModel } from "@models/Token";
-import { IUser } from "@models/User";
+import { TokensService } from "@services/tokens";
 
 @Middleware()
 export class RolesMiddleware implements NestMiddleware {
+
+    constructor(private readonly tokensSvr: TokensService) { }
+
     public resolve(): ExpressMiddleware {
         return async (req: Request, res: Response, next) => {
             let user = (req as any).user;
@@ -19,16 +22,21 @@ export class RolesMiddleware implements NestMiddleware {
             }
             const tokenUser = basicAuth(req);
             if (tokenUser && tokenUser.name && tokenUser.pass) {
-                if (await TokensModel.isVaild(tokenUser.name, tokenUser.pass)) {
+                const isVaild =
+                    await this.tokensSvr.isVaild(tokenUser.name, tokenUser.pass);
+                if (isVaild) {
                     user.account = tokenUser.name;
                     user.token = tokenUser.pass;
                     user.roles.push("token");
                     next();
-                    return;
+                } else {
+                    next();
                 }
+                return;
             }
-            if ((req as any).session.loginUser) {
-                user.account = (req as any).session.loginUser;
+            const session = (req as any).session;
+            if (session && session.loginUser) {
+                user.account = session.loginUser;
                 user.roles.push("admin");
                 // throw new UnauthorizedException();
             }

@@ -8,7 +8,7 @@ import { Base, IDoc, IDocRaw, MODIFY_MOTHODS } from "./common";
 
 const cache = Cache.create(`${Date.now()}${Math.random()}`);
 
-export const Flag = "users";
+export const FLAG = "users";
 
 const Definition: SchemaDefinition = {
     username: { type: String, required: true, trim: true },
@@ -26,6 +26,35 @@ export interface IUser extends IDocRaw {
 export type UserDoc = IDoc<IUser>;
 
 const UsersSchema = new Base(Definition).createSchema();
+
+// region validators
+
+UsersSchema.path("username").validate({
+    isAsync: true,
+    validator: async function usernameModifyValidator(val, respond) {
+        if (!this.isNew) {
+            const id = this.getQuery()._id;
+            const col = await Model.findById(id).exec();
+            return respond(col.toObject().username === val);
+        }
+        return respond(true);
+    },
+    message: "The username cannt modify"
+});
+
+UsersSchema.path("username").validate({
+    isAsync: true,
+    validator: async function usernameExistValidator(val, respond) {
+        if (!this.isNew) {
+            return respond(true);
+        }
+        const result = await Model.findOne({ username: val }).exec();
+        respond(result ? false : true);
+    },
+    message: "The username is existed"
+});
+
+// endregion validators
 
 const encryptStr = (pwd: string) => {
     return md5(md5(pwd) + config.db.salt);
@@ -82,24 +111,6 @@ UsersSchema.static("passwd", (id: ObjectId, oldP: string, newP: string) => {
                 password: encryptStr(newP)
             }).select("-password").exec();
         });
-});
-
-UsersSchema.static("ban", (id: ObjectId) => {
-    return Model.count({ active: true }).exec()
-        .then((num) => {
-            if (num === 1) {
-                return Promise.reject("Must have one active user");
-            }
-            return Model.findByIdAndUpdate(id, { active: false })
-                .select("-password")
-                .exec();
-        });
-});
-
-UsersSchema.static("allow", (id: ObjectId) => {
-    return Model.findByIdAndUpdate(id, { active: true })
-        .select("-password")
-        .exec();
 });
 
 UsersSchema.static("isVaild", (username: string, password: string) => {
@@ -159,20 +170,6 @@ interface IUserModel<T extends UserDoc> extends M<T> {
      */
     passwd(id: ObjectId, oldPass: string, newPass: string): Promise<T>;
     /**
-     * 禁用某个用户
-     *
-     * @param  id {ObjectID} 用户名ID
-     * @return {Promise}
-     */
-    ban(id: ObjectId): Promise<T>;
-    /**
-     * 取消禁用某个用户
-     *
-     * @param  id {ObjectID} 用户名ID
-     * @return {Promise}
-     */
-    allow(id: ObjectId): Promise<T>;
-    /**
      * 验证用户是否存在
      *
      * @param  username {string} 用户名
@@ -204,4 +201,4 @@ for (const method of MODIFY_MOTHODS) {
     });
 }
 
-export const Model = model(Flag, UsersSchema) as IUserModel<UserDoc>;
+export const Model = model(FLAG, UsersSchema) as IUserModel<UserDoc>;

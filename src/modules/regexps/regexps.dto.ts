@@ -2,28 +2,37 @@ import { IsString, IsMongoId, IsOptional } from "class-validator";
 import { ObjectId } from "@models/common";
 import { ApiModelProperty, ApiModelPropertyOptional } from "@nestjs/swagger";
 
-export class NewRegexp {
-    @ApiModelProperty({ type: String })
-    @IsString()
-    public readonly name: string;
-    @ApiModelProperty({ type: String })
-    @IsString()
-    public readonly value: string;
-}
-
-export class CommonRegexpDot {
-    @ApiModelProperty({ type: String })
-    @IsMongoId()
-    public readonly id: ObjectId;
-}
-
-interface IEditRegexp {
+interface IRegexp {
     name?: string;
     value?: string;
     link?: ObjectId;
 }
 
-export class EditRegexpDot implements IEditRegexp {
+export interface INewRegexp extends IRegexp {
+    name: string;
+    value: string;
+}
+
+export class EditRegexpRawDot implements IRegexp {
+    public name?: string;
+    public value?: string;
+    public link?: ObjectId;
+}
+
+export class NewRegexp implements INewRegexp {
+    @ApiModelProperty({ type: String })
+    @IsString()
+    public readonly name: string;
+    @ApiModelProperty({ type: String })
+    @IsString()
+    public readonly value: string;
+    @ApiModelPropertyOptional({ type: String })
+    @IsOptional()
+    @IsMongoId()
+    public readonly link: ObjectId;
+}
+
+export class EditRegexpDot implements IRegexp {
     @ApiModelPropertyOptional({ type: String })
     @IsOptional()
     @IsString()
@@ -34,12 +43,6 @@ export class EditRegexpDot implements IEditRegexp {
     public readonly value: string;
     @ApiModelPropertyOptional({ type: String })
     @IsOptional()
-    @IsString()
+    @IsMongoId()
     public readonly link: ObjectId;
-}
-
-export class EditRegexpRawDot implements IEditRegexp {
-    public name?: string;
-    public value?: string;
-    public link?: ObjectId;
 }

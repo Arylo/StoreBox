@@ -2,14 +2,14 @@ import supertest = require("supertest");
 import faker = require("faker");
 
 import {
-    connect, drop, newUser, addCategoryAndRegexp
+    connect, drop, newUser, newCategory
 } from "../helpers/database";
 import { init } from "../helpers/server";
 
 /**
- * Fix [Issus 22](https://github.com/Arylo/StoreBox/issues/22)
+ * Fix [Issue 27](https://github.com/Arylo/StoreBox/issues/27)
  */
-describe("Fix Issuses", () => {
+describe("Fix Issues", () => {
 
     let request: supertest.SuperTest<supertest.Test>;
 
@@ -18,7 +18,9 @@ describe("Fix Issuses", () => {
     });
 
     const ids = {
-        users: [ ]
+        users: [ ],
+        categories: [ ],
+        regexps: [ ]
     };
 
     after(() => {
@@ -29,8 +31,7 @@ describe("Fix Issuses", () => {
         request = await init();
     });
 
-    describe("Github 22", () => {
-
+    describe("Github 27 ", () => {
         const user = {
             name: faker.name.firstName(),
             pass: faker.random.words()
@@ -44,26 +45,24 @@ describe("Fix Issuses", () => {
                 }).then();
         });
 
-        step("Status Code isnt 500 #0", async () => {
-            const {
-                body: result, status
-            } = await request.get("/api/v1/goods?page=1&perNum=25")
-                .send({
-                    username: user.name, password: user.pass
-                }).then();
-            status.should.be.not.eql(500);
+        step("Add Category", async () => {
+            const doc = await newCategory({ name: faker.random.word() });
+            ids.categories.push(doc._id);
         });
 
-        step("Status Code isnt 500 #1", async () => {
+        step("Add Regexp and link category", async () => {
             const {
                 body: result, status
-            } = await request.get("/api/v1/goods?perNum=25&page=1")
+            } = await request.post("/api/v1/regexps")
                 .send({
-                    username: user.name, password: user.pass
+                    name: faker.random.word() + "link_cate",
+                    value: new RegExp("chchachc.+").source,
+                    link: ids.categories[0]
                 }).then();
-            status.should.be.not.eql(500);
+            status.should.be.eql(201);
+            ids.regexps.push(result._id);
+            result.should.have.property("link");
         });
 
     });
-
 });

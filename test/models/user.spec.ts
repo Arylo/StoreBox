@@ -102,18 +102,6 @@ describe("User Model", () => {
             });
     });
 
-    it("Ban User", () => {
-        return UsersModel.ban(user.id).then((result) => {
-            result.should.be.not.empty();
-        });
-    });
-
-    it("Release Ban User", () => {
-        return UsersModel.allow(user.id).then((result) => {
-            result.should.be.not.empty();
-        });
-    });
-
     it("Vaild", () => {
         return UsersModel.isVaild(user.username, user.password)
             .then((result) => {

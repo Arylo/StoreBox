@@ -10,12 +10,15 @@ import basicAuth = require("basic-auth");
 import { Model as UserModel, UserDoc  } from "@models/User";
 import { Model as TokensModel } from "@models/Token";
 import { RolesGuard } from "@guards/roles";
+import { TokensService } from "@services/tokens";
 import { LoginBodyDto, LoginQueryDto, LoginRespone } from "./auth.dto";
 
 @UseGuards(RolesGuard)
 @ApiUseTags("auth")
 @Controller("api/v1/auth")
 export class AuthAdminController {
+
+    constructor(private readonly tokensSvr: TokensService) { }
 
     @Post("login")
     @ApiOperation({ title: "Login System" })
@@ -43,7 +46,9 @@ export class AuthAdminController {
         if (query.token) {
             const token = uuid();
             try {
-                await TokensModel.create({ token, user: session.loginUserId });
+                await this.tokensSvr.create({
+                    token, user: session.loginUserId
+                });
             } catch (error) {
                 throw new BadRequestException(error.toString());
             }
@@ -63,7 +68,7 @@ export class AuthAdminController {
         const user = (req as any).user;
         if (user && user.token && !!~user.roles.indexOf("token")) {
             const token = user.token;
-            await TokensModel.findOneAndRemove({ token }).exec();
+            await this.tokensSvr.remove({ token });
             res.status(HttpStatus.OK).json({ });
             return;
         } else {

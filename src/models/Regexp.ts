@@ -3,6 +3,9 @@ import { Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS } from "@models/common";
 import { ICategory, FLAG as CF, Model as CM } from "@models/Categroy";
 import { DEF_PER_COUNT } from "@dtos/page";
 import Cache =  require("schedule-cache");
+import isRegExp = require("@utils/isRegExp");
+
+import { INewRegexp } from "../modules/regexps/regexps.dto";
 
 export const cache = Cache.create(`${Date.now()}${Math.random()}`);
 
@@ -39,15 +42,22 @@ RegexpSchema.static("countRegexps", async (perNum = 1) => {
     return cache.get(FLAG);
 });
 
-RegexpSchema.static("addRegexp", (name: string, value: string) => {
-    return Model.create({
-        name: name,
-        value: value
-    }).then((result) => {
-        cache.clear();
-        return result;
-    });
-});
+RegexpSchema.static(
+    "addRegexp",
+    (name: string, value: string, link?: ObjectId) => {
+        const obj: INewRegexp = {
+            name: name,
+            value: value
+        };
+        if (link) {
+            obj.link = link;
+        }
+        return Model.create(obj).then((result) => {
+            cache.clear();
+            return result;
+        });
+    }
+);
 
 RegexpSchema.static("removeRegexp", (id: ObjectId) => {
     return Model.findByIdAndRemove(id).exec();
@@ -111,7 +121,7 @@ interface IRegexpModel<T extends RegexpDoc> extends M<T> {
      * 创建新规则
      * @return {Promise}
      */
-    addRegexp(name: string, value: string): Promise<T>;
+    addRegexp(name: string, value: string, link?: ObjectId): Promise<T>;
     /**
      * 移除规则
      * @return {Promise}
@@ -148,6 +158,14 @@ RegexpSchema.path("name").validate({
         return !result;
     },
     message: "The name is exist"
+});
+
+RegexpSchema.path("value").validate({
+    isAsync: true,
+    validator: (value, respond) => {
+        return isRegExp(value);
+    },
+    message: "The value isnt Regexp"
 });
 
 RegexpSchema.path("value").validate({

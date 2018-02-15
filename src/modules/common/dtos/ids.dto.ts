@@ -17,13 +17,25 @@ export class IdDto implements IIdDto {
 
 export interface ICidDto {
     /**
-     * Category MongoID
+     * Category or Collection MongoID
      */
     readonly cid: ObjectId;
 }
 
+/**
+ * The Dto for Category ID
+ */
 export class CidDto implements ICidDto {
     @ApiModelProperty({ type: String, description: "Category ID" })
+    @IsMongoId()
+    public readonly cid: ObjectId;
+}
+
+/**
+ * The Dto for Collection ID
+ */
+export class CCidDto implements ICidDto {
+    @ApiModelProperty({ type: String, description: "Collection ID" })
     @IsMongoId()
     public readonly cid: ObjectId;
 }
