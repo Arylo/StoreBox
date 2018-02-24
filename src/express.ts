@@ -2,6 +2,7 @@ import * as express from "express";
 import * as session from "express-session";
 import * as bodyParser from "body-parser";
 import * as cookieParser from "cookie-parser";
+import helmet = require("helmet");
 import { error } from "./modules/common/middlewares/logger.middleware";
 
 let server: express.Express;
@@ -16,6 +17,7 @@ export const initExpress = () => {
 
     mServer.enable("trust proxy");
 
+    mServer.use(helmet());
     mServer.use(bodyParser.json());
     mServer.use(bodyParser.urlencoded());
     mServer.use(cookieParser("storebox"));
