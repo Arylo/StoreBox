@@ -1,4 +1,6 @@
 db:
   host: "db"
+redis:
+  host: "cache"
 path:
   tmp: /tmp

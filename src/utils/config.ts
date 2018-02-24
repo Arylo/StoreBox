@@ -25,6 +25,15 @@ for (const item of Object.keys(configModule.paths)) {
     }
 }
 
+configModule.redis.url = configModule.redis.url ||
+    `redis://${configModule.redis.host}:${configModule.redis.port}`;
+if (
+    configModule.redis.url.indexOf("redis://") !== 0 &&
+    configModule.redis.url.indexOf("//") !== 0
+) {
+    configModule.redis.url = `redis://${configModule.redis.url}`;
+}
+
 export const config = configModule.getConfig() as ConfigObj;
 
 import { systemLogger } from "../modules/common/helper/log";

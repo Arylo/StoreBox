@@ -19,7 +19,12 @@ interface paths {
     backup: string;
 }
 
+interface redis {
+    url: string;
+}
+
 export interface ConfigObj {
+    redis: redis;
     server: server;
     db: db;
     paths: paths;
