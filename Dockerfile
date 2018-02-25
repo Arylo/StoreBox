@@ -14,8 +14,10 @@ RUN npm run tsc && \
     rm -rf node_modules && \
     npm install --production && \
     npm install cross-env tsconfig-paths --save-dev && \
+    npm install pm2 --global && \
     npm cache clean -f
 
-CMD [ "npm", "run", "start:prod" ]
+CMD pm2 start index.js --node-args="-r tsconfig-paths/register" -i 0 --no-daemon
+# CMD [ "npm", "run", "start:prod" ]
 
 EXPOSE 9000

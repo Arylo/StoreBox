@@ -11,3 +11,4 @@
   - [ ] 接入AuthBox
 - [ ] 缓存整理
 - [ ] Redis 接入
+  - [x] 支持Session
