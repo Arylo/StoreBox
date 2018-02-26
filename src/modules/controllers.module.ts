@@ -30,6 +30,7 @@ import {
 // endregion Middlewares
 
 // region Services
+import { RegexpsService } from "@services/regexps";
 import { CollectionsService } from "@services/collections";
 import { UsersService } from "@services/users";
 import { TokensService } from "@services/tokens";
@@ -43,9 +44,13 @@ export const controllers = [
     CollectionsController, CollectionsAdminController
 ];
 
+const services = [
+    RegexpsService, CollectionsService, TokensService, UsersService
+];
+
 @Module({
     controllers,
-    components: [ CollectionsService, TokensService, UsersService ]
+    components: [ ...services ]
 })
 export class ControllersModule {
     private uploadFileMethod = {

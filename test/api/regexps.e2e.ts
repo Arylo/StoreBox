@@ -2,6 +2,7 @@ import supertest = require("supertest");
 import faker = require("faker");
 
 import { Model as RegexpsModel } from "@models/Regexp";
+import { RegexpsService } from "@services/regexps";
 import { connect, drop, newUser } from "../helpers/database";
 import { init } from "../helpers/server";
 import { sleep } from "../helpers/utils";
@@ -10,6 +11,7 @@ describe("Regexp E2E Api", () => {
 
     const URL = "/api/v1/regexps";
     let request: supertest.SuperTest<supertest.Test>;
+    let regexpsSvr: RegexpsService;
 
     before(() => {
         return connect();
@@ -26,6 +28,10 @@ describe("Regexp E2E Api", () => {
 
     before(async () => {
         request = await init();
+    });
+
+    before(() => {
+        regexpsSvr = new RegexpsService();
     });
 
     const user = {
@@ -53,9 +59,10 @@ describe("Regexp E2E Api", () => {
             value: "^list.2"
         }];
         for (const item of items) {
-            const doc = await RegexpsModel.addRegexp(
-                item.name + Date.now(), item.value + Date.now()
-            );
+            const doc = await regexpsSvr.create({
+                name: item.name,
+                value: item.value + Date.now()
+            });
             ids.regexps.push(doc._id);
             await sleep(100);
         }

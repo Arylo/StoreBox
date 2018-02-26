@@ -3,6 +3,7 @@ import { ObjectId } from "@models/common";
 import { Model as RegexpsModel, cache, RegexpDoc } from "@models/Regexp";
 import { Model as CategroiesModel, ICategory } from "@models/Categroy";
 import { DEF_PER_COUNT } from "@dtos/page";
+import { isUndefined } from "util";
 
 interface IGetRegexpsOptions {
     categroies?: ObjectId[];
@@ -13,7 +14,7 @@ interface IGetRegexpsOptions {
 export class RegexpsService {
 
     private loadAndCache(FLAG: string, value: any, time?: number | string) {
-        if (!cache.get(FLAG)) {
+        if (cache.get(FLAG) === null) {
             cache.put(FLAG, value, time);
         }
         return cache.get(FLAG);
@@ -22,7 +23,7 @@ export class RegexpsService {
     /**
      * 新增规则
      */
-    public async create(obj) {
+    public async create(obj: object) {
         try {
             return await RegexpsModel.create(obj);
         } catch (error) {
@@ -93,9 +94,15 @@ export class RegexpsService {
         const FLAG = "totalCount";
         return this.loadAndCache(
             FLAG,
-            CategroiesModel.count({ }).exec(),
+            RegexpsModel.count({ }).exec(),
             3000
         );
+    }
+
+    public getRegexp(id: ObjectId) {
+        return RegexpsModel.findById(id)
+            .populate({ path: "link", populate: { path: "pid" } })
+            .exec();
     }
 
     /**
