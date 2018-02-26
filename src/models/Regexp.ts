@@ -15,13 +15,15 @@ const Definition: SchemaDefinition = {
     link: {
         type: SchemaTypes.ObjectId,
         ref: CF
-    }
+    },
+    hidden: { type: Boolean, default: false }
 };
 
 export interface IRegexp extends IDocRaw {
     name: string;
     value: string;
     link: ObjectId | ICategory;
+    hidden: boolean;
 }
 
 export interface IRegexpsRaw extends IRegexp {
@@ -52,10 +54,7 @@ RegexpSchema.static(
         if (link) {
             obj.link = link;
         }
-        return Model.create(obj).then((result) => {
-            cache.clear();
-            return result;
-        });
+        return Model.create(obj);
     }
 );
 
@@ -95,7 +94,7 @@ RegexpSchema.static("discern", (name: string) => {
     if (cache.get(FLAG_DISCER_LIST)) {
         p = cache.get(FLAG_DISCER_LIST);
     } else {
-        p = Model.find({ link: { $exists: true } })
+        p = Model.find({ link: { $exists: true }, hidden: false })
             .populate("link")
             .exec();
         cache.put(FLAG_DISCER_LIST, p);
