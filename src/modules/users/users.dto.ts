@@ -1,6 +1,7 @@
 import { IsString, IsMongoId } from "class-validator";
 import { ObjectId } from "@models/common";
 import { ApiUseTags, ApiModelProperty } from "@nestjs/swagger";
+import { IUidDto, IGidDto } from "@dtos/ids";
 
 export class CreateUserDto {
     @ApiModelProperty({ type: String, description: "Username" })
@@ -24,4 +25,13 @@ export class ModifyPasswordDto {
     @ApiModelProperty({ type: String, description: "New Password" })
     @IsString()
     public readonly newPassword: string;
+}
+
+export class UserUsergroupParamDto implements IUidDto, IGidDto {
+    @ApiModelProperty({ type: String, description: "User ID" })
+    @IsMongoId()
+    public readonly uid: ObjectId;
+    @ApiModelProperty({ type: String, description: "Usergroup ID" })
+    @IsMongoId()
+    public readonly gid: ObjectId;
 }

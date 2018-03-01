@@ -74,28 +74,35 @@ export class UsergroupsService {
             .exec();
     }
 
-    public async remove(id: ObjectId) {
+    public async remove(gid: ObjectId) {
+        if ((await this.count()) === 1) {
+            throw new BadRequestException("Nnn delete unique group");
+        }
         try {
-            return await UsergroupsModel.findByIdAndRemove(id).exec();
+            return await UsergroupsModel.findByIdAndRemove(gid).exec();
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
     }
 
-    public async addUserToGroup(id: ObjectId, uid: ObjectId) {
+    public async addUserToGroup(gid: ObjectId, uid: ObjectId) {
+        // TODO User Check
+        // TODO Usergroup Check
         try {
             await UserUsergroupsModel.create({
-                user: uid, usergroup: id
+                user: uid, usergroup: gid
             });
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
     }
 
-    public async removeUserToGroup(id: ObjectId, uid: ObjectId) {
+    public async removeUserFromGroup(gid: ObjectId, uid: ObjectId) {
+        // TODO User Check
+        // TODO Usergroup Check
         try {
             await UserUsergroupsModel.findOneAndRemove({
-                user: uid, usergroup: id
+                user: uid, usergroup: gid
             }).exec();
         } catch (error) {
             throw new BadRequestException(error.toString());

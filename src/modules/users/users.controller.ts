@@ -14,6 +14,7 @@ import { Roles } from "@decorators/roles";
 import { RolesGuard } from "@guards/roles";
 import { ParseIntPipe } from "@pipes/parse-int";
 import { TokensService } from "@services/tokens";
+import { UsergroupsService } from "@services/usergroups";
 import { CollectionsService } from "@services/collections";
 import { UsersService } from "@services/users";
 import { PerPageDto, ListResponse, DEF_PER_COUNT } from "@dtos/page";
@@ -21,7 +22,7 @@ import { UidDto } from "@dtos/ids";
 import { DefResDto } from "@dtos/res";
 
 import {
-    CreateUserDto, ModifyPasswordDto, EditUserDto
+    CreateUserDto, ModifyPasswordDto, EditUserDto, UserUsergroupParamDto
 } from "./users.dto";
 
 @UseGuards(RolesGuard)
@@ -35,7 +36,8 @@ export class UsersAdminController {
     constructor(
         private readonly tokensSvr: TokensService,
         private readonly collectionsSvr: CollectionsService,
-        private readonly usersSvr: UsersService
+        private readonly usersSvr: UsersService,
+        private readonly ugSvr: UsergroupsService
     ) { }
 
     @Roles("admin")
@@ -360,6 +362,38 @@ export class UsersAdminController {
 
     ////////////////////////////////////////
     // endregion Collection Methods
+    ////////////////////////////////////////
+
+    ////////////////////////////////////////
+    // region Usergroup Methods
+    ////////////////////////////////////////
+
+    @Roles("admin")
+    @Get("/:uid/usergroup/:gid")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Move Usergroup" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Move Success",
+    })
+    // endregion Swagger Docs
+    public async moveUsergroup(@Param() param: UserUsergroupParamDto) {
+        const gid = (await this.usersSvr.getUsergroup(param.gid))._id;
+        if (gid.toString() === param.gid) {
+            throw new BadRequestException("This is old Usergroup ID");
+        }
+        await this.ugSvr.removeUserFromGroup(gid, param.uid);
+        try {
+            await this.ugSvr.addUserToGroup(param.gid, param.uid);
+        } catch (error) {
+            await this.ugSvr.addUserToGroup(gid, param.uid);
+            throw error;
+        }
+        return new DefResDto();
+    }
+
+    ////////////////////////////////////////
+    // endregion Usergroup Methods
     ////////////////////////////////////////
 
     @Roles("admin")

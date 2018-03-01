@@ -1,9 +1,21 @@
 import { Component, BadRequestException } from "@nestjs/common";
 import { ObjectId } from "@models/common";
 import { Model as UsersModel, UserDoc } from "@models/User";
+import { Model as UserUsergroupsModel } from "@models/User-Usergroup";
+import { IUsergroups } from "@models/Usergroup";
 
 @Component()
 export class UsersService {
+
+    public async getUsergroup(uid: ObjectId) {
+        const group = await UserUsergroupsModel
+            .findOne({ user: uid }).populate("usergroup")
+            .exec();
+        if (!group) {
+            return group as undefined;
+        }
+        return group.toObject().usergroup as IUsergroups;
+    }
 
     /**
      * 修改`User`属性, 除了`username`

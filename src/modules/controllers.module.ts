@@ -14,6 +14,7 @@ import {
     CollectionsAdminController
 } from "./collections/collections.admin.controller";
 import { TokensAdminController } from "./tokens/tokens.controller";
+import { UsergroupsAdminController } from "./usergroups/usergroups.controller";
 // endregion Controllers
 
 // region Middlewares
@@ -33,19 +34,26 @@ import {
 import { CollectionsService } from "@services/collections";
 import { UsersService } from "@services/users";
 import { TokensService } from "@services/tokens";
+import { UsergroupsService } from "@services/usergroups";
 // endregion Services
 
 export const controllers = [
     FilesController, GoodsController,
-    UsersAdminController, AuthAdminController, RegexpsAdminController,
+    UsersAdminController, AuthAdminController,
+    UsergroupsAdminController,
+    RegexpsAdminController,
     CategoriesAdminController, GoodsAdminController,
     TokensAdminController,
     CollectionsController, CollectionsAdminController
 ];
 
+export const services = [
+    CollectionsService, TokensService, UsersService, UsergroupsService
+];
+
 @Module({
     controllers,
-    components: [ CollectionsService, TokensService, UsersService ]
+    components: [ ...services ]
 })
 export class ControllersModule {
     private uploadFileMethod = {
