@@ -378,16 +378,15 @@ export class UsersAdminController {
     })
     // endregion Swagger Docs
     public async moveUsergroup(@Param() param: UserUsergroupParamDto) {
-        const gid = (await this.usersSvr.getUsergroup(param.gid))._id;
-        if (gid.toString() === param.gid) {
-            throw new BadRequestException("This is old Usergroup ID");
-        }
-        await this.ugSvr.removeUserFromGroup(gid, param.uid);
-        try {
+        const group = await this.usersSvr.getUsergroup(param.uid);
+        if (group) {
+            const gid = group._id;
+            if (gid.toString() === param.gid) {
+                throw new BadRequestException("This is old Usergroup ID");
+            }
+            await this.ugSvr.moveUser(param.gid, param.uid);
+        } else {
             await this.ugSvr.addUserToGroup(param.gid, param.uid);
-        } catch (error) {
-            await this.ugSvr.addUserToGroup(gid, param.uid);
-            throw error;
         }
         return new DefResDto();
     }

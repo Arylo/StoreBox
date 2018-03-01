@@ -12,7 +12,7 @@ export class UsersService {
             .findOne({ user: uid }).populate("usergroup")
             .exec();
         if (!group) {
-            return group as undefined;
+            return null;
         }
         return group.toObject().usergroup as IUsergroups;
     }

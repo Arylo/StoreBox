@@ -109,4 +109,20 @@ export class UsergroupsService {
         }
     }
 
+    public async moveUser(gid: ObjectId, uid: ObjectId) {
+        let doc = null;
+        try {
+            doc = await UserUsergroupsModel.update(
+                { user: uid }, { usergroup: gid },
+                { runValidators: true, context: "query" }
+            ).exec();
+        } catch (error) {
+            throw new BadRequestException(error.toString());
+        }
+        if (!doc) {
+            throw new BadRequestException("User hasnt usergroup");
+        }
+        return doc;
+    }
+
 }
