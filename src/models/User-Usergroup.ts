@@ -44,26 +44,6 @@ export type UserUsergroupDoc = IDoc<IUserUsergroups>;
 
 const UserUsergroupsSchema = new Base(Definition).createSchema();
 
-// region validators
-
-UserUsergroupsSchema.path("user").validate({
-    isAsync: true,
-    validator: async function userIdModifyValidator(val, respond) {
-        if (!this.isNew) {
-            const id = this.getQuery()._id;
-            const cur = await Model.findById(id).exec();
-            if (cur.toObject().user === val) {
-                return respond(true);
-            }
-        }
-        const result = await Model.findOne({ user: val }).exec();
-        return respond(!result);
-    },
-    message: "The User ID is existed"
-});
-
-// endregion validators
-
 /**
  * User-Usergroup Model
  */

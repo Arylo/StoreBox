@@ -56,6 +56,11 @@ export const drop = async (ids?: IIds) => {
         const model = MODEL_IDMETHOD_MAP[method];
         for (const id of (ids[method] || [ ])) {
             await model.findByIdAndRemove(id).exec();
+            if (method === "users") {
+                await UserUsergroupsModel.remove({ user: id }).exec();
+            } else if (method === "usergroups") {
+                await UserUsergroupsModel.remove({ usergroup: id }).exec();
+            }
         }
     }
 };

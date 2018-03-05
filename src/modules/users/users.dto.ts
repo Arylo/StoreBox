@@ -27,11 +27,11 @@ export class ModifyPasswordDto {
     public readonly newPassword: string;
 }
 
-export class UserUsergroupParamDto implements IUidDto, IGidDto {
-    @ApiModelProperty({ type: String, description: "User ID" })
-    @IsMongoId()
-    public readonly uid: ObjectId;
+export class UsergroupBodyDto {
+    @ApiModelProperty({ type: String, description: "Action" })
+    @IsString()
+    public readonly type: "add" | "remove";
     @ApiModelProperty({ type: String, description: "Usergroup ID" })
-    @IsMongoId()
-    public readonly gid: ObjectId;
+    @IsMongoId({ each: true })
+    public readonly gids: ObjectId;
 }

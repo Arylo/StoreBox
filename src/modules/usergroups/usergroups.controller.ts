@@ -7,7 +7,7 @@ import { ParseIntPipe } from "@pipes/parse-int";
 import { PerPageDto, ListResponse, DEF_PER_COUNT } from "@dtos/page";
 import { UGidDto } from "@dtos/ids";
 
-import { AddUsergroupDto, EditUsergroupDto } from "./usergroups.dto";
+import { AddUsergroupDto, EditUsergroupDto, UserUsergroupDto } from "./usergroups.dto";
 
 @UseGuards(RolesGuard)
 @ApiUseTags("User Groups")
@@ -125,6 +125,32 @@ export class UsergroupsAdminController {
         }
         group.users = users;
         return group;
+    }
+
+    @Roles("admin")
+    @Get("/:gid/add/:uid")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.CREATED)
+    @ApiOperation({ title: "Add User to Usergroup" })
+    @ApiResponse({
+        status: HttpStatus.CREATED, description: "Add Success"
+    })
+    // endregion Swagger Docs
+    public addUser(@Param() param: UserUsergroupDto) {
+        return this.ugSvr.addUserToGroup(param.gid, param.uid);
+    }
+
+    @Roles("admin")
+    @Get("/:gid/remove/:uid")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Remove User from Usergroup" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Remove Success"
+    })
+    // endregion Swagger Docs
+    public removeUser(@Param() param: UserUsergroupDto) {
+        return this.ugSvr.removeUserFromGroup(param.gid, param.uid);
     }
 
 }

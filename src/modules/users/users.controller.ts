@@ -6,6 +6,7 @@ import {
     ApiBearerAuth, ApiUseTags, ApiResponse, ApiOperation, ApiImplicitParam
 } from "@nestjs/swagger";
 import { Model as UserModel, IUser, UserDoc } from "@models/User";
+import { Model as UserUsergroupsModel } from "@models/User-Usergroup";
 import { Model as TokensModel } from "@models/Token";
 import { Model as GoodsModels } from "@models/Good";
 import { CollectionDoc } from "@models/Collection";
@@ -17,12 +18,13 @@ import { TokensService } from "@services/tokens";
 import { UsergroupsService } from "@services/usergroups";
 import { CollectionsService } from "@services/collections";
 import { UsersService } from "@services/users";
+import { SystemService } from "@services/system";
 import { PerPageDto, ListResponse, DEF_PER_COUNT } from "@dtos/page";
 import { UidDto } from "@dtos/ids";
 import { DefResDto } from "@dtos/res";
 
 import {
-    CreateUserDto, ModifyPasswordDto, EditUserDto, UserUsergroupParamDto
+    CreateUserDto, ModifyPasswordDto, EditUserDto, UsergroupBodyDto
 } from "./users.dto";
 
 @UseGuards(RolesGuard)
@@ -37,7 +39,8 @@ export class UsersAdminController {
         private readonly tokensSvr: TokensService,
         private readonly collectionsSvr: CollectionsService,
         private readonly usersSvr: UsersService,
-        private readonly ugSvr: UsergroupsService
+        private readonly ugSvr: UsergroupsService,
+        private readonly sysSvr: SystemService
     ) { }
 
     @Roles("admin")
@@ -77,14 +80,8 @@ export class UsersAdminController {
         status: HttpStatus.BAD_REQUEST, description: "Add User Fail"
     })
     // endregion Swagger Docs
-    public async addUser(@Body() user: CreateUserDto) {
-        let obj;
-        try {
-            obj = await UserModel.addUser(user.username, user.password);
-        } catch (error) {
-            throw new BadRequestException(error.toString());
-        }
-        return obj;
+    public addUser(@Body() user: CreateUserDto) {
+        return this.usersSvr.addUser(user);
     }
 
     @Roles("admin")
@@ -155,12 +152,8 @@ export class UsersAdminController {
         status: HttpStatus.BAD_REQUEST, description: "Delete User Fail"
     })
     // endregion Swagger Docs
-    public async delete(@Param() user: UidDto) {
-        try {
-            await UserModel.removeUser(user.uid);
-        } catch (error) {
-            throw new BadRequestException(error.toString());
-        }
+    public delete(@Param() user: UidDto) {
+        this.usersSvr.removeUser(user.uid);
         return new DefResDto();
     }
 
@@ -369,26 +362,33 @@ export class UsersAdminController {
     ////////////////////////////////////////
 
     @Roles("admin")
-    @Get("/:uid/usergroup/:gid")
+    @Get("/:uid/usergroups")
     // region Swagger Docs
     @HttpCode(HttpStatus.OK)
-    @ApiOperation({ title: "Move Usergroup" })
+    @ApiOperation({ title: "Get Usergroup" })
     @ApiResponse({
-        status: HttpStatus.OK, description: "Move Success",
+        status: HttpStatus.OK, type: ListResponse
     })
     // endregion Swagger Docs
-    public async moveUsergroup(@Param() param: UserUsergroupParamDto) {
-        const group = await this.usersSvr.getUsergroup(param.uid);
-        if (group) {
-            const gid = group._id;
-            if (gid.toString() === param.gid) {
-                throw new BadRequestException("This is old Usergroup ID");
-            }
-            await this.ugSvr.moveUser(param.gid, param.uid);
-        } else {
-            await this.ugSvr.addUserToGroup(param.gid, param.uid);
+    public async getUsergroups(
+        @Param() param: UidDto, @Query(new ParseIntPipe()) query: PerPageDto
+    ) {
+        const curPage = query.page || 1;
+        const perNum = query.perNum || DEF_PER_COUNT;
+        const totalPages =
+            await this.usersSvr.countPageUsergroups(param.uid, query.perNum);
+        const totalCount = await this.usersSvr.countUsergroups(param.uid);
+
+        const resData = new ListResponse();
+        resData.current = curPage;
+        resData.totalPages = totalPages;
+        resData.total = totalCount;
+        if (totalPages >= curPage) {
+            resData.data = await this.usersSvr.getUsergroups(param.uid, {
+                page: curPage, perNum
+            });
         }
-        return new DefResDto();
+        return resData;
     }
 
     ////////////////////////////////////////

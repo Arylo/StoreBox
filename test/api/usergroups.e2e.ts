@@ -1,15 +1,15 @@
 import supertest = require("supertest");
 import faker = require("faker");
 
-import { Model as UserUsergroupsModel } from "@models/User-Usergroup";
 import { UsersService } from "@services/users";
+import { SystemService } from "@services/system";
 
 import {
     connect, drop, addCategoryAndRegexp
 } from "../helpers/database";
 import { init } from "../helpers/server";
 import {
-    newUsergroup, getLinkIdByUserId
+    newUsergroup, getLinkIdsByUserId
 } from "../helpers/database/usergroups";
 import { newUser } from "../helpers/database/user";
 
@@ -35,11 +35,6 @@ describe("Usergroup E2E Api", () => {
         request = await init();
     });
 
-    let userSvr: UsersService;
-    before(() => {
-        userSvr = new UsersService();
-    });
-
     const user = {
         username: `${faker.name.firstName()}${Math.random()}`,
         password: faker.random.words()
@@ -49,7 +44,7 @@ describe("Usergroup E2E Api", () => {
         ids.users.push(userDoc._id);
         const groupDoc = await newUsergroup(undefined, userDoc._id);
         ids.usergroups.push(groupDoc._id);
-        ids.userusergroups.push(await getLinkIdByUserId(userDoc._id));
+        ids.userusergroups.push(await getLinkIdsByUserId(userDoc._id));
         await request.post("/api/v1/auth/login").send(user).then();
     });
 

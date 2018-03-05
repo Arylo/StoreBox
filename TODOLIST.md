@@ -1,8 +1,8 @@
 # TODO LIST
 
-- [ ] 用户组
+- [x] 用户组
   - [ ] 权限
-  - [ ] 默认用户组
+  - [x] 默认用户组
 - [ ] 上传到指定Categroy
 - [ ] 整顿collectin info的goods 列表
 - [ ] Token 使用日志显示
