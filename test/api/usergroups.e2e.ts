@@ -1,9 +1,6 @@
 import supertest = require("supertest");
 import faker = require("faker");
 
-import { UsersService } from "@services/users";
-import { SystemService } from "@services/system";
-
 import {
     connect, drop, addCategoryAndRegexp
 } from "../helpers/database";
@@ -11,7 +8,7 @@ import { init } from "../helpers/server";
 import {
     newUsergroup, getLinkIdsByUserId
 } from "../helpers/database/usergroups";
-import { newUser } from "../helpers/database/user";
+import { newUser, newUserWithUsergroup } from "../helpers/database/user";
 
 describe("Usergroup E2E Api", () => {
 
@@ -40,11 +37,9 @@ describe("Usergroup E2E Api", () => {
         password: faker.random.words()
     };
     step("Login", async () => {
-        const userDoc = await newUser(user.username, user.password);
+        const userDoc =
+            await newUserWithUsergroup(user.username, user.password);
         ids.users.push(userDoc._id);
-        const groupDoc = await newUsergroup(undefined, userDoc._id);
-        ids.usergroups.push(groupDoc._id);
-        ids.userusergroups.push(await getLinkIdsByUserId(userDoc._id));
         await request.post("/api/v1/auth/login").send(user).then();
     });
 
@@ -74,6 +69,30 @@ describe("Usergroup E2E Api", () => {
         status.should.be.eql(200);
         result.users.data.should.be.an.Array();
         result.users.total.should.be.eql(0);
+    });
+
+    step("Add User into Usergroup", async () => {
+        const gid = ids.usergroups[ids.usergroups.length - 1];
+        const uid = ids.users[0];
+        const url = `/api/v1/usergroups/${gid}/add/${uid}`;
+        const { status } = await request.get(url).then();
+        status.should.be.eql(201);
+    });
+
+    step("Have 1 User", async () => {
+        const id = ids.usergroups[ids.usergroups.length - 1];
+        const url = `/api/v1/usergroups/${id}`;
+        const { status, body: result } = await request.get(url).then();
+        status.should.be.eql(200);
+        result.users.total.should.be.eql(1);
+    });
+
+    step("Fail to Add User into Same Usergroup", async () => {
+        const gid = ids.usergroups[ids.usergroups.length - 1];
+        const uid = ids.users[0];
+        const url = `/api/v1/usergroups/${gid}/add/${uid}`;
+        const { status } = await request.get(url).then();
+        status.should.be.eql(400);
     });
 
     step("Modify Usergroup's name", async () => {

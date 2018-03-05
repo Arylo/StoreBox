@@ -1,4 +1,5 @@
 import { Component, BadRequestException } from "@nestjs/common";
+import { Model as UsersModel } from "@models/User";
 import { Model as UsergroupsModel } from "@models/Usergroup";
 import { Model as UserUsergroupsModel } from "@models/User-Usergroup";
 import { ObjectId } from "@models/common";
@@ -86,10 +87,19 @@ export class UsergroupsService {
     }
 
     public async addUserToGroup(gid: ObjectId, uid: ObjectId) {
-        // TODO User Check
-        // TODO Usergroup Check
+        if (!(await UsersModel.findById(uid).exec())) {
+            throw new BadRequestException("The User ID is not exist");
+        }
+        if (!(await UsergroupsModel.findById(gid).exec())) {
+            throw new BadRequestException("The Usergroup ID is not exist");
+        }
+        if (await UserUsergroupsModel.findOne({
+            user: uid, usergroup: gid
+        }).exec()) {
+            throw new BadRequestException("User has been in the usergroup");
+        }
         try {
-            await UserUsergroupsModel.create({
+            return await UserUsergroupsModel.create({
                 user: uid, usergroup: gid
             });
         } catch (error) {
@@ -98,8 +108,6 @@ export class UsergroupsService {
     }
 
     public async removeUserFromGroup(gid: ObjectId, uid: ObjectId) {
-        // TODO User Check
-        // TODO Usergroup Check
         try {
             await UserUsergroupsModel.findOneAndRemove({
                 user: uid, usergroup: gid

@@ -1,7 +1,7 @@
+import faker = require("faker");
 import { ObjectId } from "@models/common";
 import { Model as UserUsergroupsModel } from "@models/User-Usergroup";
-import { Model as UsergroupsModel } from "@models/Usergroup";
-import faker = require("faker");
+import { UsergroupsService } from "@services/usergroups";
 
 /// <reference path="./usergroups.d.ts" />
 
@@ -22,11 +22,10 @@ export const getLinkIdsByUsergroupId = async (gid: ObjectId) => {
 export const newUsergroup = async (
     name = `${faker.random.word}${Math.random()}`, uid?: ObjectId
 ) => {
-    const group = await UsergroupsModel.create({ name });
+    const svr = new UsergroupsService();
+    const group = await svr.add({ name });
     if (uid) {
-        const link = await UserUsergroupsModel.create({
-            user: uid, usergroup: group._id
-        });
+        await svr.addUserToGroup(group._id, uid);
     }
     return group;
 };
