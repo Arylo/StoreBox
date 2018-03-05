@@ -5,12 +5,13 @@ import { connect, drop, newUser } from "../helpers/database";
 import { init } from "../helpers/server";
 import { UsersService } from "@services/users";
 import { TokensService } from "@services/tokens";
+import { SystemService } from "@services/system";
 
 describe("Fix Issues", () => {
 
     let request: supertest.SuperTest<supertest.Test>;
     const tokensSvr = new TokensService();
-    const usersSvr = new UsersService();
+    const usersSvr = new UsersService(new SystemService());
 
     before(() => {
         return connect();

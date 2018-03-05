@@ -14,6 +14,7 @@ import {
     CollectionsAdminController
 } from "./collections/collections.admin.controller";
 import { TokensAdminController } from "./tokens/tokens.controller";
+import { UsergroupsAdminController } from "./usergroups/usergroups.controller";
 // endregion Controllers
 
 // region Middlewares
@@ -34,18 +35,24 @@ import { RegexpsService } from "@services/regexps";
 import { CollectionsService } from "@services/collections";
 import { UsersService } from "@services/users";
 import { TokensService } from "@services/tokens";
+import { UsergroupsService } from "@services/usergroups";
+import { SystemService } from "@services/system";
 // endregion Services
 
 export const controllers = [
     FilesController, GoodsController,
-    UsersAdminController, AuthAdminController, RegexpsAdminController,
+    UsersAdminController, AuthAdminController,
+    UsergroupsAdminController,
+    RegexpsAdminController,
     CategoriesAdminController, GoodsAdminController,
     TokensAdminController,
     CollectionsController, CollectionsAdminController
 ];
 
-const services = [
-    RegexpsService, CollectionsService, TokensService, UsersService
+export const services = [
+    RegexpsService,
+    CollectionsService, TokensService, UsersService, UsergroupsService,
+    SystemService
 ];
 
 @Module({

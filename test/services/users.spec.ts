@@ -1,4 +1,5 @@
 import { UsersService } from "@services/users";
+import { SystemService } from "@services/system";
 import { Model as UsersModel } from "@models/User";
 import db = require("../helpers/database");
 import faker = require("faker");
@@ -20,7 +21,7 @@ describe("Users Service Test Unit", () => {
     });
 
     beforeEach(() => {
-        usersSvr = new UsersService();
+        usersSvr = new UsersService(new SystemService());
     });
 
     const user = {

@@ -1,7 +1,6 @@
 import faker = require("faker");
 import { config } from "@utils/config";
 import { ObjectId } from "@models/common";
-import { connectDatabase } from "../../src/modules/database/database.providers";
 
 import { Model as ValuesModel } from "@models/Value";
 import { Model as GoodsModels } from "@models/Good";
@@ -10,6 +9,11 @@ import { Model as UsersModel } from "@models/User";
 import { Model as TokensModel } from "@models/Token";
 import { Model as CollectionsModel } from "@models/Collection";
 import { Model as CategoriesModel, CategoryDoc } from "@models/Categroy";
+import { Model as UsergroupsModel } from "@models/Usergroup";
+import { Model as UserUsergroupsModel } from "@models/User-Usergroup";
+
+import { connectDatabase } from "../../src/modules/database/database.providers";
+import { newUser as newUserFn } from "./database/user";
 
 config.db.database = "storebox-test";
 
@@ -37,26 +41,27 @@ export const drop = async (ids?: IIds) => {
         await CategoriesModel.remove({ }).exec();
         return;
     }
-    for (const id of (ids.values || [ ])) {
-        await ValuesModel.findByIdAndRemove(id).exec();
-    }
-    for (const id of (ids.goods || [ ])) {
-        await GoodsModels.findByIdAndRemove(id).exec();
-    }
-    for (const id of (ids.regexps || [ ])) {
-        await RegexpsModel.findByIdAndRemove(id).exec();
-    }
-    for (const id of (ids.users || [ ])) {
-        await UsersModel.findByIdAndRemove(id).exec();
-    }
-    for (const id of (ids.tokens || [ ])) {
-        await TokensModel.findByIdAndRemove(id).exec();
-    }
-    for (const id of (ids.categories || [ ])) {
-        await CategoriesModel.findByIdAndRemove(id).exec();
-    }
-    for (const id of (ids.collections || [ ])) {
-        await CollectionsModel.findByIdAndRemove(id).exec();
+    const MODEL_IDMETHOD_MAP = {
+        "values": ValuesModel,
+        "goods": GoodsModels,
+        "regexps": RegexpsModel,
+        "users": UsersModel,
+        "tokens": TokensModel,
+        "categories": CategoriesModel,
+        "collections": CollectionsModel,
+        "usergroups": UsergroupsModel,
+        "userusergroups": UserUsergroupsModel
+    };
+    for (const method of Object.keys(MODEL_IDMETHOD_MAP)) {
+        const model = MODEL_IDMETHOD_MAP[method];
+        for (const id of (ids[method] || [ ])) {
+            await model.findByIdAndRemove(id).exec();
+            if (method === "users") {
+                await UserUsergroupsModel.remove({ user: id }).exec();
+            } else if (method === "usergroups") {
+                await UserUsergroupsModel.remove({ usergroup: id }).exec();
+            }
+        }
     }
 };
 
@@ -68,9 +73,7 @@ export const addCategoryAndRegexp = async (regexp: RegExp) => {
     return [category, reg];
 };
 
-export const newUser = (username: string, password: string) => {
-    return UsersModel.addUser(username, password);
-};
+export const newUser = newUserFn;
 
 export const newRegexp = (name: string, value: RegExp, link?) => {
     return RegexpsModel.addRegexp(name, value.source, link);

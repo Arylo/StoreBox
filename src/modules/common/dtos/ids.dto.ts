@@ -79,6 +79,12 @@ export class GidDto implements IGidDto {
     public readonly gid: ObjectId;
 }
 
+export class UGidDto implements IGidDto {
+    @ApiModelProperty({ type: String, description: "Usergroup ID" })
+    @IsMongoId()
+    public readonly gid: ObjectId;
+}
+
 export interface IUidDto {
     /**
      * User MongoID

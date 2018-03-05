@@ -2,6 +2,10 @@ import * as mongoose from "mongoose";
 import { isArray } from "util";
 import { config } from "@utils/config";
 import { Model as UsersModel } from "@models/User";
+import { Model as UsergroupsModel } from "@models/Usergroup";
+import { Model as UserUsergroupsModel } from "@models/User-Usergroup";
+import { Model as SystemModel } from "@models/System";
+import { SystemService } from "@services/system";
 import { systemLogger } from "../common/helper/log";
 
 const getDatabaseUrl = () => {
@@ -21,19 +25,38 @@ export const connectDatabase = () => {
     return new Promise((resolve, reject) => {
         const connection = mongoose.connect(getDatabaseUrl(), {
             useMongoClient: true,
-        }, (err) => {
+        }, async (err) => {
             if (err) {
                 return reject(err);
             }
             systemLogger.info("Connected Database.");
-            UsersModel.count({ }).exec().then((num) => {
-                if (num === 0) {
-                    return UsersModel.addUser("root", "admin");
-                }
-            });
+            await injectData();
             return resolve(connection);
         });
     });
+};
+
+export const injectData = async () => {
+    let num = await UsersModel.count({ }).exec();
+    if (num === 0) {
+        return UsersModel.addUser("root", "admin");
+    }
+    num = await UsergroupsModel.count({ }).exec();
+    if (num === 0) {
+        const group = await UsergroupsModel.create({ name: "admin" });
+        const conditions = (await UsersModel.find({ }).exec())
+            .map((item) => {
+                return {
+                    user: item._id,
+                    usergroup: group._id
+                };
+            });
+        await SystemModel.findOneAndUpdate(
+            { key: SystemService.DEFAULT_USERGROUP_FLAG },
+            { value: group._id.toString() }, { upsert: true }
+        ).exec();
+        await UserUsergroupsModel.create(conditions);
+    }
 };
 
 export const databaseProviders = [
