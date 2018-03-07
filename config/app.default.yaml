@@ -15,3 +15,9 @@ paths:
   log: log
   resource: resource
   backup: backup
+defaults:
+  user:
+    name: root
+    pass: admin
+  group:
+    name: admin

@@ -39,11 +39,15 @@ export const connectDatabase = () => {
 export const injectData = async () => {
     let num = await UsersModel.count({ }).exec();
     if (num === 0) {
-        return UsersModel.addUser("root", "admin");
+        return UsersModel.addUser(
+            config.defaults.user.name, config.defaults.user.pass
+        );
     }
     num = await UsergroupsModel.count({ }).exec();
     if (num === 0) {
-        const group = await UsergroupsModel.create({ name: "admin" });
+        const group = await UsergroupsModel.create({
+            name: config.defaults.group.name
+        });
         const conditions = (await UsersModel.find({ }).exec())
             .map((item) => {
                 return {
