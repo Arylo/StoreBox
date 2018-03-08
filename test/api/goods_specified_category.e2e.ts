@@ -48,10 +48,10 @@ describe("Upload Good with specified categories", () => {
 
     const targetIndex = 6;
 
-    step("Set Category Regexp", async () => {
+    step("Set Category and Regexp", async () => {
         const targetId = ids.categories[targetIndex];
 
-        for (let i = 0; i < 2; i++) {
+        for (let i = 0; i < 3; i++) {
             const filepath = files.newFile();
             filepaths.push(filepath);
             const filename = path.basename(filepath);
@@ -74,7 +74,7 @@ describe("Upload Good with specified categories", () => {
         status.should.be.eql(400);
     });
 
-    step("Upload Way Success with Specified Category", async () => {
+    step("Upload File Success with Specified Category", async () => {
         const targetId = ids.categories[targetIndex];
         const filepath = filepaths[0];
         const filename = path.basename(filepath);
@@ -88,7 +88,7 @@ describe("Upload Good with specified categories", () => {
         ids.goods.push(await goods.getIdByOriginname(filename));
     });
 
-    step("Upload Way Success with Specified Parent Category", async () => {
+    step("Upload File Success with Specified Parent Category", async () => {
         const targetId = ids.categories[targetIndex - 1];
         const filepath = filepaths[1];
         const filename = path.basename(filepath);
@@ -100,6 +100,45 @@ describe("Upload Good with specified categories", () => {
         );
         status.should.be.eql(201);
         ids.goods.push(await goods.getIdByOriginname(filename));
+    });
+
+    step("Upload File Fail with Specified Child Category", async () => {
+        const targetId = ids.categories[8];
+        const filepath = filepaths[1];
+        const filename = path.basename(filepath);
+
+        const { status } = await files.uploadFile(
+            request, filepath, { query: {
+                "category": await categories.getNameById(targetId)
+            }}
+        );
+        status.should.be.eql(400);
+    });
+
+    step("Upload File Fail with Specified Child Category", async () => {
+        const targetId = ids.categories[8];
+        const filepath = filepaths[2];
+        const filename = path.basename(filepath);
+
+        const { status } = await files.uploadFile(
+            request, filepath, { query: {
+                "category": await categories.getNameById(targetId)
+            }}
+        );
+        status.should.be.eql(400);
+    });
+
+    step("Upload File Fail with Specified Brother Category", async () => {
+        const targetId = ids.categories[7];
+        const filepath = filepaths[2];
+        const filename = path.basename(filepath);
+
+        const { status } = await files.uploadFile(
+            request, filepath, { query: {
+                "category": await categories.getNameById(targetId)
+            }}
+        );
+        status.should.be.eql(400);
     });
 
 });

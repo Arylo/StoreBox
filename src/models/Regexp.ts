@@ -11,7 +11,7 @@ export const cache = Cache.create(`${Date.now()}${Math.random()}`);
 
 const Definition: SchemaDefinition = {
     name: { type: String, required: true, unique: true },
-    value: { type: String, required: true, unique: true },
+    value: { type: String, required: true },
     link: {
         type: SchemaTypes.ObjectId,
         ref: CF
