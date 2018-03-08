@@ -9,24 +9,27 @@ export class ToArrayPipe implements PipeTransform<any> {
         this.properties = properties;
     }
 
-    public async transform(value: any, metadata: ArgumentMetadata) {
+    public transform(value: any, metadata: ArgumentMetadata) {
         if (!value || isArray(value)) {
             return value;
         }
+        if (!isObject(value)) {
+            return [ value ];
+        }
         if (this.properties.length === 0) {
-            if (isObject(value)) {
-                for (const key of Object.keys(value)) {
-                    value[key] = [ value[key] ];
+            for (const key of Object.keys(value)) {
+                if (isArray(value[key])) {
+                    continue;
                 }
-            } else {
-                return [ value ];
+                value[key] = [ value[key] ];
             }
         } else {
             for (const property of this.properties) {
-                if (!value[property] || isArray(value[property])) {
+                const val = value[property];
+                if (!val || isArray(val)) {
                     continue;
                 }
-                value[property] = [ value[property] ];
+                value[property] = [ val ];
             }
         }
         return value;
