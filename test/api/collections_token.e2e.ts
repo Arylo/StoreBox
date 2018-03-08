@@ -39,10 +39,10 @@ describe("Token to Upload Files Api", () => {
     const FILE_COUNST = 10;
     const filepaths = [ ];
     const prefix = `${faker.random.word()}_`;
-    before(() => {
+    before(async () => {
         // Generator Files
         for (let i = 0; i < FILE_COUNST; i++) {
-            filepaths.push(newFile(`${prefix}${faker.random.uuid()}`));
+            filepaths.push(await newFile(`${prefix}${faker.random.uuid()}`));
         }
     });
 

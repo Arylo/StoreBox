@@ -48,7 +48,7 @@ describe("Upload Good with Append categories", () => {
 
     step("Add File and its Regexps", async () => {
         for (let i = 0; i < 2; i++) {
-            const filepath = files.newFile();
+            const filepath = await files.newFile();
             filepaths.push(filepath);
             const filename = path.basename(filepath);
 
@@ -73,7 +73,7 @@ describe("Upload Good with Append categories", () => {
         const filepath = filepaths[0];
         const filename = path.basename(filepath);
 
-        const { status } = await files.uploadFile(
+        const { status, body: result } = await files.uploadFile(
             request, filepath, { query: {
                 "append": await categories.getNameById(targetId)
             }}

@@ -42,11 +42,11 @@ describe("Collections E2E Api", () => {
     const FILE_COUNST = 10;
     const filepaths = [ ];
     const prefix = `${faker.random.word()}_`;
-    before(() => {
+    before(async () => {
         // Generator Files
         for (let i = 0; i < FILE_COUNST; i++) {
             const filename = `${prefix}${faker.random.uuid()}`;
-            const filepath = files.newFile(filename);
+            const filepath = await files.newFile(filename);
             filepaths.push(filepath);
         }
     });

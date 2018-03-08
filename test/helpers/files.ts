@@ -65,7 +65,7 @@ const newFilename = () => {
  * @param filename
  * @returns filepath
  */
-export const newFile = (filename = newFilename()) => {
+export const newFile = async (filename = newFilename()) => {
     const folderpath = `${config.paths.tmp}/test`;
     if (!fs.existsSync(folderpath)) {
         fs.mkdirpSync(folderpath);
@@ -74,6 +74,7 @@ export const newFile = (filename = newFilename()) => {
     fs.writeFileSync(filepath, JSON.stringify({
         data: Math.random()
     }), { encoding: "utf-8" });
+    await sleep(200);
     return filepath;
 };
 

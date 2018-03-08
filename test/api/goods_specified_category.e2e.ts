@@ -52,7 +52,7 @@ describe("Upload Good with specified categories", () => {
         const targetId = ids.categories[targetIndex];
 
         for (let i = 0; i < 3; i++) {
-            const filepath = files.newFile();
+            const filepath = await files.newFile();
             filepaths.push(filepath);
             const filename = path.basename(filepath);
 

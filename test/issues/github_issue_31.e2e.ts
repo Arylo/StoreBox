@@ -42,8 +42,8 @@ describe("Fix Issues", () => {
 
         let filepath = "";
         let filename = "";
-        before(() => {
-            filepath = files.newFile();
+        before(async () => {
+            filepath = await files.newFile();
         });
 
         after(() => {
