@@ -2,17 +2,18 @@ import supertest = require("supertest");
 import path = require("path");
 import faker = require("faker");
 
-import { connect, drop, addCategoryAndRegexp, newUser } from "../helpers/database";
+import { connect, drop, addCategoryAndRegexp } from "../helpers/database";
 import { uploadFile } from "../helpers/files";
 import { init } from "../helpers/server";
+import auth = require("../helpers/database/auth");
+import { newName } from "../helpers/utils";
 
 describe("Goods E2E Api", () => {
 
     let request: supertest.SuperTest<supertest.Test>;
 
     const user = {
-        name: faker.name.firstName(),
-        pass: faker.random.words()
+        name: newName()
     };
 
     before(async () => {
@@ -35,13 +36,8 @@ describe("Goods E2E Api", () => {
         request = await init();
     });
 
-    step("Login", async () => {
-        const doc = await newUser(user.name, user.pass);
-        ids.users.push(doc._id);
-        const { body: result } = await request.post("/api/v1/auth/login")
-            .send({
-                username: user.name, password: user.pass
-            }).then();
+    before("login", async () => {
+        ids.users.push((await auth.login(request, user.name))[0]);
     });
 
     step("Add Category", async () => {

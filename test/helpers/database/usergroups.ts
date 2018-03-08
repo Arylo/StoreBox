@@ -2,8 +2,7 @@ import faker = require("faker");
 import { ObjectId } from "@models/common";
 import { Model as UserUsergroupsModel } from "@models/User-Usergroup";
 import { UsergroupsService } from "@services/usergroups";
-
-/// <reference path="./usergroups.d.ts" />
+import { newName } from "../utils";
 
 export const getLinkIdsByUserId = async (uid: ObjectId) => {
     return (await UserUsergroupsModel.find({ user: uid }).exec())
@@ -20,7 +19,7 @@ export const getLinkIdsByUsergroupId = async (gid: ObjectId) => {
 };
 
 export const newUsergroup = async (
-    name = `${faker.random.word}${Math.random()}`, uid?: ObjectId
+    name = newName(), uid?: ObjectId
 ) => {
     const svr = new UsergroupsService();
     const group = await svr.add({ name });

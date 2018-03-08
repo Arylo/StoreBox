@@ -1,17 +1,30 @@
 import { Component, BadRequestException } from "@nestjs/common";
 import { ObjectId } from "@models/common";
-import { Model as RegexpsModel, cache, RegexpDoc } from "@models/Regexp";
+import {
+    Model as RegexpsModel, cache, RegexpDoc, IRegexpDoc
+} from "@models/Regexp";
 import { Model as CategroiesModel, ICategory } from "@models/Categroy";
 import { DEF_PER_COUNT } from "@dtos/page";
 import { isUndefined } from "util";
 
-interface IGetRegexpsOptions {
+export interface IGetRegexpsOptions {
     categroies?: ObjectId[];
     appends?: ObjectId[];
 }
 
 @Component()
 export class RegexpsService {
+
+    constructor() {
+        // Update
+        setTimeout(() => {
+            // Add Hidden Label
+            RegexpsModel.update(
+                { hidden: { $exists: false } }, { hidden: false },
+                { multi: true }
+            ).exec();
+        }, 3000);
+    }
 
     private loadAndCache(FLAG: string, value: any, time?: number | string) {
         if (cache.get(FLAG) === null) {
@@ -23,7 +36,7 @@ export class RegexpsService {
     /**
      * 新增规则
      */
-    public async create(obj: object) {
+    public async create(obj: IRegexpDoc) {
         try {
             return await RegexpsModel.create(obj);
         } catch (error) {
@@ -37,7 +50,9 @@ export class RegexpsService {
     public async editById(id: ObjectId, obj) {
         try {
             return await RegexpsModel
-                .findByIdAndUpdate(id, obj, { runValidators: true })
+                .update(
+                    { _id: id }, obj, { runValidators: true, context: "query" }
+                )
                 .exec();
         } catch (error) {
             throw new BadRequestException(error.toString());
@@ -122,8 +137,12 @@ export class RegexpsService {
         );
     }
 
-    private async getRegexps(opts: IGetRegexpsOptions): Promise<RegexpDoc[]> {
-        const DEF_CONDITIONS = { link: { $exists: true }, hidden: false };
+    private async getRegexps(opts: IGetRegexpsOptions = { })
+    : Promise<RegexpDoc[]> {
+        const DEF_CONDITIONS = {
+            link: { $exists: true }, hidden: false
+        };
+
         if (opts.categroies && opts.categroies.length > 0) {
             // 指定Categroy
             const FLAG = `categroies_scan_regexps_${opts.categroies.join("_")}`;
@@ -166,7 +185,7 @@ export class RegexpsService {
      * 根据规则进行识别
      * @return {Promise}
      */
-    public async discern(name: string, opts: IGetRegexpsOptions) {
+    public async discern(name: string, opts?: IGetRegexpsOptions) {
         const result = await this.getRegexps(opts);
         const list = [ ];
         result.forEach((item) => {

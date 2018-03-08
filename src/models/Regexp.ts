@@ -30,20 +30,18 @@ export interface IRegexpsRaw extends IRegexp {
     link: ICategory;
 }
 
+export interface IRegexpDoc {
+    name: string;
+    value: string;
+    link?: ObjectId;
+    hidden?: boolean;
+}
+
 export type RegexpDoc = IDoc<IRegexp>;
 
 const RegexpSchema = new Base(Definition).createSchema();
 
 // region static methods
-RegexpSchema.static("countRegexps", async (perNum = 1) => {
-    const FLAG = `page_count_${perNum}`;
-    if (cache.get(FLAG)) {
-        return cache.get(FLAG);
-    }
-    cache.put(FLAG, Math.ceil((await Model.count({ }).exec()) / perNum));
-    return cache.get(FLAG);
-});
-
 RegexpSchema.static(
     "addRegexp",
     (name: string, value: string, link?: ObjectId) => {
@@ -62,55 +60,6 @@ RegexpSchema.static("removeRegexp", (id: ObjectId) => {
     return Model.findByIdAndRemove(id).exec();
 });
 
-RegexpSchema.static("link", (id: ObjectId, linkId: ObjectId | false) => {
-    if (!linkId) {
-        return Model.findByIdAndUpdate(id, {
-            "$unset": { link: 0 }
-        }).exec();
-    } else {
-        return Model.findByIdAndUpdate(
-            id, { link: linkId }, { runValidators: true }
-        ).exec();
-    }
-});
-
-RegexpSchema.static("list", (perNum = DEF_PER_COUNT, page = 1) => {
-    const FLAG_LIST = `list_${perNum}_${page}`;
-    if (cache.get(FLAG_LIST)) {
-        return cache.get(FLAG_LIST);
-    }
-    cache.put(
-        FLAG_LIST,
-        Model.find({ })
-            .skip((page - 1) * perNum).limit(perNum)
-            .populate("link").exec()
-    );
-    return cache.get(FLAG_LIST);
-});
-
-RegexpSchema.static("discern", (name: string) => {
-    const FLAG_DISCER_LIST = "discern";
-    let p: Promise<RegexpDoc[]>;
-    if (cache.get(FLAG_DISCER_LIST)) {
-        p = cache.get(FLAG_DISCER_LIST);
-    } else {
-        p = Model.find({ link: { $exists: true }, hidden: false })
-            .populate("link")
-            .exec();
-        cache.put(FLAG_DISCER_LIST, p);
-    }
-    return p.then((result) => {
-        const list = [ ];
-        result.forEach((item) => {
-            const obj = item.toObject();
-            const reg = new RegExp(obj.value);
-            if (reg.test(name)) {
-                list.push(obj.link);
-            }
-        });
-        return list;
-    });
-});
 // endregion static methods
 
 export const FLAG = "regexps";
@@ -126,27 +75,6 @@ interface IRegexpModel<T extends RegexpDoc> extends M<T> {
      * @return {Promise}
      */
     removeRegexp(id: ObjectId): Promise<T>;
-    /**
-     * 规则关联
-     * @return {Promise}
-     */
-    link(id: ObjectId, linkId: ObjectId | false): Promise<T>;
-    /**
-     * 规则列表
-     * @param  perNum {number} 每页数量
-     * @param  page {number} 页数
-     * @return {Promise}
-     */
-    list(perNum?: number, page?: number): Promise<T[]>;
-    /**
-     * 根据规则进行识别
-     * @return {Promise}
-     */
-    discern(filename: string): Promise<ICategory[]>;
-    /**
-     * 返回总页数
-     */
-    countRegexps(perNum?: number): Promise<number>;
 }
 
 // region Validators
@@ -154,7 +82,7 @@ RegexpSchema.path("name").validate({
     isAsync: true,
     validator: async (value, respond) => {
         const result = await Model.findOne({ name: value }).exec();
-        return !result;
+        return respond(!result);
     },
     message: "The name is exist"
 });
@@ -162,16 +90,20 @@ RegexpSchema.path("name").validate({
 RegexpSchema.path("value").validate({
     isAsync: true,
     validator: (value, respond) => {
-        return isRegExp(value);
+        return respond(isRegExp(value));
     },
     message: "The value isnt Regexp"
 });
 
 RegexpSchema.path("value").validate({
     isAsync: true,
-    validator: async (value, respond) => {
-        const result = await Model.findOne({ value: value }).exec();
-        return !result;
+    validator: async function ValueExistValdator(value, respond) {
+        if (this && this.hidden) {
+            return respond(true);
+        }
+        const result =
+            await Model.findOne({ value: value, hidden: false }).exec();
+        return respond(!result);
     },
     message: "The value is exist"
 });
@@ -180,7 +112,7 @@ RegexpSchema.path("link").validate({
     isAsync: true,
     validator: async (value, respond) => {
         const result = await CM.findById(value).exec();
-        return !!result;
+        return respond(!!result);
     },
     message: "The Category ID is not exist"
 });

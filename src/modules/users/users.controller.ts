@@ -367,7 +367,7 @@ export class UsersAdminController {
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Get Usergroup" })
     @ApiResponse({
-        status: HttpStatus.OK, type: ListResponse
+        status: HttpStatus.OK, description: "Usergroup List", type: ListResponse
     })
     // endregion Swagger Docs
     public async getUsergroups(

@@ -85,6 +85,9 @@ export class RegexpsAdminController {
         if (ctx.name) { data.name = ctx.name; }
         if (ctx.value) { data.value = ctx.value; }
         if (ctx.link) { data.link = ctx.link; }
+        if (ctx.hidden !== null && ctx.hidden !== undefined) {
+            data.hidden = ctx.hidden;
+        }
         if (Object.keys(data).length === 0) {
             throw new BadRequestException("No Params");
         }

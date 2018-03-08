@@ -3,6 +3,7 @@ import faker = require("faker");
 
 import { connect, drop, newUser } from "../helpers/database";
 import { init } from "../helpers/server";
+import { login } from "../helpers/database/auth";
 
 describe("Categories E2E Api", () => {
 
@@ -26,17 +27,8 @@ describe("Categories E2E Api", () => {
         request = await init();
     });
 
-    const user = {
-        name: faker.name.firstName(),
-        pass: faker.random.words()
-    };
-    step("Login", async () => {
-        const doc = await newUser(user.name, user.pass);
-        ids.users.push(doc._id);
-        await request.post("/api/v1/auth/login")
-            .send({
-                username: user.name, password: user.pass
-            }).then();
+    step("login", async () => {
+        ids.users.push((await login(request))[0]);
     });
 
     step("Add Category", async () => {
