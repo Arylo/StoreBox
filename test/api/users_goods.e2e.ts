@@ -1,11 +1,11 @@
 import supertest = require("supertest");
-import faker = require("faker");
 
 import {
     connect, drop, newUser, addCategoryAndRegexp
 } from "../helpers/database";
 import { init } from "../helpers/server";
 import auth = require("@db/auth");
+import { newName } from "../helpers/utils";
 
 describe("User's Goods E2E Api", () => {
 
@@ -30,8 +30,8 @@ describe("User's Goods E2E Api", () => {
     describe("Self Goods", () => {
 
         const user = {
-            name: faker.name.firstName(),
-            pass: faker.random.words(),
+            name: newName(),
+            pass: newName(),
             id: ""
         };
 
@@ -56,8 +56,8 @@ describe("User's Goods E2E Api", () => {
     describe("User's Goods", () => {
 
         const user = {
-            name: faker.name.firstName(),
-            pass: faker.random.words(),
+            name: newName(),
+            pass: newName(),
             id: ""
         };
 

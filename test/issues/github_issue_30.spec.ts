@@ -1,7 +1,7 @@
 import isRegExp = require("@utils/isRegExp");
 import { connect } from "../helpers/database";
 import { Model as RegexpsModel } from "@models/Regexp";
-import * as faker from "faker";
+import { newName } from "../helpers/utils";
 
 /**
  * Fix [Issue 30](https://github.com/Arylo/StoreBox/issues/30)
@@ -27,7 +27,7 @@ describe("Fix Issues", () => {
         it("Generate wrong Regexp item", async () => {
             try {
                 await RegexpsModel.create({
-                    name: faker.random.word(),
+                    name: newName(),
                     value: "*"
                 });
             } catch (error) {

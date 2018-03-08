@@ -10,7 +10,7 @@ import {
 } from "../helpers/database";
 import { init } from "../helpers/server";
 import { uploadFiles } from "../helpers/files";
-import { sleep } from "../helpers/utils";
+import { sleep, newName } from "../helpers/utils";
 import auth = require("@db/auth");
 import goodsDb = require("@db/goods");
 import files = require("../helpers/files");
@@ -95,8 +95,8 @@ describe("Collections E2E Api", () => {
 
     step("Add Other User", async () => {
         const user = {
-            name: faker.name.firstName(),
-            pass: faker.random.words()
+            name: newName(),
+            pass: newName()
         };
         const doc = await newUser(user.name, user.pass);
         ids.users.push(doc._id);

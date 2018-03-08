@@ -1,11 +1,11 @@
 import supertest = require("supertest");
-import faker = require("faker");
 
 import {
     connect, drop, newUser
 } from "../helpers/database";
 import { init } from "../helpers/server";
 import auth = require("@db/auth");
+import { newName } from "../helpers/utils";
 
 /**
  * The Feature of Edit User
@@ -38,7 +38,7 @@ describe("Fix Issues", () => {
         });
 
         step("Edit User's Nickname", async () => {
-            const nickname = faker.name.firstName();
+            const nickname = newName();
             const id = ids.users[0];
             const { status } = await request.post(`/api/v1/users/${id}`)
                 .send({ nickname })

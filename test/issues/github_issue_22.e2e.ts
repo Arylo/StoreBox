@@ -1,11 +1,11 @@
 import supertest = require("supertest");
-import faker = require("faker");
 
 import {
     connect, drop, addCategoryAndRegexp
 } from "../helpers/database";
 import { init } from "../helpers/server";
 import auth = require("@db/auth");
+import { newName } from "../helpers/utils";
 
 /**
  * Fix [Issue 22](https://github.com/Arylo/StoreBox/issues/22)
@@ -33,8 +33,8 @@ describe("Fix Issues", () => {
     describe("Github 22", () => {
 
         const user = {
-            name: faker.name.firstName(),
-            pass: faker.random.words()
+            name: newName(),
+            pass: newName()
         };
         before("login", async () => {
             ids.users.push(

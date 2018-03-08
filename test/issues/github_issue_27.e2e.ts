@@ -1,11 +1,11 @@
 import supertest = require("supertest");
-import faker = require("faker");
 
 import {
     connect, drop, newCategory
 } from "../helpers/database";
 import { init } from "../helpers/server";
 import auth = require("@db/auth");
+import { newName } from "../helpers/utils";
 
 /**
  * Fix [Issue 27](https://github.com/Arylo/StoreBox/issues/27)
@@ -39,7 +39,7 @@ describe("Fix Issues", () => {
         });
 
         step("Add Category", async () => {
-            const doc = await newCategory({ name: faker.random.word() });
+            const doc = await newCategory({ name: newName() });
             ids.categories.push(doc._id);
         });
 
@@ -48,7 +48,7 @@ describe("Fix Issues", () => {
                 body: result, status
             } = await request.post("/api/v1/regexps")
                 .send({
-                    name: faker.random.word() + "link_cate",
+                    name: newName(),
                     value: new RegExp("chchachc.+").source,
                     link: ids.categories[0]
                 }).then();

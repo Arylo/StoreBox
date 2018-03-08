@@ -1,8 +1,8 @@
 import * as db from "../helpers/database";
 import * as md5 from "md5";
-import * as faker from "faker";
 import { Model as RegexpsModel, RegexpDoc } from "@models/Regexp";
 import { Model as CategoryModel, ICategoryRaw } from "@models/Categroy";
+import { newName } from "../helpers/utils";
 
 describe("RegExp Model", () => {
 
@@ -14,7 +14,7 @@ describe("RegExp Model", () => {
 
     beforeEach(async () => {
         const result = await CategoryModel.create({
-            name: faker.name.findName()
+            name: newName()
         });
         ids.categories.push(result._id);
         Category = result.toObject() as ICategoryRaw;

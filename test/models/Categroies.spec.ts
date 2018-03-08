@@ -1,8 +1,8 @@
 import { Model as CategoriesModel } from "@models/Categroy";
 import { Model as ValuesModel } from "@models/Value";
 import db = require("../helpers/database");
-import faker = require("faker");
 import { addCategories } from "../helpers/database/categories";
+import { newName } from "../helpers/utils";
 
 describe("Category Model", () => {
 
@@ -19,7 +19,7 @@ describe("Category Model", () => {
 
     it("Add Category", async () => {
         const ctx = {
-            name: faker.name.firstName()
+            name: newName()
         };
         const obj = await CategoriesModel.create(ctx);
         ids.categories.push(obj._id);

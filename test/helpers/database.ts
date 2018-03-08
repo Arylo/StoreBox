@@ -15,7 +15,7 @@ import { connectDatabase } from "../../src/modules/database/database.providers";
 import { newUser as newUserFn } from "./database/user";
 import * as regexps from "./database/regexps";
 import * as categories from "./database/categories";
-import { newName } from "./utils";
+import { newName, sleep } from "./utils";
 import { remove } from "./files";
 
 config.db.database = "storebox-test";
@@ -36,6 +36,7 @@ interface IIds {
 export const connect = connectDatabase;
 
 export const drop = async (ids?: IIds) => {
+    await sleep(250);
     if (!ids) {
         await ValuesModel.remove({ }).exec();
         await GoodsModels.remove({ }).exec();

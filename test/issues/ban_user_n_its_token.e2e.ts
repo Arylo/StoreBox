@@ -1,11 +1,11 @@
 import supertest = require("supertest");
-import faker = require("faker");
 
 import { connect, drop, newUser } from "../helpers/database";
 import { init } from "../helpers/server";
 import { UsersService } from "@services/users";
 import { TokensService } from "@services/tokens";
 import { SystemService } from "@services/system";
+import { newName } from "../helpers/utils";
 
 describe("Fix Issues", () => {
 
@@ -31,8 +31,8 @@ describe("Fix Issues", () => {
     });
 
     const user = {
-        name: faker.name.firstName(),
-        pass: faker.random.words(),
+        name: newName(),
+        pass: newName(),
         token: ""
     };
     describe("Token Action When User ban", () => {

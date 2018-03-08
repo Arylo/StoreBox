@@ -1,10 +1,10 @@
-import * as faker from "faker";
 import supertest = require("supertest");
 import {
     connect, drop, newUser, newRegexp, newCategory
 } from "../helpers/database";
 import { init } from "../helpers/server";
 import auth = require("@db/auth");
+import { newName } from "../helpers/utils";
 
 describe("the E2E Api of display item count Per page", () => {
 
@@ -70,8 +70,8 @@ describe("the E2E Api of display item count Per page", () => {
         step("Add 100 Users", async () => {
             for (let i = 0; i < 100; i++) {
                 const user = {
-                    name: i + faker.name.firstName(),
-                    pass: i + faker.random.words()
+                    name: newName(),
+                    pass: newName()
                 };
                 const doc = await newUser(user.name, user.pass);
                 ids.users.push(doc._id);
@@ -196,7 +196,7 @@ describe("the E2E Api of display item count Per page", () => {
         step("Add 100 Regexps", async () => {
             for (let i = 0; i < 100; i++) {
                 const regexp = {
-                    name: i + faker.name.firstName(),
+                    name: newName(),
                     regexp: "^regexp." + i
                 };
                 const doc = await newRegexp(
@@ -323,7 +323,7 @@ describe("the E2E Api of display item count Per page", () => {
         step("Add 100 categories", async () => {
             for (let i = 0; i < 100; i++) {
                 const cate = {
-                    name: i + faker.random.words()
+                    name: newName()
                 };
                 const doc = await newCategory(cate);
                 ids.categories.push(doc._id);

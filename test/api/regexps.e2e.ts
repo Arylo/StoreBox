@@ -1,5 +1,4 @@
 import supertest = require("supertest");
-import faker = require("faker");
 
 import { Model as RegexpsModel } from "@models/Regexp";
 import { RegexpsService } from "@services/regexps";
@@ -167,7 +166,7 @@ describe("Regexp E2E Api", () => {
 
     step("Modify Exist Value", async () => {
         const data = {
-            name: faker.random.word(),
+            name: newName(),
             value: "^modify.exist.value"
         };
         const raw = await RegexpsModel.addRegexp(data.name, data.value);

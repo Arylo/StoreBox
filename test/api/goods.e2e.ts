@@ -1,6 +1,5 @@
 import supertest = require("supertest");
 import path = require("path");
-import faker = require("faker");
 
 import { connect, drop, addCategoryAndRegexp } from "../helpers/database";
 import { uploadFile } from "../helpers/files";

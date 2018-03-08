@@ -1,6 +1,5 @@
 import supertest = require("supertest");
 import path = require("path");
-import faker = require("faker");
 import { HttpStatus } from "@nestjs/common";
 
 import { connect, drop, addCategoryAndRegexp, newUser } from "../helpers/database";

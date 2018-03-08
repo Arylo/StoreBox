@@ -1,9 +1,9 @@
 import supertest = require("supertest");
-import faker = require("faker");
 
 import { connect, drop, newUser } from "../helpers/database";
 import { init } from "../helpers/server";
 import { Model as TokensModel } from "@models/Token";
+import { newName } from "../helpers/utils";
 
 describe("Token E2E Api", () => {
 
@@ -27,8 +27,8 @@ describe("Token E2E Api", () => {
     });
 
     const user = {
-        name: faker.name.firstName(),
-        pass: faker.random.words(),
+        name: newName(),
+        pass: newName(),
         id: "",
         token: ""
     };

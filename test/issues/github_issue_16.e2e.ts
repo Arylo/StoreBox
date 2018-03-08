@@ -1,5 +1,4 @@
 import supertest = require("supertest");
-import faker = require("faker");
 
 import {
     connect, drop, newUser, addCategoryAndRegexp

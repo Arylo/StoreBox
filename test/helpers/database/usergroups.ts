@@ -1,4 +1,3 @@
-import faker = require("faker");
 import { ObjectId } from "@models/common";
 import { Model as UserUsergroupsModel } from "@models/User-Usergroup";
 import { UsergroupsService } from "@services/usergroups";

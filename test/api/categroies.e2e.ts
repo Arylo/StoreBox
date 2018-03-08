@@ -1,9 +1,9 @@
 import supertest = require("supertest");
-import faker = require("faker");
 
 import { connect, drop, newUser } from "../helpers/database";
 import { init } from "../helpers/server";
 import { login } from "../helpers/database/auth";
+import { newName } from "../helpers/utils";
 
 describe("Categories E2E Api", () => {
 
@@ -33,7 +33,7 @@ describe("Categories E2E Api", () => {
 
     step("Add Category", async () => {
         const ctx = {
-            name: faker.name.firstName()
+            name: newName()
         };
         const { body: result } = await request.post("/api/v1/categories")
             .send(ctx)
@@ -48,11 +48,11 @@ describe("Categories E2E Api", () => {
 
     step("Add Category with Tags", async () => {
         const ctx = {
-            name: faker.name.firstName(),
+            name: newName(),
             tags: [
-                faker.random.words(),
-                faker.random.words(),
-                faker.random.words()
+                newName(),
+                newName(),
+                newName()
             ]
         };
         const { body: result } = await request.post("/api/v1/categories")
@@ -68,17 +68,17 @@ describe("Categories E2E Api", () => {
 
     step("Add Category with Attributes", async () => {
         const ctx = {
-            name: faker.name.firstName(),
+            name: newName(),
             attributes: [
                 {
-                    key: faker.random.words(),
-                    value: faker.random.words()
+                    key: newName(),
+                    value: newName()
                 }, {
-                    key: faker.random.words(),
-                    value: faker.random.words()
+                    key: newName(),
+                    value: newName()
                 }, {
-                    key: faker.random.words(),
-                    value: faker.random.words()
+                    key: newName(),
+                    value: newName()
                 }
             ].map((item) => JSON.stringify(item))
         };

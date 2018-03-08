@@ -1,5 +1,4 @@
 import supertest = require("supertest");
-import faker = require("faker");
 import fs = require("fs-extra");
 import { basename } from "path";
 

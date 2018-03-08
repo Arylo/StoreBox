@@ -1,6 +1,6 @@
 import { ObjectId } from "@models/common";
 import { Model as CategoriesModel, CategoryDoc } from "@models/Categroy";
-import faker = require("faker");
+import { newName } from "../utils";
 
 export const newCategory = (obj: object) => {
     return CategoriesModel.create(obj) as Promise<CategoryDoc>;
@@ -25,7 +25,7 @@ export const addCategories = async (pid?: ObjectId) => {
     // Create 11 Categories
     for (let i = 0; i < 11; i++) {
         const result = await CategoriesModel.create({
-            name: faker.name.firstName() + i
+            name: newName()
         });
         cids.push(result._id);
     }

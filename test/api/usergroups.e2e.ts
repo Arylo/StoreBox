@@ -1,5 +1,4 @@
 import supertest = require("supertest");
-import faker = require("faker");
 
 import {
     connect, drop, addCategoryAndRegexp
@@ -7,6 +6,7 @@ import {
 import { init } from "../helpers/server";
 import { newUsergroup } from "@db/usergroups";
 import auth = require("@db/auth");
+import { newName } from "../helpers/utils";
 
 describe("Usergroup E2E Api", () => {
 
@@ -37,7 +37,7 @@ describe("Usergroup E2E Api", () => {
     step("New Usergroup * 2", async () => {
         for (let i = 0; i < 2; i++) {
             const url = `/api/v1/usergroups`;
-            const name = `${faker.random.word()}${Math.random()}`;
+            const name = newName();
             const { status, body: result } =
                 await request.post(url).send({ name }).then();
             status.should.be.eql(201);
@@ -89,7 +89,7 @@ describe("Usergroup E2E Api", () => {
     step("Modify Usergroup's name", async () => {
         const id = ids.usergroups[ids.usergroups.length - 1];
         const url = `/api/v1/usergroups/${id}`;
-        const name = `${faker.random.word()}${Math.random()}`;
+        const name = newName();
         const { status } = await request.post(url).send({ name }).then();
         status.should.be.eql(200);
         const { body: result } = await request.get(url).then();

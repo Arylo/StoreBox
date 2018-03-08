@@ -2,8 +2,8 @@ import { UsersService } from "@services/users";
 import { SystemService } from "@services/system";
 import { Model as UsersModel } from "@models/User";
 import db = require("../helpers/database");
-import faker = require("faker");
 import { newUser } from "../helpers/database";
+import { newName } from "../helpers/utils";
 
 describe("Users Service Test Unit", () => {
 
@@ -25,8 +25,8 @@ describe("Users Service Test Unit", () => {
     });
 
     const user = {
-        name: faker.name.firstName(),
-        pass: faker.random.words()
+        name: newName(),
+        pass: newName()
     };
     before(async () => {
         const doc = await newUser(user.name, user.pass);
@@ -35,13 +35,13 @@ describe("Users Service Test Unit", () => {
 
     it("Cant Modify Username", async () => {
         const id = ids.users[0];
-        usersSvr.modify(id, { username: faker.name.firstName() })
+        usersSvr.modify(id, { username: newName() })
             .should.be.rejected();
     });
 
     it("Modify nickname", async () => {
         const id = ids.users[0];
-        usersSvr.modify(id, { nickname: faker.name.firstName() })
+        usersSvr.modify(id, { nickname: newName() })
             .should.be.fulfilled();
     });
 
