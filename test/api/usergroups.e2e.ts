@@ -5,10 +5,8 @@ import {
     connect, drop, addCategoryAndRegexp
 } from "../helpers/database";
 import { init } from "../helpers/server";
-import {
-    newUsergroup, getLinkIdsByUserId
-} from "../helpers/database/usergroups";
-import { newUser, newUserWithUsergroup } from "../helpers/database/user";
+import { newUsergroup } from "@db/usergroups";
+import auth = require("@db/auth");
 
 describe("Usergroup E2E Api", () => {
 
@@ -32,15 +30,8 @@ describe("Usergroup E2E Api", () => {
         request = await init();
     });
 
-    const user = {
-        username: `${faker.name.firstName()}${Math.random()}`,
-        password: faker.random.words()
-    };
-    step("Login", async () => {
-        const userDoc =
-            await newUserWithUsergroup(user.username, user.password);
-        ids.users.push(userDoc._id);
-        await request.post("/api/v1/auth/login").send(user).then();
+    before("login", async () => {
+        ids.users.push((await auth.login(request))[0]);
     });
 
     step("New Usergroup * 2", async () => {

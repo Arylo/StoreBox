@@ -2,12 +2,12 @@ import * as supertest from "supertest";
 import db = require("../helpers/database");
 import path = require("path");
 import files = require("../helpers/files");
-import auth = require("../helpers/database/auth");
-import categories = require("../helpers/database/categories");
+import auth = require("@db/auth");
+import categories = require("@db/categories");
+import * as regexps from "@db/regexps";
+import * as goods from "@db/goods";
 import { init } from "../helpers/server";
 import { newName } from "../helpers/utils";
-import * as regexps from "../helpers/database/regexps";
-import * as goods from "../helpers/database/goods";
 
 describe("Upload Good with specified categories", () => {
 

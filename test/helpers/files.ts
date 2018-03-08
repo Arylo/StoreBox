@@ -3,6 +3,7 @@ import { config } from "@utils/config";
 import { isArray } from "util";
 import faker = require("faker");
 import fs = require("fs-extra");
+import { sleep } from "./utils";
 
 interface IUploadFileOptions {
     query?: {
@@ -80,7 +81,11 @@ export const remove = (filepaths: string[] | string) => {
     if (!isArray(filepaths)) {
         filepaths = [ filepaths ];
     }
-    return Promise.all(filepaths.map((filepath) => {
-        return fs.unlink(filepath);
+    if (filepaths.length === 0) {
+        return Promise.resolve();
+    }
+    return Promise.all(filepaths.map(async (filepath) => {
+        await sleep(200);
+        return fs.existsSync(filepath) ? fs.remove(filepath) : null;
     }));
 };

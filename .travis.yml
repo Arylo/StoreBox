@@ -12,6 +12,7 @@ install:
   - "npm install"
 
 script:
+  - "npm run tsc"
   - "npm test"
 
 after_success:

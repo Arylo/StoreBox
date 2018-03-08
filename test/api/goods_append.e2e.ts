@@ -2,11 +2,11 @@ import * as supertest from "supertest";
 import path = require("path");
 import { init } from "../helpers/server";
 import db = require("../helpers/database");
-import auth = require("../helpers/database/auth");
-import goods = require("../helpers/database/goods");
-import regexps = require("../helpers/database/regexps");
+import auth = require("@db/auth");
+import goods = require("@db/goods");
+import regexps = require("@db/regexps");
 import files = require("../helpers/files");
-import categories = require("../helpers/database/categories");
+import categories = require("@db/categories");
 import { newName } from "../helpers/utils";
 
 describe("Upload Good with Append categories", () => {
@@ -79,7 +79,6 @@ describe("Upload Good with Append categories", () => {
             }}
         );
         status.should.be.eql(400);
-        // ids.goods.push(await goods.getIdByOriginname(filename));
     });
 
     step("Upload File Success", async () => {

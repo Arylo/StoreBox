@@ -8,7 +8,7 @@ export const newUser = (
     username = `${faker.name.firstName()}${Math.random()}`,
     password = `${faker.random.words()}${Math.random()}`
 ) => {
-    return UsersModel.addUser(username, password);
+    return newUserWithUsergroup(username, password);
 };
 
 export const newUserWithUsergroup = (

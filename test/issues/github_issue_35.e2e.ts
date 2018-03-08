@@ -5,6 +5,7 @@ import {
     connect, drop, newUser
 } from "../helpers/database";
 import { init } from "../helpers/server";
+import auth = require("@db/auth");
 
 /**
  * The Feature of Edit User
@@ -32,17 +33,8 @@ describe("Fix Issues", () => {
 
     describe("Github 35 [The Feature of Edit User]", () => {
 
-        const user = {
-            name: faker.name.firstName(),
-            pass: faker.random.words()
-        };
-        before("Login", async () => {
-            const doc = await newUser(user.name, user.pass);
-            ids.users.push(doc._id);
-            await request.post("/api/v1/auth/login")
-                .send({
-                    username: user.name, password: user.pass
-                }).then();
+        before("login", async () => {
+            ids.users.push((await auth.login(request))[0]);
         });
 
         step("Edit User's Nickname", async () => {

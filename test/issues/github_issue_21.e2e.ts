@@ -5,6 +5,7 @@ import {
     connect, drop, newUser, addCategoryAndRegexp
 } from "../helpers/database";
 import { init } from "../helpers/server";
+import auth = require("@db/auth");
 
 /**
  * About [Issue 21](https://github.com/Arylo/StoreBox/issues/21)
@@ -35,13 +36,10 @@ describe("Fix Issues", () => {
             name: faker.name.firstName(),
             pass: faker.random.words()
         };
-        step("Login", async () => {
-            const doc = await newUser(user.name, user.pass);
-            ids.users.push(doc._id);
-            await request.post("/api/v1/auth/login")
-                .send({
-                    username: user.name, password: user.pass
-                }).then();
+        before("login", async () => {
+            ids.users.push(
+                (await auth.login(request, user.name, user.pass))[0]
+            );
         });
 
         step("Goods List status code is 200", async () => {

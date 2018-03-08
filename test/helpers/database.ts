@@ -16,6 +16,7 @@ import { newUser as newUserFn } from "./database/user";
 import * as regexps from "./database/regexps";
 import * as categories from "./database/categories";
 import { newName } from "./utils";
+import { remove } from "./files";
 
 config.db.database = "storebox-test";
 
@@ -63,6 +64,12 @@ export const drop = async (ids?: IIds) => {
             } else if (method === "usergroups") {
                 await UserUsergroupsModel.remove({ usergroup: id }).exec();
             }
+        }
+        if (method === "categories") {
+            await remove((ids[method] || [ ]).reduce((arr, id) => {
+                arr.push(`${config.paths.upload}/${id.toString()}`);
+                return arr;
+            }, [ ]));
         }
     }
 };

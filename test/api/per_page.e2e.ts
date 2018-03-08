@@ -4,6 +4,7 @@ import {
     connect, drop, newUser, newRegexp, newCategory
 } from "../helpers/database";
 import { init } from "../helpers/server";
+import auth = require("@db/auth");
 
 describe("the E2E Api of display item count Per page", () => {
 
@@ -26,17 +27,8 @@ describe("the E2E Api of display item count Per page", () => {
         request = await init();
     });
 
-    before("Login", async () => {
-        const user = {
-            name: faker.name.firstName(),
-            pass: faker.random.words()
-        };
-        const doc = await newUser(user.name, user.pass);
-        ids.users.push(doc._id);
-        await request.post("/api/v1/auth/login")
-            .send({
-                username: user.name, password: user.pass
-            }).then();
+    before("login", async () => {
+        ids.users.push((await auth.login(request))[0]);
     });
 
     describe("Users", () => {

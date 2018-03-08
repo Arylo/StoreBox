@@ -2,9 +2,10 @@ import supertest = require("supertest");
 import faker = require("faker");
 
 import {
-    connect, drop, newUser, newCategory
+    connect, drop, newCategory
 } from "../helpers/database";
 import { init } from "../helpers/server";
+import auth = require("@db/auth");
 
 /**
  * Fix [Issue 27](https://github.com/Arylo/StoreBox/issues/27)
@@ -32,17 +33,9 @@ describe("Fix Issues", () => {
     });
 
     describe("Github 27 ", () => {
-        const user = {
-            name: faker.name.firstName(),
-            pass: faker.random.words()
-        };
-        step("Login", async () => {
-            const doc = await newUser(user.name, user.pass);
-            ids.users.push(doc._id);
-            await request.post("/api/v1/auth/login")
-                .send({
-                    username: user.name, password: user.pass
-                }).then();
+
+        before("login", async () => {
+            ids.users.push((await auth.login(request))[0]);
         });
 
         step("Add Category", async () => {

@@ -11,6 +11,8 @@ import { init } from "../helpers/server";
 import { uploadFile } from "../helpers/files";
 
 import { config } from "@utils/config";
+import auth = require("@db/auth");
+import files = require("../helpers/files");
 
 /**
  * Fix [Issue 31](https://github.com/Arylo/StoreBox/issues/31)
@@ -42,18 +44,11 @@ describe("Fix Issues", () => {
         let filepath = "";
         let filename = "";
         before(() => {
-            const folderpath = `${config.paths.tmp}/test`;
-            if (!fs.existsSync(folderpath)) {
-                fs.mkdirpSync(folderpath);
-            }
-            filepath = `${folderpath}/${faker.random.uuid()}`;
-            fs.writeFileSync(filepath, JSON.stringify({
-                data: Math.random()
-            }), { encoding: "utf-8" });
+            filepath = files.newFile();
         });
 
         after(() => {
-            fs.removeSync(filepath);
+            return files.remove(filepath);
         });
 
         after(() => {
@@ -62,17 +57,8 @@ describe("Fix Issues", () => {
             }).exec();
         });
 
-        const user = {
-            name: faker.name.firstName(),
-            pass: faker.random.words()
-        };
-        step("Login", async () => {
-            const doc = await newUser(user.name, user.pass);
-            ids.users.push(doc._id);
-            await request.post("/api/v1/auth/login")
-                .send({
-                    username: user.name, password: user.pass
-                }).then();
+        before("login", async () => {
+            ids.users.push((await auth.login(request))[0]);
         });
 
         step("Add Category and Regexp", async () => {

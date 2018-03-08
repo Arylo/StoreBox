@@ -4,6 +4,7 @@ Store PandoraBox Firmware Images and its packages
 
 [![Travis](https://img.shields.io/travis/Arylo/StoreBox.svg?style=flat-square)](https://travis-ci.org/Arylo/StoreBox)
 [![Coveralls](https://img.shields.io/coveralls/github/Arylo/StoreBox.svg?style=flat-square)](https://coveralls.io/github/Arylo/StoreBox)
+[![Known Vulnerabilities](https://snyk.io/test/github/Arylo/StoreBox/badge.svg?style=flat-square)](https://snyk.io/test/github/Arylo/StoreBox)
 [![license](https://img.shields.io/github/license/Arylo/StoreBox.svg?style=flat-square)](https://github.com/Arylo/storebox)
 
 # Usage

@@ -5,6 +5,7 @@ import {
     connect, drop, newUser, addCategoryAndRegexp
 } from "../helpers/database";
 import { init } from "../helpers/server";
+import auth = require("@db/auth");
 
 describe("User's Goods E2E Api", () => {
 
@@ -33,13 +34,11 @@ describe("User's Goods E2E Api", () => {
             pass: faker.random.words(),
             id: ""
         };
-        step("Login", async () => {
-            const doc = await newUser(user.name, user.pass);
-            ids.users.push(doc._id);
-            await request.post("/api/v1/auth/login")
-                .send({
-                    username: user.name, password: user.pass
-                }).then();
+
+        before("login", async () => {
+            const id = (await auth.login(request, user.name, user.pass))[0];
+            ids.users.push(id);
+            user.id = id;
         });
 
         step("Status Code isnt 500", async () => {
@@ -61,14 +60,11 @@ describe("User's Goods E2E Api", () => {
             pass: faker.random.words(),
             id: ""
         };
-        step("Login", async () => {
-            const doc = await newUser(user.name, user.pass);
-            ids.users.push(doc._id);
-            user.id = doc._id;
-            await request.post("/api/v1/auth/login")
-                .send({
-                    username: user.name, password: user.pass
-                }).then();
+
+        before("login", async () => {
+            const id = (await auth.login(request, user.name, user.pass))[0];
+            ids.users.push(id);
+            user.id = id;
         });
 
         step("Status Code isnt 500", async () => {

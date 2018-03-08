@@ -11,6 +11,9 @@ import {
 import { init } from "../helpers/server";
 import { uploadFiles } from "../helpers/files";
 import { sleep } from "../helpers/utils";
+import auth = require("@db/auth");
+import goodsDb = require("@db/goods");
+import files = require("../helpers/files");
 
 describe("Collections E2E Api", () => {
 
@@ -24,7 +27,8 @@ describe("Collections E2E Api", () => {
         users: [ ],
         categories: [ ],
         regexps: [ ],
-        collections: [ ]
+        collections: [ ],
+        goods: [ ]
     };
 
     after(() => {
@@ -39,44 +43,20 @@ describe("Collections E2E Api", () => {
     const filepaths = [ ];
     const prefix = `${faker.random.word()}_`;
     before(() => {
-        const folderpath = `${config.paths.tmp}/test`;
-        if (!fs.existsSync(folderpath)) {
-            fs.mkdirpSync(folderpath);
-        }
         // Generator Files
         for (let i = 0; i < FILE_COUNST; i++) {
-            const filepath = `${folderpath}/${prefix}${faker.random.uuid()}`;
+            const filename = `${prefix}${faker.random.uuid()}`;
+            const filepath = files.newFile(filename);
             filepaths.push(filepath);
-            fs.writeFileSync(filepath, JSON.stringify({
-                data: Math.random()
-            }), { encoding: "utf-8" });
         }
     });
 
-    after(async () => {
-        for (const filepath of filepaths) {
-            fs.removeSync(filepath);
-            const good = (await GoodsModels.findOne({
-                originname: basename(filepath)
-            }).exec()).toObject();
-            fs.removeSync(
-                `${config.paths.upload}/${good.category}/${good.filename}`
-            );
-            await GoodsModels.findByIdAndRemove(good._id).exec();
-        }
+    after(() => {
+        return files.remove(filepaths);
     });
 
-    const user = {
-        name: faker.name.firstName(),
-        pass: faker.random.words()
-    };
-    step("Login", async () => {
-        const doc = await newUser(user.name, user.pass);
-        ids.users.push(doc._id);
-        await request.post("/api/v1/auth/login")
-            .send({
-                username: user.name, password: user.pass
-            }).then();
+    before("login", async () => {
+        ids.users.push((await auth.login(request))[0]);
     });
 
     step("Add Category and Regexp", async () => {
@@ -94,6 +74,10 @@ describe("Collections E2E Api", () => {
         ids.collections.push(result._id);
         status.should.be.eql(201);
         result.should.have.properties("name", "_id", "goods");
+        for (const good of result.goods) {
+            const originname = good.originname;
+            ids.goods.push(await goodsDb.getIdByOriginname(originname));
+        }
     });
 
     step("User's Collection List", async () => {
