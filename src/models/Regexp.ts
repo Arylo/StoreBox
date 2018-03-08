@@ -97,7 +97,7 @@ RegexpSchema.path("value").validate({
 
 RegexpSchema.path("value").validate({
     isAsync: true,
-    validator: async function ValueExistValdator(value, respond) {
+    validator: async function ValueExistValidator(value, respond) {
         if (this && this.hidden) {
             return respond(true);
         }
@@ -115,6 +115,26 @@ RegexpSchema.path("link").validate({
         return respond(!!result);
     },
     message: "The Category ID is not exist"
+});
+
+RegexpSchema.path("hidden").validate({
+    isAsync: true,
+    validator: async function hiddenExistValidator(value, respond) {
+        if (!value) { // hidden === false
+            return respond(true);
+        }
+        if (!this.isNew) { // hidden === Old Value
+            const id = this.getQuery()._id;
+            const col = await Model.findById(id).exec();
+            if (col.toObject().hidden === value) {
+                return respond(true);
+            }
+        }
+        const result =
+            await Model.findOne({ value: this.value, hidden: value }).exec();
+        respond(result ? false : true);
+    },
+    message: "Only one active item with every value"
 });
 // endregion Validators
 
