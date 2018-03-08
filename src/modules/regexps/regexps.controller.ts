@@ -5,7 +5,7 @@ import {
 import {
     ApiBearerAuth, ApiUseTags, ApiResponse, ApiOperation, ApiImplicitParam
 } from "@nestjs/swagger";
-import { Model as RegexpsModel, IRegexp, RegexpDoc } from "@models/Regexp";
+import { RegexpDoc } from "@models/Regexp";
 import {
     NewRegexp, EditRegexpDot, EditRegexpRawDot
 } from "./regexps.dto";
@@ -14,6 +14,7 @@ import { RolesGuard } from "@guards/roles";
 import { PerPageDto, ListResponse } from "@dtos/page";
 import { RidDto } from "@dtos/ids";
 import { ParseIntPipe } from "@pipes/parse-int";
+import { RegexpsService } from "@services/regexps";
 
 @UseGuards(RolesGuard)
 @Controller("api/v1/regexps")
@@ -22,6 +23,10 @@ import { ParseIntPipe } from "@pipes/parse-int";
 @ApiBearerAuth()
 // endregion Swagger Docs
 export class RegexpsAdminController {
+
+    constructor(
+        private readonly regexpsSvr: RegexpsService
+    ) { }
 
     @Roles("admin")
     @Get()
@@ -35,15 +40,18 @@ export class RegexpsAdminController {
     // endregion Swagger Docs
     public async list(@Query(new ParseIntPipe()) query: PerPageDto) {
         const curPage = query.page || 1;
-        const totalPages = await RegexpsModel.countRegexps(query.perNum);
-        const totalCount = await RegexpsModel.countRegexps();
+        const totalPages = await this.regexpsSvr.pageCount(query.perNum);
+        const totalCount = await this.regexpsSvr.count();
 
-        const data = new ListResponse<IRegexp | RegexpDoc>();
+        const data = new ListResponse<RegexpDoc>();
         data.current = curPage;
         data.totalPages = totalPages;
         data.total = totalCount;
+        if (data.current > data.totalPages) {
+            data.current = data.totalPages;
+        }
         if (totalPages >= curPage) {
-            data.data = await RegexpsModel.list(query.perNum, query.page);
+            data.data = await this.regexpsSvr.list(query.perNum, data.current);
         }
         return data;
     }
@@ -53,14 +61,7 @@ export class RegexpsAdminController {
     @HttpCode(HttpStatus.CREATED)
     @ApiOperation({ title: "Add RegExp" })
     public async add(@Body() ctx: NewRegexp) {
-        let regexp;
-        try {
-            regexp =
-                await RegexpsModel.addRegexp(ctx.name, ctx.value, ctx.link);
-        } catch (error) {
-            throw new BadRequestException(error.toString());
-        }
-        return regexp;
+        return await this.regexpsSvr.create(ctx);
     }
 
     @Roles("admin")
@@ -70,9 +71,7 @@ export class RegexpsAdminController {
     @ApiOperation({ title: "Get RegExp Info" })
     // endregion Swagger Docs
     public getRegexp(@Param() param: RidDto) {
-        return RegexpsModel.findById(param.rid)
-            .populate({ path: "link", populate: { path: "pid" } })
-            .exec();
+        return this.regexpsSvr.getRegexp(param.rid);
     }
 
     @Roles("admin")
@@ -86,18 +85,15 @@ export class RegexpsAdminController {
         if (ctx.name) { data.name = ctx.name; }
         if (ctx.value) { data.value = ctx.value; }
         if (ctx.link) { data.link = ctx.link; }
+        if (ctx.hidden !== null && ctx.hidden !== undefined) {
+            data.hidden = ctx.hidden;
+        }
         if (Object.keys(data).length === 0) {
             throw new BadRequestException("No Params");
         }
-        try {
-            const regexp = await RegexpsModel.findByIdAndUpdate(
-                param.rid, data, { runValidators: true }
-            ).exec();
-            if (!regexp) {
-                throw new BadRequestException("NonExist RegExp");
-            }
-        } catch (error) {
-            throw new BadRequestException(error.toString());
+        const regexp = await this.regexpsSvr.editById(param.rid, data);
+        if (!regexp) {
+            throw new BadRequestException("NonExist RegExp");
         }
         return { statusCode: HttpStatus.OK };
     }
@@ -125,11 +121,7 @@ export class RegexpsAdminController {
     })
     // endregion Swagger Docs
     public async deleteByGet(@Param() param: RidDto) {
-        try {
-            await RegexpsModel.removeRegexp(param.rid);
-        } catch (error) {
-            throw new BadRequestException(error.toString());
-        }
+        await this.regexpsSvr.remove(param.rid);
         return { statusCode: HttpStatus.OK };
     }
 

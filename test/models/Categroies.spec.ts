@@ -2,6 +2,7 @@ import { Model as CategoriesModel } from "@models/Categroy";
 import { Model as ValuesModel } from "@models/Value";
 import db = require("../helpers/database");
 import faker = require("faker");
+import { addCategories } from "../helpers/database/categories";
 
 describe("Category Model", () => {
 
@@ -33,24 +34,8 @@ describe("Category Model", () => {
 
         let cids = [ ];
         before(async () => {
-            cids = [];
-            for (let i = 0; i < 10; i++) {
-                const result = await CategoriesModel.create({
-                    name: faker.name.firstName() + i
-                });
-                cids.push(result._id);
-                ids.categories.push(result._id);
-            }
-            // [parent, child]
-            const initGroups = [
-                [0, 1], [0, 2], [0, 3],
-                [1, 4], [2, 5],
-                [5, 6], [6, 7],
-                [8, 9]
-            ];
-            for (const set of initGroups) {
-                await CategoriesModel.moveCategory(cids[set[1]], cids[set[0]]);
-            }
+            cids = await addCategories();
+            ids.categories.push(...cids);
         });
 
         it("# 0", async () => {

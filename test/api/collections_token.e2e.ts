@@ -10,7 +10,7 @@ import {
     connect, drop, newUser, addCategoryAndRegexp
 } from "../helpers/database";
 import { init } from "../helpers/server";
-import { uploadFiles } from "../helpers/files";
+import { uploadFiles, newFile } from "../helpers/files";
 
 describe("Token to Upload Files Api", () => {
 
@@ -40,17 +40,9 @@ describe("Token to Upload Files Api", () => {
     const filepaths = [ ];
     const prefix = `${faker.random.word()}_`;
     before(() => {
-        const folderpath = `${config.paths.tmp}/test`;
-        if (!fs.existsSync(folderpath)) {
-            fs.mkdirpSync(folderpath);
-        }
         // Generator Files
         for (let i = 0; i < FILE_COUNST; i++) {
-            const filepath = `${folderpath}/${prefix}${faker.random.uuid()}`;
-            filepaths.push(filepath);
-            fs.writeFileSync(filepath, JSON.stringify({
-                data: Math.random()
-            }), { encoding: "utf-8" });
+            filepaths.push(newFile(`${prefix}${faker.random.uuid()}`));
         }
     });
 

@@ -17,6 +17,7 @@ export class EditRegexpRawDot implements IRegexp {
     public name?: string;
     public value?: string;
     public link?: ObjectId;
+    public hidden?: boolean;
 }
 
 export class NewRegexp implements INewRegexp {
@@ -45,4 +46,8 @@ export class EditRegexpDot implements IRegexp {
     @IsOptional()
     @IsMongoId()
     public readonly link: ObjectId;
+    @ApiModelPropertyOptional({ type: Boolean })
+    @IsOptional()
+    @IsMongoId()
+    public readonly hidden: boolean;
 }

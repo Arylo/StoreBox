@@ -1,4 +1,3 @@
-import faker = require("faker");
 import { config } from "@utils/config";
 import { ObjectId } from "@models/common";
 
@@ -14,6 +13,9 @@ import { Model as UserUsergroupsModel } from "@models/User-Usergroup";
 
 import { connectDatabase } from "../../src/modules/database/database.providers";
 import { newUser as newUserFn } from "./database/user";
+import * as regexps from "./database/regexps";
+import * as categories from "./database/categories";
+import { newName } from "./utils";
 
 config.db.database = "storebox-test";
 
@@ -65,20 +67,21 @@ export const drop = async (ids?: IIds) => {
     }
 };
 
-export const addCategoryAndRegexp = async (regexp: RegExp) => {
-    const category = await CategoriesModel.create({
-        name: faker.name.findName()
+export const addCategoryAndRegexp = async (regexp: RegExp, pid?: ObjectId) => {
+    const category = await newCategory({
+        name: newName(),
+        pid: pid
     });
-    const reg = await newRegexp(faker.random.word(), regexp, category._id);
-    return [category, reg];
+    const reg = await newRegexp(newName(), regexp, category._id);
+    return [ category, reg ];
 };
 
 export const newUser = newUserFn;
 
-export const newRegexp = (name: string, value: RegExp, link?) => {
-    return RegexpsModel.addRegexp(name, value.source, link);
+export const newRegexp = (name: string, value: RegExp, link?: ObjectId) => {
+    return regexps.newRegexp({
+        name, value: value.source, link, hidden: false
+    });
 };
 
-export const newCategory = (obj: object) => {
-    return CategoriesModel.create(obj) as Promise<CategoryDoc>;
-};
+export const newCategory = categories.newCategory;

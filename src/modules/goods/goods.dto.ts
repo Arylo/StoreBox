@@ -1,6 +1,6 @@
 import { IGidDto, IAidDto } from "@dtos/ids";
 import { ApiModelProperty } from "@nestjs/swagger";
-import { IsMongoId } from "class-validator";
+import { IsMongoId, IsString, IsOptional } from "class-validator";
 import { ObjectId } from "@models/common";
 import { IGoods } from "@models/Good";
 
@@ -18,4 +18,19 @@ export class GoodsDto {
     public readonly name: string;
     @ApiModelProperty({ type: Object, description: "Goods", isArray: true })
     public readonly goods: IGoods[];
+}
+
+export class UploadQueryDto {
+    @ApiModelProperty({
+        type: String, description: "Category Name", isArray: true
+    })
+    @IsString({ each: true })
+    @IsOptional()
+    public readonly category?: string[];
+    @ApiModelProperty({
+        type: String, description: "Append Category Name", isArray: true
+    })
+    @IsString({ each: true })
+    @IsOptional()
+    public readonly append?: string[];
 }

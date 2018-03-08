@@ -1,16 +1,19 @@
 import {
     Pipe, PipeTransform, ArgumentMetadata, BadRequestException
 } from "@nestjs/common";
-import { Model as RegexpModel } from "@models/Regexp";
 import { isArray } from "util";
 import fs = require("fs-extra");
+import { RegexpsService } from "@services/regexps";
 
 type File = Express.Multer.File;
 
 @Pipe()
 export class RegexpCountCheckPipe implements PipeTransform<File | File[]> {
+
+    private readonly regexpSvr = new RegexpsService();
+
     public async transform(value: File | File[], metadata: ArgumentMetadata) {
-        const regexpCount = (await RegexpModel.list()).length;
+        const regexpCount = await this.regexpSvr.count();
         if (regexpCount !== 0) {
             return value;
         }
