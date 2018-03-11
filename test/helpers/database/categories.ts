@@ -1,6 +1,6 @@
 import { ObjectId } from "@models/common";
 import { Model as CategoriesModel, CategoryDoc } from "@models/Categroy";
-import { newName } from "../utils";
+import { newName, sleep } from "../utils";
 
 export const newCategory = (obj: object) => {
     return CategoriesModel.create(obj) as Promise<CategoryDoc>;
@@ -43,6 +43,7 @@ export const addCategories = async (pid?: ObjectId) => {
         await CategoriesModel.moveCategory(cids[9], pid);
         await CategoriesModel.moveCategory(cids[0], pid);
     }
+    await sleep(50);
     return cids;
 };
 

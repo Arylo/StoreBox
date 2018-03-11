@@ -2,22 +2,18 @@ import { Component } from "@nestjs/common";
 import { ObjectId } from "@models/common";
 import { Model as CategoriesModel, cache } from "@models/Categroy";
 import { isFunction } from "util";
+import { BaseService } from "./base";
 
 interface IIdMap {
     [parentId: string]: ObjectId[];
 }
 
 @Component()
-export class CategoriesService {
+export class CategoriesService extends BaseService {
 
-    private loadAndCache(FLAG: string, value: () => any, time?: number) {
-        const c = cache.get(FLAG);
-        if (c) {
-            return c;
-        }
-        const val = value();
-        cache.put(FLAG, val, time);
-        return val;
+    constructor() {
+        super();
+        super.setCache(cache);
     }
 
     private async getIdMap() {
@@ -41,7 +37,7 @@ export class CategoriesService {
     }
 
     public async getChildrenIds(pid: ObjectId) {
-        const map: IIdMap = await this.loadAndCache("IdMap", () => {
+        const map = await this.loadAndCache("IdMap", () => {
             return this.getIdMap();
         });
         const ids: ObjectId[] = [ ];

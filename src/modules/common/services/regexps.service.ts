@@ -6,6 +6,7 @@ import {
 import { Model as CategroiesModel, ICategory } from "@models/Categroy";
 import { DEF_PER_COUNT } from "@dtos/page";
 import { isUndefined } from "util";
+import { BaseService } from "./base";
 
 export interface IGetRegexpsOptions {
     categroies?: ObjectId[];
@@ -13,9 +14,11 @@ export interface IGetRegexpsOptions {
 }
 
 @Component()
-export class RegexpsService {
+export class RegexpsService extends BaseService {
 
     constructor() {
+        super();
+        super.setCache(cache);
         // Update
         setTimeout(() => {
             // Add Hidden Label
@@ -24,13 +27,6 @@ export class RegexpsService {
                 { multi: true }
             ).exec();
         }, 3000);
-    }
-
-    private loadAndCache(FLAG: string, value: any, time?: number | string) {
-        if (cache.get(FLAG) === null) {
-            cache.put(FLAG, value, time);
-        }
-        return cache.get(FLAG);
     }
 
     /**
@@ -96,21 +92,19 @@ export class RegexpsService {
         }
     }
 
-    public async pageCount(perNum = 1): Promise<number> {
+    public pageCount(perNum = 1) {
         const FLAG = `pageCount_${perNum}`;
         return this.loadAndCache(
             FLAG,
-            Math.ceil((await this.count()) / perNum),
-            3000
+            async () => Math.ceil((await this.count()) / perNum)
         );
     }
 
-    public count(): Promise<number> {
+    public count() {
         const FLAG = "totalCount";
         return this.loadAndCache(
             FLAG,
-            RegexpsModel.count({ }).exec(),
-            3000
+            () => RegexpsModel.count({ }).exec()
         );
     }
 
@@ -126,19 +120,18 @@ export class RegexpsService {
      * @param  page {number} 页数
      * @return {Promise}
      */
-    public async list(perNum = DEF_PER_COUNT, page = 1): Promise<RegexpDoc[]> {
+    public list(perNum = DEF_PER_COUNT, page = 1) {
         const FLAG = `list_${perNum}_${page}`;
         return this.loadAndCache(
             FLAG,
-            RegexpsModel.find({ })
+            () => RegexpsModel.find({ })
                 .skip((page - 1) * perNum).limit(perNum)
                 .populate("link").exec(),
             3000
         );
     }
 
-    private async getRegexps(opts: IGetRegexpsOptions = { })
-    : Promise<RegexpDoc[]> {
+    private getRegexps(opts: IGetRegexpsOptions = { }) {
         const DEF_CONDITIONS = {
             link: { $exists: true }, hidden: false
         };
@@ -154,7 +147,7 @@ export class RegexpsService {
             };
             return this.loadAndCache(
                 FLAG,
-                RegexpsModel.find(conditions).populate("link").exec(),
+                () => RegexpsModel.find(conditions).populate("link").exec(),
                 3000
             );
         } else if (opts.appends && opts.appends.length > 0) {
@@ -168,14 +161,14 @@ export class RegexpsService {
             };
             return this.loadAndCache(
                 FLAG,
-                RegexpsModel.find(conditions).populate("link").exec(),
+                () => RegexpsModel.find(conditions).populate("link").exec(),
                 3000
             );
         } else {
             const FLAG = "default_scan_regexps";
             return this.loadAndCache(
                 FLAG,
-                RegexpsModel.find(DEF_CONDITIONS).populate("link").exec(),
+                () => RegexpsModel.find(DEF_CONDITIONS).populate("link").exec(),
                 3000
             );
         }
