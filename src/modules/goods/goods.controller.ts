@@ -27,6 +27,7 @@ import { TokensService } from "@services/tokens";
 import { CollectionsService } from "@services/collections";
 import { IGetRegexpsOptions, RegexpsService } from "@services/regexps";
 import { CategoriesService } from "@services/categories";
+import { UtilService } from "@services/util";
 import * as hasha from "hasha";
 import fs = require("fs-extra");
 import multer  = require("multer");
@@ -68,21 +69,12 @@ export class GoodsAdminController {
     })
     // endregion Swagger Docs
     public async getGoods(@Query(new ParseIntPipe()) query: PerPageDto) {
-        const curPage = query.page || 1;
-        const totalPages =
-            await GoodsModels.countGoodsByUids([ ], query.perNum);
-        const totalCount = await GoodsModels.countGoodsByUids([ ]);
-
-        const resData = new ListResponse();
-        resData.current = curPage;
-        resData.totalPages = totalPages;
-        resData.total = totalCount;
-        if (totalPages >= curPage) {
-            resData.data = await GoodsModels.getGoodsByUids(
-                [ ], query.perNum, query.page
-            );
-        }
-        return resData;
+        const arr = await GoodsModels.getGoodsByUids(
+            [ ], query.perNum, query.page
+        );
+        return UtilService.toListRespone(arr, Object.assign({
+            total: await GoodsModels.countGoodsByUids([ ])
+        }, query));
     }
 
     private async getCategoriesIds(names: string[]) {

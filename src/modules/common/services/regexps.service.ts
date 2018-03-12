@@ -6,7 +6,7 @@ import {
 import { Model as CategroiesModel, ICategory } from "@models/Categroy";
 import { DEF_PER_COUNT } from "@dtos/page";
 import { isUndefined } from "util";
-import { BaseService } from "./base";
+import { BaseService } from "@services/base";
 
 export interface IGetRegexpsOptions {
     categroies?: ObjectId[];
@@ -92,11 +92,9 @@ export class RegexpsService extends BaseService {
         }
     }
 
-    public pageCount(perNum = 1) {
-        const FLAG = `pageCount_${perNum}`;
-        return this.loadAndCache(
-            FLAG,
-            async () => Math.ceil((await this.count()) / perNum)
+    public async pageCount(perNum?: number) {
+        return this.calPageCount(
+            await this.count(), perNum
         );
     }
 
@@ -120,7 +118,9 @@ export class RegexpsService extends BaseService {
      * @param  page {number} 页数
      * @return {Promise}
      */
-    public list(perNum = DEF_PER_COUNT, page = 1) {
+    public list(
+        perNum = this.DEF_PER_OBJ.perNum, page = this.DEF_PER_OBJ.page
+    ) {
         const FLAG = `list_${perNum}_${page}`;
         return this.loadAndCache(
             FLAG,

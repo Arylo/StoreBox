@@ -3,15 +3,10 @@ import { Model as UsersModel } from "@models/User";
 import { Model as UsergroupsModel } from "@models/Usergroup";
 import { Model as UserUsergroupsModel } from "@models/User-Usergroup";
 import { ObjectId } from "@models/common";
-import { DEF_PER_COUNT, IPerPage } from "@dtos/page";
+import { BaseService } from "@services/base";
 
 @Component()
-export class UsergroupsService {
-
-    private DEF_PER_OBJ: IPerPage = {
-        perNum: DEF_PER_COUNT,
-        page: 1
-    };
+export class UsergroupsService extends BaseService {
 
     public async add(obj: object) {
         try {
@@ -35,8 +30,10 @@ export class UsergroupsService {
         return UserUsergroupsModel.count({ usergroup: gid }).exec();
     }
 
-    public async usersCountPage(id: ObjectId, perNum = DEF_PER_COUNT) {
-        const total = await this.usersCount(id);
+    public async usersCountPage(
+        uid: ObjectId, perNum = this.DEF_PER_OBJ.perNum
+    ) {
+        const total = await this.usersCount(uid);
         return Math.ceil(total / perNum);
     }
 
@@ -45,7 +42,7 @@ export class UsergroupsService {
     }
 
     public async getGroupUsers(
-        gid: ObjectId, pageObj: IPerPage = this.DEF_PER_OBJ
+        gid: ObjectId, pageObj = this.DEF_PER_OBJ
     ) {
         const perNum = pageObj.perNum;
         const page = pageObj.page;
@@ -61,14 +58,14 @@ export class UsergroupsService {
         return UsergroupsModel.count({ }).exec();
     }
 
-    public async countPage(perNum = DEF_PER_COUNT) {
+    public async countPage(perNum = this.DEF_PER_OBJ.perNum) {
         const total = await this.count();
         return Math.ceil(total / perNum);
     }
 
-    public list(pageObj: IPerPage = this.DEF_PER_OBJ) {
-        const perNum = pageObj.perNum;
-        const page = pageObj.page;
+    public list(pageObj = this.DEF_PER_OBJ) {
+        const perNum = pageObj.perNum || this.DEF_PER_OBJ.perNum;
+        const page = pageObj.page || this.DEF_PER_OBJ.page;
         return UsergroupsModel.find({ })
             .skip((page - 1) * perNum).limit(perNum)
             .sort({ createdAt: -1 })

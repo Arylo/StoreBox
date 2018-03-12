@@ -1,11 +1,13 @@
 import {
-    UseGuards, Controller, Get, HttpCode, HttpStatus, Param
+    UseGuards, Controller, Get, HttpCode, HttpStatus, Param, Query
 } from "@nestjs/common";
 import { ApiUseTags, ApiOperation } from "@nestjs/swagger";
 import { CollectionsService } from "@services/collections";
+import { UtilService } from "@services/util";
 import { RolesGuard } from "@guards/roles";
 import { Roles } from "@decorators/roles";
 import { GetCollectionNameDto } from "./collections.dto";
+import { PerPageDto } from "@dtos/page";
 
 @UseGuards(RolesGuard)
 @Controller("/collections")
@@ -22,12 +24,17 @@ export class CollectionsController {
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Get Collection Info" })
     // endregion Swagger Docs
-    public async getCollection(@Param() query: GetCollectionNameDto) {
-        const colDoc = await this.collectionsSvr.getByName(query.name);
-        let col;
-        col = colDoc.toObject();
-        col.creator = col.creator.nickname;
-        col.goods.map((good) => {
+    public async getCollection(
+        @Param() param: GetCollectionNameDto, @Query() query: PerPageDto
+    ) {
+        const doc = await this.collectionsSvr.getByName(param.name);
+        if (!doc) {
+            return null;
+        }
+        let obj;
+        obj = doc.toObject();
+        obj.creator = obj.creator.nickname;
+        obj.goods.map((good) => {
             const keys = [
                 "__v", "uploader", "hidden"
             ];
@@ -36,7 +43,10 @@ export class CollectionsController {
             }
             return good;
         });
-        return col;
+        obj.goods = UtilService.toListRespone(obj.goods, {
+            perNum: obj.goods.length
+        });
+        return obj;
     }
 
 }

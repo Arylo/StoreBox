@@ -19,6 +19,7 @@ import { UsergroupsService } from "@services/usergroups";
 import { CollectionsService } from "@services/collections";
 import { UsersService } from "@services/users";
 import { SystemService } from "@services/system";
+import { UtilService } from "@services/util";
 import { PerPageDto, ListResponse, DEF_PER_COUNT } from "@dtos/page";
 import { UidDto } from "@dtos/ids";
 import { DefResDto } from "@dtos/res";
@@ -54,18 +55,10 @@ export class UsersAdminController {
     })
     // endregion Swagger Docs
     public async findAll(@Query(new ParseIntPipe()) query: PerPageDto) {
-        const curPage = query.page || 1;
-        const totalPages = await UserModel.countUsers(query.perNum);
-        const totalCount = await UserModel.countUsers();
-
-        const data = new ListResponse<IUser | UserDoc>();
-        data.current = curPage;
-        data.totalPages = totalPages;
-        data.total = totalCount;
-        if (totalPages >= curPage) {
-            data.data = await UserModel.list(query.perNum, query.page);
-        }
-        return data;
+        const arr = await UserModel.list(query.perNum, query.page);
+        return UtilService.toListRespone(arr, Object.assign({
+            total: await UserModel.countUsers()
+        }, query));
     }
 
     @Roles("admin")
@@ -208,11 +201,8 @@ export class UsersAdminController {
     })
     // endregion Swagger Docs
     public async getSelfTokens(@Session() session) {
-        const data = new ListResponse();
-        data.current = data.totalPages = 1;
-        data.data = await this.tokensSvr.getTokens(session.loginUserId);
-        data.total = data.data.length;
-        return data;
+        const arr = await this.tokensSvr.getTokens(session.loginUserId);
+        return UtilService.toListRespone(arr);
     }
 
     @Roles("admin")
@@ -226,11 +216,8 @@ export class UsersAdminController {
     })
     // endregion Swagger Docs
     public async getTokens(@Param() param: UidDto, @Session() session) {
-        const data = new ListResponse();
-        data.current = data.totalPages = 1;
-        data.data = await this.tokensSvr.getTokens(param.uid);
-        data.total = data.data.length;
-        return data;
+        const arr = await this.tokensSvr.getTokens(param.uid);
+        return UtilService.toListRespone(arr);
     }
 
     ////////////////////////////////////////
@@ -242,22 +229,12 @@ export class UsersAdminController {
     ////////////////////////////////////////
 
     private async getGoodsRes(uid: ObjectId, query: PerPageDto) {
-        const curPage = query.page || 1;
-        const perNum = query.perNum || DEF_PER_COUNT;
-        const totalPages =
-            await GoodsModels.countGoodsByUids(uid, query.perNum);
-        const totalCount = await GoodsModels.countGoodsByUids(uid);
-
-        const resData = new ListResponse();
-        resData.current = curPage;
-        resData.totalPages = totalPages;
-        resData.total = totalCount;
-        if (totalPages >= curPage) {
-            resData.data = await GoodsModels.getGoodsByUids(
-                uid, query.perNum, query.page
-            );
-        }
-        return resData;
+        const arr = await GoodsModels.getGoodsByUids(
+            uid, query.perNum, query.page
+        );
+        return UtilService.toListRespone(arr, Object.assign({
+            total: await GoodsModels.countGoodsByUids(uid)
+        }, query));
     }
 
     @Roles("admin", "token")
@@ -303,20 +280,10 @@ export class UsersAdminController {
     ////////////////////////////////////////
 
     private async getCollectionsRes(uid: ObjectId, query: PerPageDto) {
-        const curPage = query.page || 1;
-        const perNum = query.perNum || DEF_PER_COUNT;
-        const totalPages =
-            await this.collectionsSvr.countPage(uid, query.perNum);
-        const totalCount = await this.collectionsSvr.count(uid);
-
-        const resData = new ListResponse<CollectionDoc>();
-        resData.current = curPage;
-        resData.totalPages = totalPages;
-        resData.total = totalCount;
-        if (totalPages >= curPage) {
-            resData.data = await this.collectionsSvr.list(uid, query);
-        }
-        return resData;
+        const arr = await this.collectionsSvr.list(uid, query);
+        return UtilService.toListRespone(arr, {
+            total: await this.collectionsSvr.count(uid)
+        });
     }
 
     @Roles("admin", "token")
@@ -373,22 +340,10 @@ export class UsersAdminController {
     public async getUsergroups(
         @Param() param: UidDto, @Query(new ParseIntPipe()) query: PerPageDto
     ) {
-        const curPage = query.page || 1;
-        const perNum = query.perNum || DEF_PER_COUNT;
-        const totalPages =
-            await this.usersSvr.countPageUsergroups(param.uid, query.perNum);
-        const totalCount = await this.usersSvr.countUsergroups(param.uid);
-
-        const resData = new ListResponse();
-        resData.current = curPage;
-        resData.totalPages = totalPages;
-        resData.total = totalCount;
-        if (totalPages >= curPage) {
-            resData.data = await this.usersSvr.getUsergroups(param.uid, {
-                page: curPage, perNum
-            });
-        }
-        return resData;
+        const arr = await this.usersSvr.getUsergroups(param.uid, query);
+        return UtilService.toListRespone(arr, Object.assign({
+            total: await this.usersSvr.countUsergroups(param.uid)
+        }, query));
     }
 
     ////////////////////////////////////////

@@ -6,6 +6,7 @@ import { Roles } from "@decorators/roles";
 import { ParseIntPipe } from "@pipes/parse-int";
 import { PerPageDto, ListResponse, DEF_PER_COUNT } from "@dtos/page";
 import { UGidDto } from "@dtos/ids";
+import { UtilService } from "@services/util";
 
 import { AddUsergroupDto, EditUsergroupDto, UserUsergroupDto } from "./usergroups.dto";
 
@@ -27,18 +28,10 @@ export class UsergroupsAdminController {
     })
     // endregion Swagger Docs
     public async getList(@Query(new ParseIntPipe()) query: PerPageDto) {
-        const curPage = query.page || 1;
-        const perNum = query.perNum || DEF_PER_COUNT;
-        const resData = new ListResponse();
-        resData.current = curPage;
-        resData.totalPages = await this.ugSvr.countPage(perNum);
-        resData.total = await this.ugSvr.count();
-        if (resData.totalPages >= resData.current) {
-            resData.data = await this.ugSvr.list({
-                page: curPage, perNum
-            });
-        }
-        return resData;
+        const arr = await this.ugSvr.list(query);
+        return UtilService.toListRespone(arr, Object.assign({
+            total: await this.ugSvr.count()
+        }, query));
     }
 
     @Roles("admin")
@@ -112,18 +105,10 @@ export class UsergroupsAdminController {
             return group;
         }
         group = group.toObject();
-        const users = new ListResponse();
-        const curPage = query.page || 1;
-        const perNum = query.perNum || DEF_PER_COUNT;
-        users.current = curPage;
-        users.totalPages = await this.ugSvr.usersCountPage(param.gid, perNum);
-        users.total = await this.ugSvr.usersCount(param.gid);
-        if (users.totalPages >= users.current) {
-            users.data = await this.ugSvr.getGroupUsers(param.gid, {
-                page: curPage, perNum
-            });
-        }
-        group.users = users;
+        const arr = await this.ugSvr.getGroupUsers(param.gid, query);
+        group.users = UtilService.toListRespone(arr, Object.assign({
+            total: await this.ugSvr.usersCount(param.gid)
+        }, query));
         return group;
     }
 

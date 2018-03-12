@@ -55,7 +55,7 @@ describe("Collections E2E Api", () => {
         return files.remove(filepaths);
     });
 
-    before("login", async () => {
+    step("login", async () => {
         ids.users.push((await auth.login(request))[0]);
     });
 
@@ -81,9 +81,11 @@ describe("Collections E2E Api", () => {
     });
 
     step("User's Collection List", async () => {
+        const userId = ids.users[ids.users.length - 1];
+        const url = `/api/v1/users/${userId}/collections`;
         const {
             body: result, status
-        } = await request.get("/api/v1/users/collections").then();
+        } = await request.get(url).then();
         status.should.be.eql(200);
         result.should.have.properties("total", "data");
         result.data.should.be.an.Array()
@@ -104,9 +106,10 @@ describe("Collections E2E Api", () => {
 
     step("Other User's Collection List", async () => {
         const userId = ids.users[ids.users.length - 1];
+        const url = `/api/v1/users/${userId}/collections`;
         const {
             body: result, status
-        } = await request.get(`/api/v1/users/${userId}/collections`).then();
+        } = await request.get(url).then();
         status.should.be.eql(200);
         result.should.have.properties("total", "data");
         result.data.should.be.an.Array()
@@ -137,8 +140,8 @@ describe("Collections E2E Api", () => {
         } = await request.get(`/api/v1/collections/${collectionId}`).then();
         status.should.be.eql(200);
         result.should.have.properties("name", "goods", "creator");
-        result.goods.should.be.an.Array().which.have.length(FILE_COUNST);
-        goods = result.goods;
+        result.goods.data.should.be.an.Array().which.have.length(FILE_COUNST);
+        goods = result.goods.data;
     });
 
     step("Add New Collection", async () => {
@@ -277,7 +280,7 @@ describe("Collections E2E Api", () => {
             body: result
         } = await request.get(`/api/v1/collections/${id}`)
             .then();
-        result.goods.should.have.length(4);
+        result.goods.data.should.have.length(4);
     });
 
     step("Delete by DELETE METHOD", async () => {

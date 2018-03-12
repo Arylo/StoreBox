@@ -50,7 +50,7 @@ export class UsersService {
     }
 
     public async getUsergroups(
-        uid: ObjectId, pageObj: IPerPage = this.DEF_PER_OBJ
+        uid: ObjectId, pageObj = this.DEF_PER_OBJ
     ) {
         const perNum = pageObj.perNum;
         const page = pageObj.page;

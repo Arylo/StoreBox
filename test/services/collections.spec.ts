@@ -59,10 +59,10 @@ describe("Collections Service Test Unit", () => {
         should(count).be.a.Number();
     });
 
-    it("The Function `countPage` will return number", async () => {
-        const user = await UsersModel.findOne().exec();
-        const count = await collectionsSvr.countPage(user._id);
-        should(count).be.a.Number();
+    it.skip("The Function `countPage` will return number", async () => {
+        // const user = await UsersModel.findOne().exec();
+        // const count = await collectionsSvr.countPage(user._id);
+        // should(count).be.a.Number();
     });
 
     it("The Function `list` will return array", async () => {

@@ -9,12 +9,14 @@ import {
     Model as CategoriesModel, CategoryDoc, ICategory
 } from "@models/Categroy";
 import { Model as ValuesModel, ValueDoc, IValues } from "@models/Value";
-import { Model as GoodsModels } from "@models/Good";
 import { Roles } from "@decorators/roles";
 import { RolesGuard } from "@guards/roles";
 import { ParseIntPipe } from "@pipes/parse-int";
 import { PerPageDto, ListResponse } from "@dtos/page";
 import { CidDto } from "@dtos/ids";
+import { CategoriesService } from "@services/categories";
+import { GoodsService } from "@services/goods";
+import { UtilService } from "@services/util";
 import md5 = require("md5");
 
 import {
@@ -30,6 +32,11 @@ import { CreateValueDto, EditValueDto } from "../values/values.dto";
 // endregion Swagger Docs
 export class CategoriesAdminController {
 
+    constructor(
+        private readonly categoriesSvr: CategoriesService,
+        private readonly goodsSvr: GoodsService
+    ) { }
+
     @Roles("admin")
     @Get()
     // region Swagger Docs
@@ -41,18 +48,10 @@ export class CategoriesAdminController {
     })
     // endregion Swagger Docs
     public async list(@Query(new ParseIntPipe()) query: PerPageDto) {
-        const curPage = query.page || 1;
-        const totalPages = await CategoriesModel.countCategories(query.perNum);
-        const totalCount = await CategoriesModel.countCategories();
-
-        const data = new ListResponse<ICategory | CategoryDoc>();
-        data.current = curPage;
-        data.totalPages = totalPages;
-        data.total = totalCount;
-        if (totalPages >= curPage) {
-            data.data = await CategoriesModel.list(query.perNum, query.page);
-        }
-        return data;
+        const arr = await CategoriesModel.list(query.perNum, query.page);
+        return UtilService.toListRespone(arr, Object.assign({
+            total: await CategoriesModel.countCategories()
+        }, query));
     }
 
     @Roles("admin")
@@ -111,7 +110,9 @@ export class CategoriesAdminController {
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Get Category Info" })
     // endregion Swagger Docs
-    public async get(@Param() param: CidDto) {
+    public async get(
+        @Param() param: CidDto, @Query(new ParseIntPipe()) query: PerPageDto
+    ) {
         let obj: ICategory;
         try {
             const doc = await CategoriesModel.findById(param.cid)
@@ -124,15 +125,11 @@ export class CategoriesAdminController {
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        obj.goods = (
-            await GoodsModels.find({ category: obj._id })
-                .populate("uploader")
-                .populate("attributes")
-                .select("-category")
-                .exec()
-        ).map((doc) => {
-            return doc.toObject();
-        });
+        const arr = (await this.goodsSvr.listByCategoryId(param.cid))
+            .map((doc) => {
+                return doc.toObject();
+            });
+        obj.goods = UtilService.toListRespone(arr, query);
         return obj;
     }
 

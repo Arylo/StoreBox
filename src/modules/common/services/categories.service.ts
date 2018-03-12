@@ -2,7 +2,7 @@ import { Component } from "@nestjs/common";
 import { ObjectId } from "@models/common";
 import { Model as CategoriesModel, cache } from "@models/Categroy";
 import { isFunction } from "util";
-import { BaseService } from "./base";
+import { BaseService } from "@services/base";
 
 interface IIdMap {
     [parentId: string]: ObjectId[];

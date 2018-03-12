@@ -2,8 +2,11 @@ import { model, SchemaDefinition, Model as M, SchemaTypes } from "mongoose";
 import { Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS } from "@models/common";
 import { IGoods, FLAG as GoodFlag, Model as GoodsModels } from "@models/Good";
 import { IUser, FLAG as UserFlag } from "@models/User";
+import Cache =  require("schedule-cache");
 
 export const FLAG = "collections";
+
+export const cache = Cache.create(`${Date.now()}${Math.random()}`);
 
 const Definition: SchemaDefinition = {
     name: {

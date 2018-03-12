@@ -15,6 +15,7 @@ import { PerPageDto, ListResponse } from "@dtos/page";
 import { RidDto } from "@dtos/ids";
 import { ParseIntPipe } from "@pipes/parse-int";
 import { RegexpsService } from "@services/regexps";
+import { UtilService } from "@services/util";
 
 @UseGuards(RolesGuard)
 @Controller("api/v1/regexps")
@@ -39,21 +40,10 @@ export class RegexpsAdminController {
     })
     // endregion Swagger Docs
     public async list(@Query(new ParseIntPipe()) query: PerPageDto) {
-        const curPage = query.page || 1;
-        const totalPages = await this.regexpsSvr.pageCount(query.perNum);
-        const totalCount = await this.regexpsSvr.count();
-
-        const data = new ListResponse<RegexpDoc>();
-        data.current = curPage;
-        data.totalPages = totalPages;
-        data.total = totalCount;
-        if (data.current > data.totalPages) {
-            data.current = data.totalPages;
-        }
-        if (totalPages >= curPage) {
-            data.data = await this.regexpsSvr.list(query.perNum, data.current);
-        }
-        return data;
+        const arr = await this.regexpsSvr.list(query.perNum, query.page);
+        return UtilService.toListRespone(arr, Object.assign({
+            total: await this.regexpsSvr.count()
+        }, query));
     }
 
     @Roles("admin")
