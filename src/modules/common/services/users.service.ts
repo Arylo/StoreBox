@@ -78,9 +78,9 @@ export class UsersService extends BaseService {
             throw new BadRequestException("Empty Content");
         }
         try {
-            return await UsersModel.update({ _id: id }, content, {
-                runValidators: true, context: "query"
-            }).exec();
+            return await UsersModel
+                .update({ _id: id }, content, this.DEF_UPDATE_OPTIONS)
+                .exec();
         } catch (error) {
             throw new BadRequestException(error.toString());
         }

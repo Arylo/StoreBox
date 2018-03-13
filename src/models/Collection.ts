@@ -1,5 +1,7 @@
 import { model, SchemaDefinition, Model as M, SchemaTypes } from "mongoose";
-import { Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS } from "@models/common";
+import {
+    Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS, existsValidator
+} from "@models/common";
 import { IGoods, FLAG as GoodFlag, Model as GoodsModels } from "@models/Good";
 import { IUser, FLAG as UserFlag } from "@models/User";
 import Cache =  require("schedule-cache");
@@ -46,15 +48,7 @@ const CollectionsSchema = new Base(Definition).createSchema();
 CollectionsSchema.path("name").validate({
     isAsync: true,
     validator: async function nameValidator(val, respond) {
-        if (!this.isNew) {
-            const id = this.getQuery()._id;
-            const col = await Model.findById(id).exec();
-            if (col.toObject().name === val) {
-                return respond(true);
-            }
-        }
-        const result = await Model.findOne({ name: val }).exec();
-        respond(result ? false : true);
+        respond(await existsValidator(Model, "name", val));
     },
     message: "The name is existed"
 });

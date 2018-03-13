@@ -24,9 +24,9 @@ export class CollectionsService extends BaseService {
 
     public async edit(cid: ObjectId, ctx: IEditCollection) {
         try {
-            return await CollectionsModel.update({ _id: cid }, ctx, {
-                runValidators: true, context: "query"
-            }).exec();
+            return await CollectionsModel
+                .update({ _id: cid }, ctx, this.DEF_UPDATE_OPTIONS)
+                .exec();
         } catch (error) {
             throw new BadRequestException(error.toString());
         }

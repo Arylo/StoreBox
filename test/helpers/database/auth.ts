@@ -1,5 +1,5 @@
 import supertest = require("supertest");
-import { newUser } from "./user";
+import { newUser } from "@db/user";
 import { newName } from "../utils";
 
 export const login = async (

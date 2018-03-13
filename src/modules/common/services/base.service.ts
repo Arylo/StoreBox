@@ -11,6 +11,9 @@ export interface IGetOptions {
 
 export abstract class BaseService {
 
+    protected readonly DEF_UPDATE_OPTIONS = {
+        runValidators: true, context: "query"
+    };
     private cache;
 
     protected setCache(cache) {
@@ -20,7 +23,6 @@ export abstract class BaseService {
     protected loadAndCache<T>(
         FLAG: string, value: () => T, time?: TimeType
     ): T {
-        /* istanbul ignore else */
         if (!this.cache) {
             return value();
         }

@@ -1,7 +1,7 @@
 import { model, SchemaDefinition, Model as M } from "mongoose";
 import * as md5 from "md5";
 import { config } from "@utils/config";
-import { ObjectId } from "@models/common";
+import { ObjectId, existsValidator } from "@models/common";
 import { DEF_PER_COUNT } from "@dtos/page";
 import Cache =  require("schedule-cache");
 import { Base, IDoc, IDocRaw, MODIFY_MOTHODS } from "./common";
@@ -32,7 +32,7 @@ const UsersSchema = new Base(Definition).createSchema();
 UsersSchema.path("username").validate({
     isAsync: true,
     validator: async function usernameModifyValidator(val, respond) {
-        if (!this.isNew) {
+        if (this && !this.isNew) {
             const id = this.getQuery()._id;
             const col = await Model.findById(id).exec();
             return respond(col.toObject().username === val);
@@ -45,11 +45,12 @@ UsersSchema.path("username").validate({
 UsersSchema.path("username").validate({
     isAsync: true,
     validator: async function usernameExistValidator(val, respond) {
-        if (!this.isNew) {
+        if (this && !this.isNew) {
             return respond(true);
         }
-        const result = await Model.findOne({ username: val }).exec();
-        respond(result ? false : true);
+        respond(
+            await existsValidator(Model, "username", val, { update: false })
+        );
     },
     message: "The username is existed"
 });

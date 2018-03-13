@@ -1,5 +1,7 @@
 import { model, SchemaDefinition, Model as M, SchemaTypes } from "mongoose";
-import { Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS } from "@models/common";
+import {
+    Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS, existsValidator
+} from "@models/common";
 import { IValues, Flag as ValueFlag } from "@models/Value";
 import { IUser, FLAG as UserFlag } from "@models/User";
 import { ICategory, FLAG as CategoryFlag } from "@models/Categroy";
@@ -61,20 +63,20 @@ const GoodsSchema = new Base(Definition).createSchema();
 // region validators
 GoodsSchema.path("md5sum").validate({
     isAsync: true,
-    validator: (val, respond) => {
-        Model.findOne({ md5sum: val }).exec().then((result) => {
-            respond(result ? false : true);
-        });
+    validator: async function md5ExistsValidator(val, respond) {
+        respond(await existsValidator(Model, "md5sum", val, {
+            update: false
+        }));
     },
     message: "The file is existed"
 });
 
 GoodsSchema.path("sha256sum").validate({
     isAsync: true,
-    validator: (val, respond) => {
-        Model.findOne({ sha256sum: val }).exec().then((result) => {
-            respond(result ? false : true);
-        });
+    validator: async function sha256ExistsValidator(val, respond) {
+        respond(await existsValidator(Model, "sha256sum", val, {
+            update: false
+        }));
     },
     message: "The file is existed"
 });

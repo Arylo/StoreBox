@@ -1,5 +1,7 @@
 import { model, SchemaDefinition, Model as M, SchemaTypes } from "mongoose";
-import { Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS } from "@models/common";
+import {
+    Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS, existsValidator
+} from "@models/common";
 import { ICategory, FLAG as CF, Model as CM } from "@models/Categroy";
 import { DEF_PER_COUNT } from "@dtos/page";
 import Cache =  require("schedule-cache");
@@ -123,16 +125,9 @@ RegexpSchema.path("hidden").validate({
         if (!value) { // hidden === false
             return respond(true);
         }
-        if (!this.isNew) { // hidden === Old Value
-            const id = this.getQuery()._id;
-            const col = await Model.findById(id).exec();
-            if (col.toObject().hidden === value) {
-                return respond(true);
-            }
-        }
-        const result =
-            await Model.findOne({ value: this.value, hidden: value }).exec();
-        respond(result ? false : true);
+        respond(await existsValidator(Model, "hidden", value, {
+            extraCond: { value: this.value }
+        }));
     },
     message: "Only one active item with every value"
 });

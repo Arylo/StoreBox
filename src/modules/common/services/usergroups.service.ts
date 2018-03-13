@@ -18,9 +18,9 @@ export class UsergroupsService extends BaseService {
 
     public async edit(id: ObjectId, obj: object) {
         try {
-            return await UsergroupsModel.update(
-                { _id: id }, obj, { runValidators: true, context: "query" }
-            ).exec();
+            return await UsergroupsModel
+                .update({ _id: id }, obj, this.DEF_UPDATE_OPTIONS)
+                .exec();
         } catch (error) {
             throw new BadRequestException(error.toString());
         }

@@ -47,9 +47,7 @@ export class RegexpsService extends BaseService {
     public async editById(id: ObjectId, obj: object) {
         try {
             return await RegexpsModel
-                .update(
-                    { _id: id }, obj, { runValidators: true, context: "query" }
-                )
+                .update({ _id: id }, obj, this.DEF_UPDATE_OPTIONS)
                 .exec();
         } catch (error) {
             throw new BadRequestException(error.toString());
@@ -85,9 +83,9 @@ export class RegexpsService extends BaseService {
             throw new BadRequestException("Nonexist Categroy ID");
         }
         try {
-            return await RegexpsModel.findByIdAndUpdate(
-                id, { link: linkId }, { runValidators: true }
-            ).exec();
+            return await RegexpsModel
+                .update({ _id: id }, { link: linkId }, this.DEF_UPDATE_OPTIONS)
+                .exec();
         } catch (error) {
             throw new BadRequestException(error.toSrting());
         }
