@@ -1,4 +1,7 @@
-import { UseGuards, Controller, Get, Query, HttpStatus, HttpCode, Post, Body, Param, Delete } from "@nestjs/common";
+import {
+    UseGuards, Controller, Get, Query, HttpStatus, HttpCode, Post, Body, Param,
+    Delete
+} from "@nestjs/common";
 import { ApiUseTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 import { RolesGuard } from "@guards/roles";
 import { UsergroupsService } from "@services/usergroups";
@@ -8,7 +11,9 @@ import { PerPageDto, ListResponse, DEF_PER_COUNT } from "@dtos/page";
 import { UGidDto } from "@dtos/ids";
 import { UtilService } from "@services/util";
 
-import { AddUsergroupDto, EditUsergroupDto, UserUsergroupDto } from "./usergroups.dto";
+import {
+    AddUsergroupDto, EditUsergroupDto, UserUsergroupDto
+} from "./usergroups.dto";
 
 @UseGuards(RolesGuard)
 @ApiUseTags("User Groups")

@@ -51,11 +51,6 @@ export class UsergroupsService extends BaseService {
         return UsergroupsModel.count({ }).exec();
     }
 
-    public async countPage(perNum = this.DEF_PER_OBJ.perNum) {
-        const total = await this.count();
-        return Math.ceil(total / perNum);
-    }
-
     public list(pageObj = this.DEF_PER_OBJ) {
         const perNum = pageObj.perNum || this.DEF_PER_OBJ.perNum;
         const page = pageObj.page || this.DEF_PER_OBJ.page;
@@ -65,12 +60,20 @@ export class UsergroupsService extends BaseService {
             .exec();
     }
 
+    /**
+     * Remove Usergroup By Usergroup ID
+     * @param gid Usergroup ID
+     */
     public async remove(gid: ObjectId) {
         if ((await this.count()) === 1) {
-            throw new BadRequestException("Nnn delete unique group");
+            throw new BadRequestException("Cant delete unique group");
         }
         try {
-            return await UsergroupsModel.findByIdAndRemove(gid).exec();
+            const p = await UsergroupsModel.findByIdAndRemove(gid).exec();
+            await UserUsergroupsModel.findOneAndRemove({
+                usergroup: gid
+            }).exec();
+            return p;
         } catch (error) {
             throw new BadRequestException(error.toString());
         }

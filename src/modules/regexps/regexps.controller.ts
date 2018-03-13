@@ -16,6 +16,7 @@ import { RidDto } from "@dtos/ids";
 import { ParseIntPipe } from "@pipes/parse-int";
 import { RegexpsService } from "@services/regexps";
 import { UtilService } from "@services/util";
+import { DefResDto } from "@dtos/res";
 
 @UseGuards(RolesGuard)
 @Controller("api/v1/regexps")
@@ -50,8 +51,8 @@ export class RegexpsAdminController {
     @Post()
     @HttpCode(HttpStatus.CREATED)
     @ApiOperation({ title: "Add RegExp" })
-    public async add(@Body() ctx: NewRegexp) {
-        return await this.regexpsSvr.create(ctx);
+    public add(@Body() ctx: NewRegexp) {
+        return this.regexpsSvr.create(ctx);
     }
 
     @Roles("admin")
@@ -61,7 +62,7 @@ export class RegexpsAdminController {
     @ApiOperation({ title: "Get RegExp Info" })
     // endregion Swagger Docs
     public getRegexp(@Param() param: RidDto) {
-        return this.regexpsSvr.getRegexp(param.rid);
+        return this.regexpsSvr.getById(param.rid);
     }
 
     @Roles("admin")
@@ -85,7 +86,7 @@ export class RegexpsAdminController {
         if (!regexp) {
             throw new BadRequestException("NonExist RegExp");
         }
-        return { statusCode: HttpStatus.OK };
+        return new DefResDto();
     }
 
     @Roles("admin")
@@ -94,7 +95,8 @@ export class RegexpsAdminController {
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Delete RegExp" })
     @ApiResponse({
-        status: HttpStatus.OK, description: "Delete RegExp Success"
+        status: HttpStatus.OK, description: "Delete RegExp Success",
+        type: DefResDto
     })
     // endregion Swagger Docs
     public deleteByDelete(@Param() param: RidDto) {
@@ -107,12 +109,13 @@ export class RegexpsAdminController {
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Delete RegExp" })
     @ApiResponse({
-        status: HttpStatus.OK, description: "Delete RegExp Success"
+        status: HttpStatus.OK, description: "Delete RegExp Success",
+        type: DefResDto
     })
     // endregion Swagger Docs
     public async deleteByGet(@Param() param: RidDto) {
         await this.regexpsSvr.remove(param.rid);
-        return { statusCode: HttpStatus.OK };
+        return new DefResDto();
     }
 
 }

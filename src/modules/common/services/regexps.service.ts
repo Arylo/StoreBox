@@ -6,7 +6,7 @@ import {
 import { Model as CategroiesModel, ICategory } from "@models/Categroy";
 import { DEF_PER_COUNT } from "@dtos/page";
 import { isUndefined } from "util";
-import { BaseService } from "@services/base";
+import { BaseService, IGetOptions } from "@services/base";
 
 export interface IGetRegexpsOptions {
     categroies?: ObjectId[];
@@ -42,8 +42,9 @@ export class RegexpsService extends BaseService {
 
     /**
      * 修改规则
+     * @param id Regexp ID
      */
-    public async editById(id: ObjectId, obj) {
+    public async editById(id: ObjectId, obj: object) {
         try {
             return await RegexpsModel
                 .update(
@@ -100,10 +101,11 @@ export class RegexpsService extends BaseService {
         );
     }
 
-    public getRegexp(id: ObjectId) {
-        return RegexpsModel.findById(id)
-            .populate({ path: "link", populate: { path: "pid" } })
-            .exec();
+    public getById(id: ObjectId, opts?: IGetOptions) {
+        let p = RegexpsModel.findById(id)
+            .populate({ path: "link", populate: { path: "pid" } });
+        p = this.documentQueryProcess(p, opts);
+        return p.exec();
     }
 
     /**

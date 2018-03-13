@@ -4,7 +4,7 @@ import { Model as CollectionsModel, cache } from "@models/Collection";
 import { ObjectId } from "@models/common";
 import { DEF_PER_COUNT } from "@dtos/page";
 import { IEditCollection } from "../../../modules/collections/collections.dto";
-import { BaseService } from "@services/base";
+import { BaseService, IGetOptions } from "@services/base";
 
 @Component()
 export class CollectionsService extends BaseService {
@@ -56,13 +56,17 @@ export class CollectionsService extends BaseService {
         );
     }
 
-    public getByName(name: string, opts = this.GetOptions) {
+    private readonly GET_OPTIONS: IGetOptions = {
+        populate: [ "creator", "goods" ]
+    };
+
+    /**
+     * Get By Collection Name
+     * @param name Collection Name
+     */
+    public getByName(name: string, opts = this.GET_OPTIONS) {
         let p = CollectionsModel.findOne({ name });
-        if (opts.populate && opts.populate.length > 0) {
-            for (const field of opts.populate) {
-                p = p.populate(field);
-            }
-        }
+        p = this.documentQueryProcess(p, opts);
         return this.loadAndCache(
             `getByName_${name}`,
             () => p.exec(),
@@ -70,19 +74,15 @@ export class CollectionsService extends BaseService {
         );
     }
 
-    private readonly GetOptions = {
-        populate: [ "creator", "goods" ]
-    };
-
-    public getByCid(cid: ObjectId, opts = this.GetOptions) {
-        let p = CollectionsModel.findById(cid);
-        if (opts.populate && opts.populate.length > 0) {
-            for (const field of opts.populate) {
-                p = p.populate(field);
-            }
-        }
+    /**
+     * Get By Collection ID
+     * @param id Collection ID
+     */
+    public getById(id: ObjectId, opts = this.GET_OPTIONS) {
+        let p = CollectionsModel.findById(id);
+        p = this.documentQueryProcess(p, opts);
         return this.loadAndCache(
-            `getById_${cid.toString()}`,
+            `getById_${id.toString()}`,
             () => p.exec(),
             7200
         );

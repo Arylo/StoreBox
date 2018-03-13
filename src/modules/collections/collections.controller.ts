@@ -8,6 +8,7 @@ import { RolesGuard } from "@guards/roles";
 import { Roles } from "@decorators/roles";
 import { GetCollectionNameDto } from "./collections.dto";
 import { PerPageDto } from "@dtos/page";
+import { ParseIntPipe } from "@pipes/parse-int";
 
 @UseGuards(RolesGuard)
 @Controller("/collections")
@@ -25,7 +26,8 @@ export class CollectionsController {
     @ApiOperation({ title: "Get Collection Info" })
     // endregion Swagger Docs
     public async getCollection(
-        @Param() param: GetCollectionNameDto, @Query() query: PerPageDto
+        @Param() param: GetCollectionNameDto,
+        @Query(new ParseIntPipe()) query: PerPageDto
     ) {
         const doc = await this.collectionsSvr.getByName(param.name);
         if (!doc) {

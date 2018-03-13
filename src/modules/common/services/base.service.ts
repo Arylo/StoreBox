@@ -1,7 +1,13 @@
 import { DEF_PER_COUNT } from "@dtos/page";
 import { UtilService } from "@services/util";
+import { DocumentQuery, ModelPopulateOptions } from "mongoose";
 
 type TimeType = number | string;
+
+export interface IGetOptions {
+    populate?: Array<string | ModelPopulateOptions>;
+    select?: string[];
+}
 
 export abstract class BaseService {
 
@@ -14,6 +20,7 @@ export abstract class BaseService {
     protected loadAndCache<T>(
         FLAG: string, value: () => T, time?: TimeType
     ): T {
+        /* istanbul ignore else */
         if (!this.cache) {
             return value();
         }
@@ -38,5 +45,17 @@ export abstract class BaseService {
      * @param perNum 每页显示数
      */
     public calPageCount = UtilService.calPageCount;
+
+    public documentQueryProcess<T extends DocumentQuery<any, any>>(
+        query: T, opts: IGetOptions = { }
+    ) {
+        for (const p of (opts.populate || [ ])) {
+            query = query.populate(p);
+        }
+        for (const s of (opts.select || [ ])) {
+            query = query.select(s);
+        }
+        return query;
+    }
 
 }

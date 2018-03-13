@@ -3,7 +3,6 @@ import {
     BadRequestException, ForbiddenException
 } from "@nestjs/common";
 import { ApiUseTags, ApiResponse, ApiOperation } from "@nestjs/swagger";
-import { Model as TokensModel } from "@models/Token";
 import { Roles } from "@decorators/roles";
 import { RolesGuard } from "@guards/roles";
 import { TokensService } from "@services/tokens";
@@ -66,16 +65,12 @@ export class TokensAdminController {
     public async deleteTokenByGet(
         @Param() param: TokenParamDto, @Session() session
     ) {
-        try {
-            const token = await this.tokensSvr.remove({
-                _id: param.tid,
-                user: session.loginUserId
-            });
-            if (!token) {
-                throw new BadRequestException("The Tokens isth exist");
-            }
-        } catch (error) {
-            throw new BadRequestException(error.toString());
+        const token = await this.tokensSvr.remove({
+            _id: param.tid,
+            user: session.loginUserId
+        });
+        if (!token) {
+            throw new BadRequestException("The Tokens isth exist");
         }
         return new DefResDto();
     }

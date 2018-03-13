@@ -1,8 +1,9 @@
-import { Component } from "@nestjs/common";
+import { Component, BadRequestException } from "@nestjs/common";
 import { ObjectId } from "@models/common";
-import { Model as CategoriesModel, cache } from "@models/Categroy";
-import { isFunction } from "util";
-import { BaseService } from "@services/base";
+import { Model as CategoriesModel, cache, ICategoryRaw, ICategory } from "@models/Categroy";
+import { isFunction, isArray } from "util";
+import { BaseService, IGetOptions } from "@services/base";
+import { difference } from "lodash";
 
 interface IIdMap {
     [parentId: string]: ObjectId[];
@@ -49,6 +50,97 @@ export class CategoriesService extends BaseService {
             }
         }
         return ids;
+    }
+
+    private getTags(obj: ICategoryRaw | ICategory) {
+        const tags = obj.tags;
+        const pid = obj.pid as ICategoryRaw | void;
+        if (pid && pid.tags) {
+            return tags.concat(this.getTags(pid));
+        }
+        return tags;
+    }
+
+    public async getByTags(tags: string | string[]) {
+        if (!isArray(tags)) {
+            tags = [ tags ];
+        }
+        if (tags.length === 0) {
+            return Promise.resolve([ ]);
+        }
+        const conditions = tags.length === 1 ? {
+            tags: { $in: tags }
+        } : {
+            $or: tags.reduce((arr, tag) => {
+                arr.push({ tags: { $in: [ tag ] } });
+                return arr;
+            }, [])
+        };
+        const p = (await this.get(conditions, {
+                populate: [
+                    "attributes",
+                    { path: "pid", populate: { path: "pid" } }
+                ]
+            }))
+            .map((item) => item.toObject())
+            .map((item) => {
+                item.tags = Array.from(new Set(this.getTags(item)));
+                delete item.pid;
+                return item;
+            })
+            .filter((item) => {
+                const diffLength = difference(item.tags, tags).length;
+                return diffLength + tags.length === item.tags.length ;
+            });
+        return p;
+    }
+
+    /**
+     * Category 列表
+     * @param  opts.perNum {number} 每页数量
+     * @param  opts.page {number} 页数
+     * @return {Promise}
+     */
+    public async list(opts = this.DEF_PER_OBJ) {
+        return CategoriesModel.find({ })
+            .skip((opts.page - 1) * opts.perNum).limit(opts.perNum)
+            .exec();
+    }
+
+    public count() {
+        return CategoriesModel.count({ }).exec();
+    }
+
+    public add(ctx: object) {
+        return CategoriesModel.create(ctx);
+    }
+
+    public get(cond: object, opts?: IGetOptions) {
+        let p = CategoriesModel.find(cond);
+        p = this.documentQueryProcess(p, opts);
+        return p.exec();
+    }
+
+    public getById(id: ObjectId, opts?: IGetOptions) {
+        let p = CategoriesModel.findById(id);
+        p = this.documentQueryProcess(p, opts);
+        return p.exec();
+    }
+
+    public editById(id: ObjectId, ctx: object) {
+        try {
+            return CategoriesModel.findByIdAndUpdate(id, ctx).exec();
+        } catch (error) {
+            throw new BadRequestException(error.toString());
+        }
+    }
+
+    public removeById(id: ObjectId) {
+        try {
+            return CategoriesModel.findByIdAndRemove(id).exec();
+        } catch (error) {
+            throw new BadRequestException(error.toString());
+        }
     }
 
 }

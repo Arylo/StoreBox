@@ -5,11 +5,6 @@ import {
 import {
     ApiBearerAuth, ApiUseTags, ApiResponse, ApiOperation, ApiImplicitParam
 } from "@nestjs/swagger";
-import { Model as UserModel, IUser, UserDoc } from "@models/User";
-import { Model as UserUsergroupsModel } from "@models/User-Usergroup";
-import { Model as TokensModel } from "@models/Token";
-import { Model as GoodsModels } from "@models/Good";
-import { CollectionDoc } from "@models/Collection";
 import { ObjectId } from "@models/common";
 import { Roles } from "@decorators/roles";
 import { RolesGuard } from "@guards/roles";
@@ -20,6 +15,7 @@ import { CollectionsService } from "@services/collections";
 import { UsersService } from "@services/users";
 import { SystemService } from "@services/system";
 import { UtilService } from "@services/util";
+import { GoodsService } from "@services/goods";
 import { PerPageDto, ListResponse, DEF_PER_COUNT } from "@dtos/page";
 import { UidDto } from "@dtos/ids";
 import { DefResDto } from "@dtos/res";
@@ -41,7 +37,8 @@ export class UsersAdminController {
         private readonly collectionsSvr: CollectionsService,
         private readonly usersSvr: UsersService,
         private readonly ugSvr: UsergroupsService,
-        private readonly sysSvr: SystemService
+        private readonly sysSvr: SystemService,
+        private readonly goodsSvr: GoodsService
     ) { }
 
     @Roles("admin")
@@ -55,9 +52,9 @@ export class UsersAdminController {
     })
     // endregion Swagger Docs
     public async findAll(@Query(new ParseIntPipe()) query: PerPageDto) {
-        const arr = await UserModel.list(query.perNum, query.page);
+        const arr = await this.usersSvr.list(query);
         return UtilService.toListRespone(arr, Object.assign({
-            total: await UserModel.countUsers()
+            total: await this.usersSvr.conut()
         }, query));
     }
 
@@ -110,11 +107,9 @@ export class UsersAdminController {
     public async password(
         @Body() user: ModifyPasswordDto, @Param() param: UidDto
     ) {
-        try {
-            await UserModel.passwd(param.uid, user.oldPassword, user.newPassword);
-        } catch (error) {
-            throw new BadRequestException(error.toString());
-        }
+        await this.usersSvr.passwd(
+            param.uid, user.oldPassword, user.newPassword
+        );
         return new DefResDto();
     }
 
@@ -229,11 +224,9 @@ export class UsersAdminController {
     ////////////////////////////////////////
 
     private async getGoodsRes(uid: ObjectId, query: PerPageDto) {
-        const arr = await GoodsModels.getGoodsByUids(
-            uid, query.perNum, query.page
-        );
+        const arr = await this.goodsSvr.getByUids(uid, query);
         return UtilService.toListRespone(arr, Object.assign({
-            total: await GoodsModels.countGoodsByUids(uid)
+            total: await this.goodsSvr.countByUids(uid)
         }, query));
     }
 
@@ -358,7 +351,7 @@ export class UsersAdminController {
     @ApiResponse({ status: HttpStatus.OK, description: "Get User Info" })
     // endregion Swagger Docs
     public get(@Param() param: UidDto) {
-        return UserModel.findById(param.uid).exec();
+        return this.usersSvr.getById(param.uid);
     }
 
 }

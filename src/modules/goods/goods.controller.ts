@@ -7,11 +7,7 @@ import {
     ApiImplicitBody, ApiConsumes
 } from "@nestjs/swagger";
 import { IValues, Model as ValuesModel } from "@models/Value";
-import { Model as GoodsModels, IGoods } from "@models/Good";
-import { Model as RegexpModel } from "@models/Regexp";
-import { Model as TokensModel } from "@models/Token";
-import { Model as CollectionsModel } from "@models/Collection";
-import { Model as CategroiesModel } from "@models/Categroy";
+import { IGoods } from "@models/Good";
 import { ObjectId } from "@models/common";
 import { config } from "@utils/config";
 import { RolesGuard } from "@guards/roles";
@@ -20,6 +16,7 @@ import { File, Files, User } from "@decorators/route";
 import { GidDto } from "@dtos/ids";
 import { IReqUser } from "@dtos/req";
 import { PerPageDto, ListResponse } from "@dtos/page";
+import { DefResDto } from "@dtos/res";
 import { RegexpCountCheckPipe } from "@pipes/regexp-count-check";
 import { ParseIntPipe } from "@pipes/parse-int";
 import { ToArrayPipe } from "@pipes/to-array";
@@ -27,6 +24,7 @@ import { TokensService } from "@services/tokens";
 import { CollectionsService } from "@services/collections";
 import { IGetRegexpsOptions, RegexpsService } from "@services/regexps";
 import { CategoriesService } from "@services/categories";
+import { GoodsService } from "@services/goods";
 import { UtilService } from "@services/util";
 import * as hasha from "hasha";
 import fs = require("fs-extra");
@@ -47,7 +45,8 @@ export class GoodsAdminController {
         private readonly tokensSvr: TokensService,
         private readonly collectionsSvr: CollectionsService,
         private readonly regexpSvr: RegexpsService,
-        private readonly categoriesSvr: CategoriesService
+        private readonly categoriesSvr: CategoriesService,
+        private readonly goodsSvr: GoodsService
     ) { }
 
     private toMd5sum(filepath: string) {
@@ -69,11 +68,11 @@ export class GoodsAdminController {
     })
     // endregion Swagger Docs
     public async getGoods(@Query(new ParseIntPipe()) query: PerPageDto) {
-        const arr = await GoodsModels.getGoodsByUids(
-            [ ], query.perNum, query.page
+        const arr = await this.goodsSvr.getByUids(
+            [ ], query
         );
         return UtilService.toListRespone(arr, Object.assign({
-            total: await GoodsModels.countGoodsByUids([ ])
+            total: await this.goodsSvr.countByUids([ ])
         }, query));
     }
 
@@ -87,7 +86,7 @@ export class GoodsAdminController {
                 return arr;
             }, [ ])
         };
-        const categories = await CategroiesModel.find(conditions).exec();
+        const categories = await this.categoriesSvr.get(conditions);
         const idSet = new Set<ObjectId>();
         for (const category of categories) {
             const id = category._id.toString();
@@ -124,7 +123,7 @@ export class GoodsAdminController {
         try {
             const md5sum = this.toMd5sum(obj.file.path);
             const sha256sum = this.toSha256sum(obj.file.path);
-            goodObj = (await GoodsModels.create({
+            goodObj = (await this.goodsSvr.add({
                 filename: obj.file.filename,
                 originname: obj.file.originalname,
                 category: categories[0]._id,
@@ -230,10 +229,9 @@ export class GoodsAdminController {
                 });
                 const collection =
                     isArray(collections) ? collections[0] : collections;
-                return CollectionsModel
-                    .findById(collection._id)
-                    .populate("goods")
-                    .exec();
+                return this.collectionsSvr.getById(collection._id, {
+                    populate: [ "goods" ]
+                });
             } catch (error) {
                 throw new BadRequestException(error.toString());
             }
@@ -249,11 +247,13 @@ export class GoodsAdminController {
     public async get(@Param() param: GidDto) {
         let obj;
         try {
-            obj = await GoodsModels.findById(param.gid)
-                .populate("uploader", "nickname")
-                .populate("attributes")
-                .populate("category", "name attributes tags")
-                .exec();
+            obj = await this.goodsSvr.getById(param.gid, {
+                populate: [
+                    "attributes",
+                    { path: "uploader", select: "nickname" },
+                    { path: "category", select: "name attributes tags" }
+                ]
+            });
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
@@ -269,11 +269,11 @@ export class GoodsAdminController {
     public async addAttr(
         @Param() param: GidDto, @Body() ctx: CreateValueDto
     ) {
-        const obj = await GoodsModels.findById(param.gid)
-            .populate("attributes")
-            .exec();
+        const obj = await this.goodsSvr.getById(param.gid, {
+            populate: [ "attributes" ]
+        });
         if (!obj) {
-            // TODO throw
+            throw new BadRequestException("Non Exist Good");
         }
         const attributes = obj.toObject().attributes as IValues[];
         if (attributes.length !== 0) {
@@ -287,9 +287,9 @@ export class GoodsAdminController {
             }
         }
         const newAttr = await ValuesModel.create(ctx);
-        await GoodsModels.findByIdAndUpdate(
+        await this.goodsSvr.editById(
             param.gid, { $push: { attributes: newAttr._id } }
-        ).exec();
+        );
         return { statusCode: HttpStatus.CREATED };
     }
 
@@ -307,7 +307,7 @@ export class GoodsAdminController {
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        return { statusCode: HttpStatus.OK };
+        return new DefResDto();
     }
 
     @Roles("admin")
@@ -333,22 +333,18 @@ export class GoodsAdminController {
     })
     // endregion Swagger Docs
     public async deleteAttrByGet(@Param() param: GoodAttributeParamDto) {
-        try {
-            await GoodsModels.findByIdAndUpdate(param.gid, {
-                $pull: { attributes: param.aid}
-            }).exec();
-        } catch (error) {
-            throw new BadRequestException(error.toString());
-        }
+        await this.goodsSvr.editById(param.gid, {
+            $pull: { attributes: param.aid}
+        });
         try {
             await ValuesModel.findByIdAndRemove(param.aid).exec();
         } catch (error) {
-            await GoodsModels.findByIdAndUpdate(
+            await this.goodsSvr.editById(
                 param.gid, { $push: { attributes: param.aid } }
-            ).exec();
+            );
             throw new BadRequestException(error.toString());
         }
-        return { statusCode: HttpStatus.OK };
+        return new DefResDto();
     }
 
 }

@@ -59,11 +59,6 @@ for (const method of MODIFY_MOTHODS) {
 
 export const Model = model(Flag, TokensSchema) as M<TokenDoc>;
 
-const getCount = async (userId: ObjectId): Promise<number> => {
-    if (cache.get(userId.toString())) {
-        cache.get(userId.toString());
-    }
-    const count = await Model.count({ user: userId }).exec();
-    cache.put(userId.toString(), count);
-    return cache.get(userId.toString());
+const getCount = (userId: ObjectId): Promise<number> => {
+    return Model.count({ user: userId }).exec();
 };

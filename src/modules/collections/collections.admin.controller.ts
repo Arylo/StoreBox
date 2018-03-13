@@ -102,7 +102,7 @@ export class CollectionsAdminController {
     @ApiOperation({ title: "Get One Collection's Info" })
     // endregion Swagger Docs
     public async getCollection(@Param() param: CCidDto) {
-        const doc = await this.collectionsSvr.getByCid(param.cid);
+        const doc = await this.collectionsSvr.getById(param.cid);
         if (!doc) {
             return null;
         }
