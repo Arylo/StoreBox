@@ -4,17 +4,14 @@ import { Model as UsersModel, UserDoc } from "@models/User";
 import { Model as UserUsergroupsModel } from "@models/User-Usergroup";
 import { IUsergroups } from "@models/Usergroup";
 import { SystemService } from "@services/system";
-import { IPerPage, DEF_PER_COUNT } from "@dtos/page";
+import { BaseService } from "@services/base";
 
 @Component()
-export class UsersService {
+export class UsersService extends BaseService {
 
-    private DEF_PER_OBJ: IPerPage = {
-        perNum: DEF_PER_COUNT,
-        page: 1
-    };
-
-    constructor(private readonly sysSvr: SystemService) { }
+    constructor(private readonly sysSvr: SystemService) {
+        super();
+    }
 
     public async addUser(obj, gid?: ObjectId) {
         try {
@@ -42,11 +39,6 @@ export class UsersService {
 
     public countUsergroups(uid: ObjectId) {
         return UserUsergroupsModel.count({ user: uid }).exec();
-    }
-
-    public async countPageUsergroups(uid: ObjectId, perNum = DEF_PER_COUNT) {
-        const total = await this.countUsergroups(uid);
-        return Math.ceil(total / perNum);
     }
 
     public async getUsergroups(

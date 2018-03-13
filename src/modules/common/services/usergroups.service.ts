@@ -30,13 +30,6 @@ export class UsergroupsService extends BaseService {
         return UserUsergroupsModel.count({ usergroup: gid }).exec();
     }
 
-    public async usersCountPage(
-        uid: ObjectId, perNum = this.DEF_PER_OBJ.perNum
-    ) {
-        const total = await this.usersCount(uid);
-        return Math.ceil(total / perNum);
-    }
-
     public getGroup(gid: ObjectId) {
         return UsergroupsModel.findById(gid).exec();
     }

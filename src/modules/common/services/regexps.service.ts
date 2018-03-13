@@ -92,12 +92,6 @@ export class RegexpsService extends BaseService {
         }
     }
 
-    public async pageCount(perNum?: number) {
-        return this.calPageCount(
-            await this.count(), perNum
-        );
-    }
-
     public count() {
         const FLAG = "totalCount";
         return this.loadAndCache(
