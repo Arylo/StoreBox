@@ -1,20 +1,20 @@
 import {
     Controller, Post, Res, Body, Get, HttpStatus, HttpCode, Param,
-    BadRequestException, UseGuards, Delete, Query
+    BadRequestException, UseGuards, Delete, Query, BadGatewayException
 } from "@nestjs/common";
 import {
     ApiBearerAuth, ApiUseTags, ApiResponse, ApiImplicitParam, ApiOperation
 } from "@nestjs/swagger";
-import {
-    Model as CategoriesModel, CategoryDoc, ICategory
-} from "@models/Categroy";
 import { Model as ValuesModel, ValueDoc, IValues } from "@models/Value";
-import { Model as GoodsModels } from "@models/Good";
 import { Roles } from "@decorators/roles";
 import { RolesGuard } from "@guards/roles";
 import { ParseIntPipe } from "@pipes/parse-int";
 import { PerPageDto, ListResponse } from "@dtos/page";
 import { CidDto } from "@dtos/ids";
+import { DefResDto } from "@dtos/res";
+import { CategoriesService } from "@services/categories";
+import { GoodsService } from "@services/goods";
+import { UtilService } from "@services/util";
 import md5 = require("md5");
 
 import {
@@ -30,6 +30,11 @@ import { CreateValueDto, EditValueDto } from "../values/values.dto";
 // endregion Swagger Docs
 export class CategoriesAdminController {
 
+    constructor(
+        private readonly categoriesSvr: CategoriesService,
+        private readonly goodsSvr: GoodsService
+    ) { }
+
     @Roles("admin")
     @Get()
     // region Swagger Docs
@@ -41,18 +46,10 @@ export class CategoriesAdminController {
     })
     // endregion Swagger Docs
     public async list(@Query(new ParseIntPipe()) query: PerPageDto) {
-        const curPage = query.page || 1;
-        const totalPages = await CategoriesModel.countCategories(query.perNum);
-        const totalCount = await CategoriesModel.countCategories();
-
-        const data = new ListResponse<ICategory | CategoryDoc>();
-        data.current = curPage;
-        data.totalPages = totalPages;
-        data.total = totalCount;
-        if (totalPages >= curPage) {
-            data.data = await CategoriesModel.list(query.perNum, query.page);
-        }
-        return data;
+        const arr = await this.categoriesSvr.list(query);
+        return UtilService.toListRespone(arr, Object.assign({
+            total: await this.categoriesSvr.count()
+        }, query));
     }
 
     @Roles("admin")
@@ -62,7 +59,7 @@ export class CategoriesAdminController {
     @ApiOperation({ title: "Add Category" })
     // endregion Swagger Docs
     public async add(@Body() ctx: NewCategoryDto) {
-        if (ctx.pid && !(await CategoriesModel.findById(ctx.pid).exec())) {
+        if (ctx.pid && !(await this.categoriesSvr.getById(ctx.pid))) {
             throw new BadRequestException("The Parent Category isnt exist!");
         }
         let attrsIds = [ ];
@@ -90,7 +87,7 @@ export class CategoriesAdminController {
         }
         let result;
         try {
-            result = await CategoriesModel.create({
+            result = await this.categoriesSvr.add({
                 name: ctx.name,
                 tags: ctx.tags,
                 attributes: attrsIds,
@@ -111,28 +108,31 @@ export class CategoriesAdminController {
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Get Category Info" })
     // endregion Swagger Docs
-    public async get(@Param() param: CidDto) {
-        let obj: ICategory;
+    public async get(
+        @Param() param: CidDto, @Query(new ParseIntPipe()) query: PerPageDto
+    ) {
+        let obj;
         try {
-            const doc = await CategoriesModel.findById(param.cid)
-                .populate("attributes")
-                .populate({
-                    path: "pid", populate: { path: "pid" }
-                })
-                .exec();
+            const doc = await this.categoriesSvr.getById(param.cid, {
+                populate: [
+                    "attributes",
+                    {
+                        path: "pid", populate: { path: "pid" }
+                    }
+                ]
+            });
+            if (!obj) {
+                return doc;
+            }
             obj = doc.toObject();
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        obj.goods = (
-            await GoodsModels.find({ category: obj._id })
-                .populate("uploader")
-                .populate("attributes")
-                .select("-category")
-                .exec()
-        ).map((doc) => {
-            return doc.toObject();
-        });
+        const arr = (await this.goodsSvr.listByCategoryId(param.cid))
+            .map((doc) => {
+                return doc.toObject();
+            });
+        obj.goods = UtilService.toListRespone(arr, query);
         return obj;
     }
 
@@ -145,9 +145,14 @@ export class CategoriesAdminController {
     public async addAttr(
         @Param() param: CidDto, @Body() ctx: CreateValueDto
     ) {
-        const curCategory = (
-            await CategoriesModel.findById(param.cid).populate("attributes").exec()
-        ).toObject();
+        const category =
+            await this.categoriesSvr.getById(param.cid, {
+                populate: [ "attributes" ]
+            });
+        if (!category) {
+            throw new BadGatewayException("Non Exist Category");
+        }
+        const curCategory = category.toObject();
         const attributes = curCategory.attributes as IValues[];
         if (attributes.length !== 0) {
             const attrSet = new Set<string>();
@@ -163,9 +168,9 @@ export class CategoriesAdminController {
             }
         }
         const newAttr = await ValuesModel.create(ctx);
-        await CategoriesModel.findByIdAndUpdate(
+        await this.categoriesSvr.editById(
             param.cid, { $push: { attributes: newAttr._id } }
-        ).exec();
+        );
         return newAttr;
     }
 
@@ -183,7 +188,7 @@ export class CategoriesAdminController {
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        return { statusCode: HttpStatus.OK };
+        return new DefResDto();
     }
 
     @Roles("admin")
@@ -209,19 +214,15 @@ export class CategoriesAdminController {
     })
     // endregion Swagger Docs
     public async deleteAttrByGet(@Param() param: CategoryAttributeParamDto) {
-        try {
-            await CategoriesModel.findByIdAndUpdate(param.cid, {
-                $pull: { attributes: param.aid}
-            }).exec();
-        } catch (error) {
-            throw new BadRequestException(error.toString());
-        }
+        await this.categoriesSvr.editById(param.cid, {
+            $pull: { attributes: param.aid}
+        });
         try {
             await ValuesModel.findByIdAndRemove(param.aid).exec();
         } catch (error) {
-            await CategoriesModel.findByIdAndUpdate(
+            await this.categoriesSvr.editById(
                 param.cid, { $push: { attributes: param.aid } }
-            ).exec();
+            );
             throw new BadRequestException(error.toString());
         }
         return { status: HttpStatus.OK };
@@ -236,32 +237,36 @@ export class CategoriesAdminController {
     public async edit(
         @Param() param: CidDto, @Body() ctx: EditCategoryDto
     ) {
-        const curCategory = (
-            await CategoriesModel.findById(param.cid)
-                .populate("attributes")
-                .populate({
-                    path: "pid", populate: { path: "pid" }
-                }).exec()
-        ).toObject();
+        const curCategory =
+            await this.categoriesSvr.getById(param.cid, {
+                populate: [
+                    "attributes",
+                    {
+                        path: "pid", populate: { path: "pid" }
+                    }
+                ]
+            });
+        if (!curCategory) {
+            throw new BadGatewayException("Non Exist Category");
+        }
         let parentCategory;
         if (ctx.pid) {
-            parentCategory = await CategoriesModel.findById(ctx.pid)
-                .populate("attributes")
-                .populate({
-                    path: "pid", populate: { path: "pid" }
-                }).exec();
+            parentCategory = await this.categoriesSvr.getById(ctx.pid, {
+                populate: [
+                    "attributes",
+                    {
+                        path: "pid", populate: { path: "pid" }
+                    }
+                ]
+            });
             if (!parentCategory) {
                 throw new BadRequestException(
                     "The Parent Category isnt exist!"
                 );
             }
         }
-        try {
-            await CategoriesModel.findByIdAndUpdate(param.cid, ctx).exec();
-        } catch (error) {
-            throw new BadRequestException(error.toString());
-        }
-        return { status: HttpStatus.OK };
+        await this.categoriesSvr.editById(param.cid, ctx);
+        return new DefResDto();
     }
 
     @Roles("admin")
@@ -287,11 +292,7 @@ export class CategoriesAdminController {
     })
     // endregion Swagger Docs
     public async deleteByGet(@Param() param: CidDto) {
-        try {
-            await CategoriesModel.findByIdAndRemove(param.cid).exec();
-        } catch (error) {
-            throw new BadRequestException(error.toString());
-        }
-        return { status: HttpStatus.OK };
+        await this.categoriesSvr.removeById(param.cid);
+        return new DefResDto();
     }
 }

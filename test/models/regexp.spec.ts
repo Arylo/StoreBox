@@ -28,9 +28,11 @@ describe("RegExp Model", () => {
         return db.drop(ids);
     });
 
+    const REG = new RegExp(newName());
+
     it("Add Regexp", async () => {
         const md5sum = md5(Date.now() + "");
-        const reg = await RegexpsModel.addRegexp(md5sum, /[\da-fA-F]/.source);
+        const reg = await RegexpsModel.addRegexp(md5sum, REG.source);
         ids.regexps.push(reg._id);
         reg.should.be.not.an.empty();
     });
@@ -39,7 +41,7 @@ describe("RegExp Model", () => {
         const md5sum = md5(Date.now() + "");
         let reg: RegexpDoc;
 
-        reg = await RegexpsModel.addRegexp(md5sum, /[\da-fA-F]/.source);
+        reg = await RegexpsModel.addRegexp(md5sum, REG.source);
         ids.regexps.push(reg._id);
         reg = await RegexpsModel.removeRegexp(reg._id);
         reg = await RegexpsModel.findById(reg._id).exec();

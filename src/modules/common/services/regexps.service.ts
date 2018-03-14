@@ -6,7 +6,7 @@ import {
 import { Model as CategroiesModel, ICategory } from "@models/Categroy";
 import { DEF_PER_COUNT } from "@dtos/page";
 import { isUndefined } from "util";
-import { BaseService } from "./base";
+import { BaseService, IGetOptions } from "@services/base";
 
 export interface IGetRegexpsOptions {
     categroies?: ObjectId[];
@@ -42,13 +42,12 @@ export class RegexpsService extends BaseService {
 
     /**
      * 修改规则
+     * @param id Regexp ID
      */
-    public async editById(id: ObjectId, obj) {
+    public async editById(id: ObjectId, obj: object) {
         try {
             return await RegexpsModel
-                .update(
-                    { _id: id }, obj, { runValidators: true, context: "query" }
-                )
+                .update({ _id: id }, obj, this.DEF_UPDATE_OPTIONS)
                 .exec();
         } catch (error) {
             throw new BadRequestException(error.toString());
@@ -84,20 +83,12 @@ export class RegexpsService extends BaseService {
             throw new BadRequestException("Nonexist Categroy ID");
         }
         try {
-            return await RegexpsModel.findByIdAndUpdate(
-                id, { link: linkId }, { runValidators: true }
-            ).exec();
+            return await RegexpsModel
+                .update({ _id: id }, { link: linkId }, this.DEF_UPDATE_OPTIONS)
+                .exec();
         } catch (error) {
             throw new BadRequestException(error.toSrting());
         }
-    }
-
-    public pageCount(perNum = 1) {
-        const FLAG = `pageCount_${perNum}`;
-        return this.loadAndCache(
-            FLAG,
-            async () => Math.ceil((await this.count()) / perNum)
-        );
     }
 
     public count() {
@@ -108,10 +99,11 @@ export class RegexpsService extends BaseService {
         );
     }
 
-    public getRegexp(id: ObjectId) {
-        return RegexpsModel.findById(id)
-            .populate({ path: "link", populate: { path: "pid" } })
-            .exec();
+    public getById(id: ObjectId, opts?: IGetOptions) {
+        let p = RegexpsModel.findById(id)
+            .populate({ path: "link", populate: { path: "pid" } });
+        p = this.documentQueryProcess(p, opts);
+        return p.exec();
     }
 
     /**
@@ -120,7 +112,9 @@ export class RegexpsService extends BaseService {
      * @param  page {number} 页数
      * @return {Promise}
      */
-    public list(perNum = DEF_PER_COUNT, page = 1) {
+    public list(
+        perNum = this.DEF_PER_OBJ.perNum, page = this.DEF_PER_OBJ.page
+    ) {
         const FLAG = `list_${perNum}_${page}`;
         return this.loadAndCache(
             FLAG,

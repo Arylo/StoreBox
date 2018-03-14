@@ -1,5 +1,7 @@
 import { model, SchemaDefinition, Model as M, SchemaTypes } from "mongoose";
-import { Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS } from "@models/common";
+import {
+    Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS, existsValidator
+} from "@models/common";
 import { IUser, FLAG as UserFlag } from "@models/User";
 
 import Cache =  require("schedule-cache");
@@ -33,10 +35,10 @@ const TokensSchema = new Base(Definition).createSchema();
 // region validators
 TokensSchema.path("token").validate({
     isAsync: true,
-    validator: (val, respond) => {
-        Model.findOne({ token: val }).exec().then((result) => {
-            respond(result ? false : true);
-        });
+    validator: async (val, respond) => {
+        respond(await existsValidator.bind(this)(Model, "token", val, {
+            update: false
+        }));
     },
     message: "The token is existed"
 });
@@ -59,11 +61,6 @@ for (const method of MODIFY_MOTHODS) {
 
 export const Model = model(Flag, TokensSchema) as M<TokenDoc>;
 
-const getCount = async (userId: ObjectId): Promise<number> => {
-    if (cache.get(userId.toString())) {
-        cache.get(userId.toString());
-    }
-    const count = await Model.count({ user: userId }).exec();
-    cache.put(userId.toString(), count);
-    return cache.get(userId.toString());
+const getCount = (userId: ObjectId): Promise<number> => {
+    return Model.count({ user: userId }).exec();
 };

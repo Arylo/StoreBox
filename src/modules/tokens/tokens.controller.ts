@@ -3,10 +3,10 @@ import {
     BadRequestException, ForbiddenException
 } from "@nestjs/common";
 import { ApiUseTags, ApiResponse, ApiOperation } from "@nestjs/swagger";
-import { Model as TokensModel } from "@models/Token";
 import { Roles } from "@decorators/roles";
 import { RolesGuard } from "@guards/roles";
 import { TokensService } from "@services/tokens";
+import { UtilService } from "@services/util";
 import { DefResDto } from "@dtos/res";
 import { ListResponse } from "@dtos/page";
 import { TokenParamDto } from "./tokens.dto";
@@ -29,11 +29,8 @@ export class TokensAdminController {
     })
     // endregion Swagger Docs
     public async getTokens(@Session() session) {
-        const data = new ListResponse();
-        data.current = data.totalPages = 1;
-        data.data = await this.tokensSvr.getTokens(session.loginUserId);
-        data.total = data.data.length;
-        return data;
+        const arr = await this.tokensSvr.getTokens(session.loginUserId);
+        return UtilService.toListRespone(arr);
     }
 
     @Roles("admin")
@@ -68,16 +65,12 @@ export class TokensAdminController {
     public async deleteTokenByGet(
         @Param() param: TokenParamDto, @Session() session
     ) {
-        try {
-            const token = await this.tokensSvr.remove({
-                _id: param.tid,
-                user: session.loginUserId
-            });
-            if (!token) {
-                throw new BadRequestException("The Tokens isth exist");
-            }
-        } catch (error) {
-            throw new BadRequestException(error.toString());
+        const token = await this.tokensSvr.remove({
+            _id: param.tid,
+            user: session.loginUserId
+        });
+        if (!token) {
+            throw new BadRequestException("The Tokens isth exist");
         }
         return new DefResDto();
     }

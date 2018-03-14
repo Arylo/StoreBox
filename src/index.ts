@@ -10,7 +10,9 @@ import { isDevelopment } from "./modules/common/helper/env";
 const bootstrap = async () => {
     const server = initExpress();
 
-    const app = await NestFactory.create(ApplicationModule, server, { });
+    const app = await NestFactory.create(ApplicationModule, server, {
+        cors: true
+    });
     app.useGlobalPipes(new ValidationPipe());
 
     if (isDevelopment) {

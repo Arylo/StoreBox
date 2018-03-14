@@ -38,6 +38,7 @@ import { TokensService } from "@services/tokens";
 import { UsergroupsService } from "@services/usergroups";
 import { SystemService } from "@services/system";
 import { CategoriesService } from "@services/categories";
+import { GoodsService } from "@services/goods";
 // endregion Services
 
 export const controllers = [
@@ -51,7 +52,7 @@ export const controllers = [
 ];
 
 export const services = [
-    RegexpsService, CategoriesService,
+    RegexpsService, CategoriesService, GoodsService,
     CollectionsService, TokensService, UsersService, UsergroupsService,
     SystemService
 ];

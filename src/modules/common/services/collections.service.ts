@@ -1,17 +1,18 @@
 import { Component, Param, BadRequestException } from "@nestjs/common";
 import { UidDto } from "@dtos/ids";
-import { Model as CollectionsModel } from "@models/Collection";
+import { Model as CollectionsModel, cache } from "@models/Collection";
 import { ObjectId } from "@models/common";
-import { IPerPage, DEF_PER_COUNT } from "@dtos/page";
+import { DEF_PER_COUNT } from "@dtos/page";
 import { IEditCollection } from "../../../modules/collections/collections.dto";
+import { BaseService, IGetOptions } from "@services/base";
 
 @Component()
-export class CollectionsService {
+export class CollectionsService extends BaseService {
 
-    private DEF_PER_OBJ: IPerPage = {
-        perNum: DEF_PER_COUNT,
-        page: 1
-    };
+    constructor() {
+        super();
+        this.setCache(cache);
+    }
 
     public async create(obj) {
         try {
@@ -23,46 +24,68 @@ export class CollectionsService {
 
     public async edit(cid: ObjectId, ctx: IEditCollection) {
         try {
-            return await CollectionsModel.update({ _id: cid }, ctx, {
-                runValidators: true, context: "query"
-            }).exec();
+            return await CollectionsModel
+                .update({ _id: cid }, ctx, this.DEF_UPDATE_OPTIONS)
+                .exec();
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
     }
 
-    public list(uid: ObjectId, pageObj: IPerPage = this.DEF_PER_OBJ) {
+    public list(uid: ObjectId, pageObj = this.DEF_PER_OBJ) {
         const perNum = pageObj.perNum;
         const page = pageObj.page;
-        return CollectionsModel.find({ creator: uid })
-            .skip((page - 1) * perNum).limit(perNum)
-            .sort({ updatedAt: -1 })
-            .populate("creator")
-            .populate("goods")
-            .exec();
+        return this.loadAndCache(
+            `list_${uid.toString}_${perNum}_${page}`,
+            () => {
+                return CollectionsModel.find({ creator: uid })
+                    .skip((page - 1) * perNum).limit(perNum)
+                    .sort({ updatedAt: -1 })
+                    .populate("creator")
+                    .populate("goods")
+                    .exec();
+            },
+            7200
+        );
     }
 
     public count(uid: ObjectId) {
-        return CollectionsModel.count({ creator: uid }).exec();
+        return this.loadAndCache(
+            `count_${uid}`,
+            () => CollectionsModel.count({ creator: uid }).exec()
+        );
     }
 
-    public async countPage(uid: ObjectId, perNum = DEF_PER_COUNT) {
-        const total = await this.count(uid);
-        return Math.ceil(total / perNum);
+    private readonly GET_OPTIONS: IGetOptions = {
+        populate: [ "creator", "goods" ]
+    };
+
+    /**
+     * Get By Collection Name
+     * @param name Collection Name
+     */
+    public getByName(name: string, opts = this.GET_OPTIONS) {
+        let p = CollectionsModel.findOne({ name });
+        p = this.documentQueryProcess(p, opts);
+        return this.loadAndCache(
+            `getByName_${name}`,
+            () => p.exec(),
+            7200
+        );
     }
 
-    public getByName(name: string) {
-        return CollectionsModel.findOne({ name })
-            .populate("creator")
-            .populate("goods")
-            .exec();
-    }
-
-    public getById(cid: ObjectId) {
-        return CollectionsModel.findById(cid)
-            .populate("creator")
-            .populate("goods")
-            .exec();
+    /**
+     * Get By Collection ID
+     * @param id Collection ID
+     */
+    public getById(id: ObjectId, opts = this.GET_OPTIONS) {
+        let p = CollectionsModel.findById(id);
+        p = this.documentQueryProcess(p, opts);
+        return this.loadAndCache(
+            `getById_${id.toString()}`,
+            () => p.exec(),
+            7200
+        );
     }
 
     public async remove(cid: ObjectId) {

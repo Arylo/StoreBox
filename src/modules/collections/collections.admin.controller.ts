@@ -3,16 +3,18 @@ import {
 } from "@nestjs/swagger";
 import {
     Controller, UseGuards, Get, HttpCode, HttpStatus, Session, Query, Post,
-    Body, Param, Delete
+    Body, Param, Delete, BadRequestException
 } from "@nestjs/common";
 import { CollectionDoc } from "@models/Collection";
 import { ObjectId } from "@models/common";
 import { RolesGuard } from "@guards/roles";
 import { CollectionsService } from "@services/collections";
+import { UtilService } from "@services/util";
 import { Roles } from "@decorators/roles";
 import { ParseIntPipe } from "@pipes/parse-int";
 import { PerPageDto, DEF_PER_COUNT, ListResponse } from "@dtos/page";
 import { CCidDto } from "@dtos/ids";
+import { DefResDto } from "@dtos/res";
 import {
     CreateCollectionDto, EditCollectionDto, ICollection, IEditCollection
 } from "./collections.dto";
@@ -28,22 +30,13 @@ export class CollectionsAdminController {
     constructor(private readonly collectionsSvr: CollectionsService) { }
 
     private async getCollectionsRes(uid: ObjectId, query: PerPageDto) {
-        const curPage = query.page || 1;
-        const perNum = query.perNum || DEF_PER_COUNT;
-        const totalPages =
-            await this.collectionsSvr.countPage(uid, query.perNum);
-        const totalCount = await this.collectionsSvr.count(uid);
-
-        const resData = new ListResponse<CollectionDoc>();
-        resData.current = curPage;
-        resData.totalPages = totalPages;
-        resData.total = totalCount;
-        if (totalPages >= curPage) {
-            resData.data = await this.collectionsSvr.list(uid, {
-                page: curPage, perNum
-            });
-        }
-        return resData;
+        const arr = await this.collectionsSvr.list(uid, {
+            page: query.page, perNum: query.perNum
+        });
+        const opts = Object.assign({
+            total: await this.collectionsSvr.count(uid)
+        }, query);
+        return UtilService.toListRespone(arr, opts);
     }
 
     @Roles("admin")
@@ -88,7 +81,7 @@ export class CollectionsAdminController {
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Edit Collection" })
     // endregion Swagger Docs
-    public editCollection(
+    public async editCollection(
         @Param() param: CCidDto, @Body() body: EditCollectionDto
     ) {
         const obj: IEditCollection = { };
@@ -98,7 +91,8 @@ export class CollectionsAdminController {
         if (body.goods) {
             obj.goods = body.goods;
         }
-        return this.collectionsSvr.edit(param.cid, obj);
+        await this.collectionsSvr.edit(param.cid, obj);
+        return new DefResDto();
     }
 
     @Roles("admin")
@@ -107,8 +101,16 @@ export class CollectionsAdminController {
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Get One Collection's Info" })
     // endregion Swagger Docs
-    public getCollection(@Param() param: CCidDto) {
-        return this.collectionsSvr.getById(param.cid);
+    public async getCollection(@Param() param: CCidDto) {
+        const doc = await this.collectionsSvr.getById(param.cid);
+        if (!doc) {
+            return null;
+        }
+        const obj = doc.toObject();
+        obj.goods = UtilService.toListRespone(obj.goods as any[], {
+            perNum: obj.goods.length
+        }) as any;
+        return obj;
     }
 
     /////////////////////////

@@ -7,8 +7,12 @@ import { IUidDto } from "@dtos/ids";
 @Component()
 export class TokensService {
 
-    public create(obj) {
-        return TokensModel.create(obj);
+    public async create(obj) {
+        try {
+            return await TokensModel.create(obj);
+        } catch (error) {
+            throw new BadRequestException(error.toString());
+        }
     }
 
     public getRawTokens(uid: ObjectId) {
@@ -36,8 +40,12 @@ export class TokensService {
         }
     }
 
-    public remove(obj) {
-        return TokensModel.findOneAndRemove(obj).exec();
+    public async remove(obj) {
+        try {
+            return await TokensModel.findOneAndRemove(obj).exec();
+        } catch (error) {
+            throw new BadRequestException(error.toString());
+        }
     }
 
     /**

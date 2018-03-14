@@ -3,15 +3,10 @@ import { Model as UsersModel } from "@models/User";
 import { Model as UsergroupsModel } from "@models/Usergroup";
 import { Model as UserUsergroupsModel } from "@models/User-Usergroup";
 import { ObjectId } from "@models/common";
-import { DEF_PER_COUNT, IPerPage } from "@dtos/page";
+import { BaseService } from "@services/base";
 
 @Component()
-export class UsergroupsService {
-
-    private DEF_PER_OBJ: IPerPage = {
-        perNum: DEF_PER_COUNT,
-        page: 1
-    };
+export class UsergroupsService extends BaseService {
 
     public async add(obj: object) {
         try {
@@ -23,9 +18,9 @@ export class UsergroupsService {
 
     public async edit(id: ObjectId, obj: object) {
         try {
-            return await UsergroupsModel.update(
-                { _id: id }, obj, { runValidators: true, context: "query" }
-            ).exec();
+            return await UsergroupsModel
+                .update({ _id: id }, obj, this.DEF_UPDATE_OPTIONS)
+                .exec();
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
@@ -35,17 +30,12 @@ export class UsergroupsService {
         return UserUsergroupsModel.count({ usergroup: gid }).exec();
     }
 
-    public async usersCountPage(id: ObjectId, perNum = DEF_PER_COUNT) {
-        const total = await this.usersCount(id);
-        return Math.ceil(total / perNum);
-    }
-
     public getGroup(gid: ObjectId) {
         return UsergroupsModel.findById(gid).exec();
     }
 
     public async getGroupUsers(
-        gid: ObjectId, pageObj: IPerPage = this.DEF_PER_OBJ
+        gid: ObjectId, pageObj = this.DEF_PER_OBJ
     ) {
         const perNum = pageObj.perNum;
         const page = pageObj.page;
@@ -61,26 +51,29 @@ export class UsergroupsService {
         return UsergroupsModel.count({ }).exec();
     }
 
-    public async countPage(perNum = DEF_PER_COUNT) {
-        const total = await this.count();
-        return Math.ceil(total / perNum);
-    }
-
-    public list(pageObj: IPerPage = this.DEF_PER_OBJ) {
-        const perNum = pageObj.perNum;
-        const page = pageObj.page;
+    public list(pageObj = this.DEF_PER_OBJ) {
+        const perNum = pageObj.perNum || this.DEF_PER_OBJ.perNum;
+        const page = pageObj.page || this.DEF_PER_OBJ.page;
         return UsergroupsModel.find({ })
             .skip((page - 1) * perNum).limit(perNum)
             .sort({ createdAt: -1 })
             .exec();
     }
 
+    /**
+     * Remove Usergroup By Usergroup ID
+     * @param gid Usergroup ID
+     */
     public async remove(gid: ObjectId) {
         if ((await this.count()) === 1) {
-            throw new BadRequestException("Nnn delete unique group");
+            throw new BadRequestException("Cant delete unique group");
         }
         try {
-            return await UsergroupsModel.findByIdAndRemove(gid).exec();
+            const p = await UsergroupsModel.findByIdAndRemove(gid).exec();
+            await UserUsergroupsModel.findOneAndRemove({
+                usergroup: gid
+            }).exec();
+            return p;
         } catch (error) {
             throw new BadRequestException(error.toString());
         }

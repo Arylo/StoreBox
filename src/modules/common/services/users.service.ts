@@ -4,17 +4,14 @@ import { Model as UsersModel, UserDoc } from "@models/User";
 import { Model as UserUsergroupsModel } from "@models/User-Usergroup";
 import { IUsergroups } from "@models/Usergroup";
 import { SystemService } from "@services/system";
-import { IPerPage, DEF_PER_COUNT } from "@dtos/page";
+import { BaseService, IGetOptions } from "@services/base";
 
 @Component()
-export class UsersService {
+export class UsersService extends BaseService {
 
-    private DEF_PER_OBJ: IPerPage = {
-        perNum: DEF_PER_COUNT,
-        page: 1
-    };
-
-    constructor(private readonly sysSvr: SystemService) { }
+    constructor(private readonly sysSvr: SystemService) {
+        super();
+    }
 
     public async addUser(obj, gid?: ObjectId) {
         try {
@@ -40,17 +37,20 @@ export class UsersService {
         }
     }
 
+    public async isVaild(username: string, password: string) {
+        try {
+            return await UsersModel.isVaild(username, password);
+        } catch (err) {
+            throw new BadRequestException(err.toString());
+        }
+    }
+
     public countUsergroups(uid: ObjectId) {
         return UserUsergroupsModel.count({ user: uid }).exec();
     }
 
-    public async countPageUsergroups(uid: ObjectId, perNum = DEF_PER_COUNT) {
-        const total = await this.countUsergroups(uid);
-        return Math.ceil(total / perNum);
-    }
-
     public async getUsergroups(
-        uid: ObjectId, pageObj: IPerPage = this.DEF_PER_OBJ
+        uid: ObjectId, pageObj = this.DEF_PER_OBJ
     ) {
         const perNum = pageObj.perNum;
         const page = pageObj.page;
@@ -64,23 +64,62 @@ export class UsersService {
     }
 
     /**
-     * 修改`User`属性, 除了`username`
+     * 修改`User`属性, 除了`username`和`password`
      * @param id User ID
      * @param content Content
      */
     public async modify(id: ObjectId, content): Promise<UserDoc> {
-        if (content && content.username) {
-            delete content.username;
+        for (const field of [ "username", "password" ]) {
+            if (content && content[field]) {
+                delete content[field];
+            }
         }
         if (Object.keys(content).length === 0) {
             throw new BadRequestException("Empty Content");
         }
         try {
-            return await UsersModel.update({ _id: id }, content, {
-                runValidators: true, context: "query"
-            }).exec();
+            return await UsersModel
+                .update({ _id: id }, content, this.DEF_UPDATE_OPTIONS)
+                .exec();
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
+    }
+
+    public async passwd(id: ObjectId, oldPass: string, newPass: string) {
+        try {
+            return await UsersModel.passwd(id, oldPass, newPass);
+        } catch (error) {
+            throw new BadRequestException(error.toString());
+        }
+    }
+
+    /**
+     * 返回总数
+     */
+    public conut() {
+        return UsersModel.count({ }).exec();
+    }
+
+    /**
+     * 获取用户列表
+     *
+     * @param opts.perNum 每页数量
+     * @param opts.page {number} 页数
+     */
+    public list(opts = this.DEF_PER_OBJ) {
+        return UsersModel.find().select("-password")
+            .skip((opts.page - 1) * opts.perNum).limit(opts.perNum)
+            .exec();
+    }
+
+    /**
+     * Get User By User ID
+     * @param id User ID
+     */
+    public getById(id: ObjectId, opts?: IGetOptions) {
+        let p = UsersModel.findById(id);
+        p = this.documentQueryProcess(p, opts);
+        return p.exec();
     }
 }

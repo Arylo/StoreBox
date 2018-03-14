@@ -23,8 +23,8 @@ export class ListResponse<T> {
 }
 
 export interface IPerPage {
-    readonly perNum: number;
-    readonly page: number;
+    readonly perNum?: number;
+    readonly page?: number;
 }
 
 export class PerPageDto implements IPerPage {
