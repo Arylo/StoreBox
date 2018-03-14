@@ -28,6 +28,7 @@ import { RolesMiddleware } from "./common/middlewares/roles.middleware";
 import {
     ReloadSessionMiddleware
 } from "./common/middlewares/reloadSession.middleware";
+import { CorsMiddleware } from "./common/middlewares/cors.middleware";
 // endregion Middlewares
 
 // region Services
@@ -76,6 +77,12 @@ export class ControllersModule {
             .apply(UploadFileMiddleware).forRoutes(this.uploadFileMethod)
             .apply(UploadFilesMiddleware).forRoutes(this.uploadFilesMethod)
             // endregion Upload
+            // region Cors
+            .apply(CorsMiddleware).forRoutes([
+                GoodsController, CollectionsController, GoodsController,
+                AuthAdminController
+            ])
+            // endregion Cors
             // region Log
             .apply([ ApiLoggerMiddleware ])
             .forRoutes(...controllers.filter((item) => {
