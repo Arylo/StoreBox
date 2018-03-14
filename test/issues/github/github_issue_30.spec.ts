@@ -1,7 +1,7 @@
 import isRegExp = require("@utils/isRegExp");
-import { connect } from "../helpers/database";
+import { connect } from "../../helpers/database";
 import { Model as RegexpsModel } from "@models/Regexp";
-import { newName } from "../helpers/utils";
+import { newName } from "../../helpers/utils";
 
 /**
  * Fix [Issue 30](https://github.com/Arylo/StoreBox/issues/30)

@@ -5,13 +5,12 @@ import { basename } from "path";
 import { Model as GoodsModels } from "@models/Good";
 import {
     connect, drop, newUser, addCategoryAndRegexp
-} from "../helpers/database";
-import { init } from "../helpers/server";
-import { uploadFile } from "../helpers/files";
+} from "../../helpers/database";
+import { init } from "../../helpers/server";
+import * as files from "../../helpers/files";
 
 import { config } from "@utils/config";
 import auth = require("@db/auth");
-import files = require("../helpers/files");
 
 /**
  * Fix [Issue 31](https://github.com/Arylo/StoreBox/issues/31)
@@ -72,14 +71,14 @@ describe("Fix Issues", () => {
         step("Upload Success", async () => {
             const {
                 body: result, status
-            } = await uploadFile(request, filepath);
+            } = await files.uploadFile(request, filepath);
             status.should.be.eql(201);
         });
 
         step("Upload Fail", async () => {
             const {
                 body: result, status
-            } = await uploadFile(request, filepath);
+            } = await files.uploadFile(request, filepath);
             status.should.be.not.eql(201);
             status.should.be.eql(400);
         });

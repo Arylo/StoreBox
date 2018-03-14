@@ -2,10 +2,10 @@ import supertest = require("supertest");
 
 import {
     connect, drop, newCategory
-} from "../helpers/database";
-import { init } from "../helpers/server";
+} from "../../helpers/database";
+import { init } from "../../helpers/server";
 import auth = require("@db/auth");
-import { newName } from "../helpers/utils";
+import { newName } from "../../helpers/utils";
 
 /**
  * Fix [Issue 27](https://github.com/Arylo/StoreBox/issues/27)
