@@ -72,19 +72,9 @@ export class RegexpsAdminController {
     @ApiOperation({ title: "Edit RegExp" })
     // endregion Swagger Docs
     public async edit(@Body() ctx: EditRegexpDot, @Param() param: RidDto) {
-        const data: EditRegexpRawDot = { };
-        if (ctx.name) { data.name = ctx.name; }
-        if (ctx.value) { data.value = ctx.value; }
-        if (ctx.link) { data.link = ctx.link; }
-        if (ctx.hidden !== null && ctx.hidden !== undefined) {
-            data.hidden = ctx.hidden;
-        }
-        if (Object.keys(data).length === 0) {
-            throw new BadRequestException("No Params");
-        }
-        const regexp = await this.regexpsSvr.editById(param.rid, data);
+        const regexp = await this.regexpsSvr.editById(param.rid, ctx);
         if (!regexp) {
-            throw new BadRequestException("NonExist RegExp");
+            throw new BadRequestException("Non Exist RegExp");
         }
         return new DefResDto();
     }

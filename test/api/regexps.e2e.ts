@@ -177,7 +177,7 @@ describe("Regexp E2E Api", () => {
         status.should.be.eql(400);
     });
 
-    step("Modify with Empty Param", async () => {
+    xstep("Modify with Empty Param", async () => {
         const raw = await RegexpsModel.addRegexp(
             newName(), "^empty.param"
         );
