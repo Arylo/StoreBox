@@ -125,9 +125,9 @@ RegexpSchema.path("hidden").validate({
         if (!value) { // hidden === false
             return respond(true);
         }
-        respond(await existsValidator(Model, "hidden", value, {
-            extraCond: { value: this.value }
-        }));
+        respond(await existsValidator.bind(this)(
+            Model, "hidden", value, { extraCond: { value: this.value } }
+        ));
     },
     message: "Only one active item with every value"
 });

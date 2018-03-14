@@ -20,7 +20,7 @@ const UsergroupsSchema = new Base(Definition).createSchema();
 UsergroupsSchema.path("name").validate({
     isAsync: true,
     validator: async function nameExistValidator(val, respond) {
-        return respond(await existsValidator(Model, "name", val));
+        return respond(await existsValidator.bind(this)(Model, "name", val));
     },
     message: "The Name is exist"
 });

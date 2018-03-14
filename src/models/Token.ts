@@ -36,7 +36,7 @@ const TokensSchema = new Base(Definition).createSchema();
 TokensSchema.path("token").validate({
     isAsync: true,
     validator: async (val, respond) => {
-        respond(await existsValidator(Model, "token", val, {
+        respond(await existsValidator.bind(this)(Model, "token", val, {
             update: false
         }));
     },

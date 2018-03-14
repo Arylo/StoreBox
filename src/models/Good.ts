@@ -64,7 +64,7 @@ const GoodsSchema = new Base(Definition).createSchema();
 GoodsSchema.path("md5sum").validate({
     isAsync: true,
     validator: async function md5ExistsValidator(val, respond) {
-        respond(await existsValidator(Model, "md5sum", val, {
+        respond(await existsValidator.bind(this)(Model, "md5sum", val, {
             update: false
         }));
     },
@@ -74,7 +74,7 @@ GoodsSchema.path("md5sum").validate({
 GoodsSchema.path("sha256sum").validate({
     isAsync: true,
     validator: async function sha256ExistsValidator(val, respond) {
-        respond(await existsValidator(Model, "sha256sum", val, {
+        respond(await existsValidator.bind(this)(Model, "sha256sum", val, {
             update: false
         }));
     },

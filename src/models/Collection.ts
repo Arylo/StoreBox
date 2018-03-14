@@ -48,7 +48,7 @@ const CollectionsSchema = new Base(Definition).createSchema();
 CollectionsSchema.path("name").validate({
     isAsync: true,
     validator: async function nameValidator(val, respond) {
-        respond(await existsValidator(Model, "name", val));
+        respond(await existsValidator.bind(this)(Model, "name", val));
     },
     message: "The name is existed"
 });

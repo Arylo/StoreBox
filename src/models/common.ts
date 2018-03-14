@@ -57,14 +57,14 @@ interface IExistsValidatorOptions {
     extraCond?: object;
 }
 
-const existsValidatorOptions = {
+const existsValidatorOptions: IExistsValidatorOptions = {
     update: true
 };
 
-export async function existsValidator(
+export const existsValidator = async function ExistsValidatorFn(
     model: M<any>, field: string, value, opts?: IExistsValidatorOptions
 ) {
-    const options = Object.assign({ }, existsValidator, opts);
+    const options = Object.assign({ }, existsValidatorOptions, opts);
     if (options.update && this && !this.isNew) {
         const id = this.getQuery()._id;
         const col = await model.findById(id).exec();
@@ -76,4 +76,4 @@ export async function existsValidator(
         Object.assign({ }, (options.extraCond || { }), { [field]: value });
     const result = await model.findOne(cond).exec();
     return !result;
-}
+};

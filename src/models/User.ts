@@ -48,9 +48,9 @@ UsersSchema.path("username").validate({
         if (this && !this.isNew) {
             return respond(true);
         }
-        respond(
-            await existsValidator(Model, "username", val, { update: false })
-        );
+        respond(await existsValidator.bind(this)(
+            Model, "username", val, { update: false }
+        ));
     },
     message: "The username is existed"
 });
