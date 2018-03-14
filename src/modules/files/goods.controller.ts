@@ -49,7 +49,7 @@ export class GoodsController {
             .map((doc) => {
                 const good = doc.toObject() as IGoodsRaw;
                 const category = categories[good.category.toString()];
-                delete good.category;
+                // delete good.category;
                 good.uploader = good.uploader.nickname as any;
                 good.tags =
                     Array.from(new Set(good.tags.concat(category.tags)));
