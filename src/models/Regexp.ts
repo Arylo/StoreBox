@@ -82,9 +82,10 @@ interface IRegexpModel<T extends RegexpDoc> extends M<T> {
 // region Validators
 RegexpSchema.path("name").validate({
     isAsync: true,
-    validator: async (value, respond) => {
-        const result = await Model.findOne({ name: value }).exec();
-        return respond(!result);
+    validator: async function nameExistValidator(value, respond) {
+        return respond(await existsValidator.bind(this)(
+            Model, "name", value
+        ));
     },
     message: "The name is exist"
 });
@@ -99,13 +100,13 @@ RegexpSchema.path("value").validate({
 
 RegexpSchema.path("value").validate({
     isAsync: true,
-    validator: async function ValueExistValidator(value, respond) {
+    validator: async function valueExistValidator(value, respond) {
         if (this && this.hidden) {
             return respond(true);
         }
-        const result =
-            await Model.findOne({ value: value, hidden: false }).exec();
-        return respond(!result);
+        return respond(await existsValidator.bind(this)(
+            Model, "value", value, { extraCond: { hidden: false } }
+        ));
     },
     message: "The value is exist"
 });

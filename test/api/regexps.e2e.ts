@@ -164,15 +164,15 @@ describe("Regexp E2E Api", () => {
         status.should.be.eql(400);
     });
 
-    step("Modify Exist Value", async () => {
+    // Ignore Self Value
+    xstep("Modify Exist Value", async () => {
         const data = {
             name: newName(),
             value: "^modify.exist.value"
         };
         const raw = await RegexpsModel.addRegexp(data.name, data.value);
         ids.regexps.push(raw._id);
-        const { body: result, status: status } =
-            await request.post(`${URL}/${raw._id}`)
+        const { body: result, status } = await request.post(`${URL}/${raw._id}`)
             .send({ value: data.value }).then();
         status.should.be.eql(400);
     });
