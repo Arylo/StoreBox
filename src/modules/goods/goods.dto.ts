@@ -1,5 +1,5 @@
 import { IGidDto, IAidDto } from "@dtos/ids";
-import { ApiModelProperty } from "@nestjs/swagger";
+import { ApiModelProperty, ApiModelPropertyOptional } from "@nestjs/swagger";
 import { IsMongoId, IsString, IsOptional } from "class-validator";
 import { ObjectId } from "@models/common";
 import { IGoods } from "@models/Good";
@@ -33,4 +33,21 @@ export class UploadQueryDto {
     @IsString({ each: true })
     @IsOptional()
     public readonly append?: string[];
+}
+
+export class EditBodyDto {
+    @ApiModelPropertyOptional({ type: String, description: "Good Name" })
+    @IsOptional()
+    public readonly name?: string;
+    @ApiModelPropertyOptional({ type: Boolean })
+    @IsOptional()
+    public readonly hidden?: boolean;
+    @ApiModelPropertyOptional({ type: String, description: "Category ID" })
+    @IsOptional()
+    public readonly category?: ObjectId;
+    @ApiModelPropertyOptional({
+        type: String, description: "Filename when download"
+    })
+    @IsOptional()
+    public readonly originname?: string;
 }

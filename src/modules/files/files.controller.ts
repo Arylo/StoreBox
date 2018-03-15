@@ -51,8 +51,7 @@ export class FilesController {
         }
 
         const good = obj.toObject();
-        const filepath =
-            `${config.paths.upload}/${params.cid}/${good.filename}`;
+        const filepath = this.goodsSvr.getFilepath(good);
 
         if (!good.active) {
             throw new BadRequestException("Disallow download the File");

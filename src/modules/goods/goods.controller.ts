@@ -1,6 +1,6 @@
 import {
     Controller, Req, Res, Body, Get, Post, Param, Session,
-    HttpStatus, BadRequestException, UseGuards, Delete, HttpCode, Query
+    HttpStatus, BadRequestException, UseGuards, Delete, HttpCode, Query, Put
 } from "@nestjs/common";
 import {
     ApiBearerAuth, ApiUseTags, ApiResponse, ApiOperation, ApiImplicitParam,
@@ -32,7 +32,7 @@ import multer  = require("multer");
 import { isArray } from "util";
 
 import { CreateValueDto, EditValueDto } from "../values/values.dto";
-import { GoodAttributeParamDto, UploadQueryDto } from "./goods.dto";
+import { GoodAttributeParamDto, UploadQueryDto, EditBodyDto } from "./goods.dto";
 
 @UseGuards(RolesGuard)
 @Controller("api/v1/goods")
@@ -344,6 +344,35 @@ export class GoodsAdminController {
             );
             throw new BadRequestException(error.toString());
         }
+        return new DefResDto();
+    }
+
+    @Roles("admin")
+    @Put("/:gid")
+    @Delete("/:gid")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Modify Good" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Modify Success"
+    })
+    // endregion Swagger Docs
+    public async edit(@Param() param: GidDto, @Body() body: EditBodyDto) {
+        await this.goodsSvr.editById(param.gid, body);
+        return new DefResDto();
+    }
+
+    @Roles("admin")
+    @Delete("/:gid")
+    // region Swagger Docs
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ title: "Delete Good" })
+    @ApiResponse({
+        status: HttpStatus.OK, description: "Delete Success"
+    })
+    // endregion Swagger Docs
+    public async delete(@Param() param: GidDto) {
+        await this.goodsSvr.remove(param.gid);
         return new DefResDto();
     }
 

@@ -1,8 +1,12 @@
 import { Component, BadRequestException } from "@nestjs/common";
-import { Model as GoodsModels } from "@models/Good";
 import { ObjectId } from "@models/common";
+import { Model as GoodsModels, IGoods, IGoodsRaw } from "@models/Good";
+import { ICategory } from "@models/Categroy";
+import { Model as ValuesModel } from "@models/Value";
 import { BaseService, IGetOptions } from "@services/base";
-import { isArray } from "util";
+import { isArray, isObject, isString } from "util";
+import { config } from "@utils/config";
+import fs = require("fs-extra");
 
 @Component()
 export class GoodsService extends BaseService {
@@ -134,7 +138,9 @@ export class GoodsService extends BaseService {
      */
     public async editById(id: ObjectId, ctx: object) {
         try {
-            await GoodsModels.findByIdAndUpdate(id, ctx).exec();
+            await GoodsModels
+                .update({ _id: id }, ctx, this.DEF_UPDATE_OPTIONS)
+                .exec();
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
@@ -142,6 +148,40 @@ export class GoodsService extends BaseService {
 
     public add(ctx: object) {
         return GoodsModels.create(ctx);
+    }
+
+    public async remove(id: ObjectId) {
+        const doc = await this.getById(id);
+        if (!doc) {
+            throw new BadRequestException("Non Exist Good ID");
+        }
+        const good = doc.toObject();
+        try {
+            await GoodsModels.findByIdAndRemove(id).exec();
+            if (good.attributes.length > 0) {
+                const cond = (good.attributes as ObjectId[])
+                    .reduce((obj, item) => {
+                        obj.$or.push({ _id: item });
+                        return obj;
+                    }, { $or: [ ] });
+                await ValuesModel.remove(cond).exec();
+            }
+        } catch (error) {
+            throw new BadRequestException(error.toString());
+        }
+        await fs.remove(this.getFilepath(good));
+    }
+
+    public getFilepath(good: IGoods) {
+        const filename = good.filename;
+        const cid =
+            isObject(good.category) && (good.category as ICategory)._id ?
+            (good.category as ICategory)._id :
+            good.category;
+        if (!cid) {
+            throw new BadRequestException();
+        }
+        return `${config.paths.upload}/${cid}/${filename}`;
     }
 
 }
