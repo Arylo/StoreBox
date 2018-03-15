@@ -84,5 +84,17 @@ describe("Fix Issues", () => {
             body.link._id.should.be.eql(targetId);
         });
 
+        step("Modify Regexp link with other fields", async () => {
+            const url = `/api/v1/regexps/${ids.regexps[0]}`;
+            const targetId = ids.categories[7].toString();
+
+            const { body } = await request.get(url).then();
+            body.link = targetId;
+
+            const { status, body: result } = await request.post(url)
+                .send(body).then();
+            status.should.be.not.eql(400);
+        });
+
     });
 });
