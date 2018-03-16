@@ -1,11 +1,11 @@
 import supertest = require("supertest");
 import path = require("path");
 
-import { connect, drop, addCategoryAndRegexp } from "../helpers/database";
-import { uploadFile } from "../helpers/files";
-import { init } from "../helpers/server";
-import auth = require("../helpers/database/auth");
-import { newName } from "../helpers/utils";
+import { connect, drop, addCategoryAndRegexp } from "../../helpers/database";
+import { uploadFile } from "../../helpers/files";
+import { init } from "../../helpers/server";
+import auth = require("@db/auth");
+import { newName } from "../../helpers/utils";
 
 describe("Goods E2E Api", () => {
 
@@ -47,7 +47,7 @@ describe("Goods E2E Api", () => {
 
     let result;
     step("Upload File", async () => {
-        const filepath = `${__dirname}/../files/icon_pandorabox_64x64.png`;
+        const filepath = `${__dirname}/../../files/icon_pandorabox_64x64.png`;
         // Create
         result = await uploadFile(request, filepath);
         result = result.body;

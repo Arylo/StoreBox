@@ -4,6 +4,7 @@ import { Model as CategoriesModel, cache, ICategoryRaw, ICategory } from "@model
 import { isFunction, isArray } from "util";
 import { BaseService, IGetOptions } from "@services/base";
 import { difference } from "lodash";
+import { GoodsService } from "@services/goods";
 
 interface IIdMap {
     [parentId: string]: ObjectId[];
@@ -12,35 +13,35 @@ interface IIdMap {
 @Component()
 export class CategoriesService extends BaseService {
 
-    constructor() {
+    constructor(private readonly goodsSvr: GoodsService) {
         super();
         super.setCache(cache);
     }
 
-    private async getIdMap() {
-        // { parentId: childrenIds }
-        const map: IIdMap = { };
-        const docs = await CategoriesModel.find().select("_id pid").exec();
-        docs.forEach((doc) => {
-            const category = doc.toObject();
-            let index;
-            if (!category.pid) {
-                index = "*";
-            } else {
-                index = category.pid.toString();
-            }
-            if (!map[index]) {
-                map[index] = [ ];
-            }
-            map[index].push(category._id.toString());
+    private getIdMap() {
+        return this.loadAndCache("IdMap", async () => {
+            // { parentId: childrenIds }
+            const map: IIdMap = { };
+            const docs = await CategoriesModel.find().select("_id pid").exec();
+            docs.forEach((doc) => {
+                const category = doc.toObject();
+                let index;
+                if (!category.pid) {
+                    index = "*";
+                } else {
+                    index = category.pid.toString();
+                }
+                if (!map[index]) {
+                    map[index] = [ ];
+                }
+                map[index].push(category._id.toString());
+            });
+            return map;
         });
-        return map;
     }
 
     public async getChildrenIds(pid: ObjectId) {
-        const map = await this.loadAndCache("IdMap", () => {
-            return this.getIdMap();
-        });
+        const map = await this.getIdMap();
         const ids: ObjectId[] = [ ];
         const childrenIds = map[pid.toString()];
         if (childrenIds) {
@@ -140,9 +141,19 @@ export class CategoriesService extends BaseService {
         }
     }
 
-    public removeById(id: ObjectId) {
+    public async removeById(id: ObjectId) {
+        const goods = await this.goodsSvr.getByCids(id);
+        if (goods.length > 0) {
+            throw new BadRequestException("Some Good in the category");
+        }
+        const map = await this.getIdMap();
+        if (map[id.toString()] && map[id.toString()].length > 0) {
+            throw new BadRequestException(
+                "The Category have some child categories"
+            );
+        }
         try {
-            return CategoriesModel.findByIdAndRemove(id).exec();
+            return await CategoriesModel.findByIdAndRemove(id).exec();
         } catch (error) {
             throw new BadRequestException(error.toString());
         }

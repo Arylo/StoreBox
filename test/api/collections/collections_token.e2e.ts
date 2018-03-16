@@ -8,9 +8,9 @@ import { Model as GoodsModels } from "@models/Good";
 
 import {
     connect, drop, newUser, addCategoryAndRegexp
-} from "../helpers/database";
-import { init } from "../helpers/server";
-import { uploadFiles, newFile } from "../helpers/files";
+} from "../../helpers/database";
+import { init } from "../../helpers/server";
+import { uploadFiles, newFile } from "../../helpers/files";
 
 describe("Token to Upload Files Api", () => {
 

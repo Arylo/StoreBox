@@ -85,6 +85,7 @@ export const remove = (filepaths: string[] | string) => {
     if (filepaths.length === 0) {
         return Promise.resolve();
     }
+    filepaths = Array.from(new Set(filepaths));
     return Promise.all(filepaths.map(async (filepath) => {
         await sleep(200);
         return fs.existsSync(filepath) ? fs.remove(filepath) : null;

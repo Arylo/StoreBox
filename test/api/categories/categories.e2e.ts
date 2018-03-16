@@ -1,9 +1,9 @@
 import supertest = require("supertest");
 
-import { connect, drop, newUser } from "../helpers/database";
-import { init } from "../helpers/server";
-import { login } from "../helpers/database/auth";
-import { newName } from "../helpers/utils";
+import { connect, drop, newUser } from "../../helpers/database";
+import { init } from "../../helpers/server";
+import { login } from "../../helpers/database/auth";
+import { newName } from "../../helpers/utils";
 
 describe("Categories E2E Api", () => {
 

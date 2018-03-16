@@ -1,6 +1,7 @@
 import {
     Controller, Req, Res, Body, Get, Post, Param, Session,
-    HttpStatus, BadRequestException, UseGuards, Delete, HttpCode, Query, Put
+    HttpStatus, BadRequestException, UseGuards, Delete, HttpCode, Query, Put,
+    UploadedFile, UploadedFiles, UsePipes, UseInterceptors
 } from "@nestjs/common";
 import {
     ApiBearerAuth, ApiUseTags, ApiResponse, ApiOperation, ApiImplicitParam,
@@ -12,7 +13,7 @@ import { ObjectId } from "@models/common";
 import { config } from "@utils/config";
 import { RolesGuard } from "@guards/roles";
 import { Roles } from "@decorators/roles";
-import { File, Files, User } from "@decorators/route";
+import { User } from "@decorators/route";
 import { GidDto } from "@dtos/ids";
 import { IReqUser } from "@dtos/req";
 import { PerPageDto, ListResponse } from "@dtos/page";
@@ -33,6 +34,7 @@ import { isArray } from "util";
 
 import { CreateValueDto, EditValueDto } from "../values/values.dto";
 import { GoodAttributeParamDto, UploadQueryDto, EditBodyDto } from "./goods.dto";
+import { RegexpCountCheckInterceptor } from "@interceptors/regexp-count-check";
 
 @UseGuards(RolesGuard)
 @Controller("api/v1/goods")
@@ -144,6 +146,7 @@ export class GoodsAdminController {
 
     @Roles("admin", "token")
     @Post()
+    @UseInterceptors(RegexpCountCheckInterceptor)
     // region Swagger Docs
     @HttpCode(HttpStatus.CREATED)
     @ApiOperation({ title: "上传单个文件" })
@@ -153,7 +156,7 @@ export class GoodsAdminController {
     })
     // endregion Swagger Docs
     public async addGood(
-        @File(new RegexpCountCheckPipe()) file: Express.Multer.File,
+        @UploadedFile() file: Express.Multer.File,
         @User() user: IReqUser, @Session() session,
         @Query(new ToArrayPipe()) query: UploadQueryDto
     ) {
@@ -184,6 +187,7 @@ export class GoodsAdminController {
 
     @Roles("admin", "token")
     @Post("/collections")
+    @UseInterceptors(RegexpCountCheckInterceptor)
     // region Swagger Docs
     @HttpCode(HttpStatus.CREATED)
     @ApiOperation({ title: "上传多个文件并形成文件集" })
@@ -193,7 +197,7 @@ export class GoodsAdminController {
     })
     // endregion Swagger Docs
     public async addGoods(
-        @Files(new RegexpCountCheckPipe()) files: Express.Multer.File[],
+        @UploadedFiles() files: Express.Multer.File[],
         @User() user: IReqUser, @Session() session,
         @Query(new ToArrayPipe()) query: UploadQueryDto
     ) {

@@ -1,13 +1,13 @@
 import * as supertest from "supertest";
 import path = require("path");
-import { init } from "../helpers/server";
-import db = require("../helpers/database");
+import { init } from "../../helpers/server";
+import db = require("../../helpers/database");
 import auth = require("@db/auth");
 import goods = require("@db/goods");
 import regexps = require("@db/regexps");
-import files = require("../helpers/files");
+import files = require("../../helpers/files");
 import categories = require("@db/categories");
-import { newName } from "../helpers/utils";
+import { newName } from "../../helpers/utils";
 
 describe("Upload Good with Append categories", () => {
 
