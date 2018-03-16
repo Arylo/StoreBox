@@ -18,7 +18,6 @@ import { GidDto } from "@dtos/ids";
 import { IReqUser } from "@dtos/req";
 import { PerPageDto, ListResponse } from "@dtos/page";
 import { DefResDto } from "@dtos/res";
-import { RegexpCountCheckPipe } from "@pipes/regexp-count-check";
 import { ParseIntPipe } from "@pipes/parse-int";
 import { ToArrayPipe } from "@pipes/to-array";
 import { TokensService } from "@services/tokens";
