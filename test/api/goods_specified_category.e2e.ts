@@ -81,7 +81,7 @@ describe("Upload Good with specified categories", () => {
 
         const { status } = await files.uploadFile(
             request, filepath, { query: {
-                "category": await categories.getNameById(targetId)
+                "category": encodeURI(await categories.getNameById(targetId))
             }}
         );
         status.should.be.eql(201);
@@ -95,7 +95,7 @@ describe("Upload Good with specified categories", () => {
 
         const { status } = await files.uploadFile(
             request, filepath, { query: {
-                "category": await categories.getNameById(targetId)
+                "category": encodeURI(await categories.getNameById(targetId))
             }}
         );
         status.should.be.eql(201);
@@ -109,7 +109,7 @@ describe("Upload Good with specified categories", () => {
 
         const { status } = await files.uploadFile(
             request, filepath, { query: {
-                "category": await categories.getNameById(targetId)
+                "category": encodeURI(await categories.getNameById(targetId))
             }}
         );
         status.should.be.eql(400);

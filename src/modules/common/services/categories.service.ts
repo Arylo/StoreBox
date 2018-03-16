@@ -111,8 +111,12 @@ export class CategoriesService extends BaseService {
         return CategoriesModel.count({ }).exec();
     }
 
-    public add(ctx: object) {
-        return CategoriesModel.create(ctx);
+    public async add(ctx: object) {
+        try {
+            return await CategoriesModel.create(ctx);
+        } catch (error) {
+            throw new BadRequestException(error.toString());
+        }
     }
 
     public get(cond: object, opts?: IGetOptions) {
@@ -121,15 +125,16 @@ export class CategoriesService extends BaseService {
         return p.exec();
     }
 
-    public getById(id: ObjectId, opts?: IGetOptions) {
-        let p = CategoriesModel.findById(id);
-        p = this.documentQueryProcess(p, opts);
-        return p.exec();
+    public async getById(id: ObjectId, opts?: IGetOptions) {
+        const arr = await this.get({ _id: id }, opts);
+        return arr.length === 0 ? null : arr[0];
     }
 
-    public editById(id: ObjectId, ctx: object) {
+    public async editById(id: ObjectId, ctx: object) {
         try {
-            return CategoriesModel.findByIdAndUpdate(id, ctx).exec();
+            return await CategoriesModel
+                .update({ _id: id }, ctx, this.DEF_UPDATE_OPTIONS)
+                .exec();
         } catch (error) {
             throw new BadRequestException(error.toString());
         }

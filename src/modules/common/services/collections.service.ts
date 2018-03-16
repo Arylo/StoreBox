@@ -36,7 +36,7 @@ export class CollectionsService extends BaseService {
         const perNum = pageObj.perNum;
         const page = pageObj.page;
         return this.loadAndCache(
-            `list_${uid.toString}_${perNum}_${page}`,
+            `list_${uid.toString()}_${perNum}_${page}`,
             () => {
                 return CollectionsModel.find({ creator: uid })
                     .skip((page - 1) * perNum).limit(perNum)
@@ -45,13 +45,13 @@ export class CollectionsService extends BaseService {
                     .populate("goods")
                     .exec();
             },
-            7200
+            50
         );
     }
 
     public count(uid: ObjectId) {
         return this.loadAndCache(
-            `count_${uid}`,
+            `count_${uid.toString()}`,
             () => CollectionsModel.count({ creator: uid }).exec()
         );
     }
@@ -70,7 +70,7 @@ export class CollectionsService extends BaseService {
         return this.loadAndCache(
             `getByName_${name}`,
             () => p.exec(),
-            7200
+            50
         );
     }
 
@@ -84,7 +84,7 @@ export class CollectionsService extends BaseService {
         return this.loadAndCache(
             `getById_${id.toString()}`,
             () => p.exec(),
-            7200
+            50
         );
     }
 

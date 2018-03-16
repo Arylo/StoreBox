@@ -76,4 +76,10 @@ CollectionsSchema.path("goods").validate({
 });
 // endregion validators
 
+for (const method of MODIFY_MOTHODS) {
+    CollectionsSchema.post(method, () => {
+        cache.clear();
+    });
+}
+
 export const Model = model(FLAG, CollectionsSchema) as M<CollectionDoc>;

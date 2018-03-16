@@ -37,7 +37,8 @@ export class GoodsService extends BaseService {
                 .populate("uploader")
                 .populate("attributes")
                 .select("-category")
-                .exec()
+                .exec(),
+            50
         );
     }
 

@@ -85,20 +85,12 @@ export class CategoriesAdminController {
                 attrs.map((item) => item.toObject()._id)
             );
         }
-        let result;
-        try {
-            result = await this.categoriesSvr.add({
-                name: ctx.name,
-                tags: ctx.tags,
-                attributes: attrsIds,
-                pid: ctx.pid
-            });
-        } catch (error) {
-            attrsIds.forEach((id) => {
-                ValuesModel.findByIdAndRemove(id).exec();
-            });
-            throw new BadRequestException(error.toString());
-        }
+        const result = await this.categoriesSvr.add({
+            name: ctx.name,
+            tags: ctx.tags,
+            attributes: attrsIds,
+            pid: ctx.pid
+        });
         return result;
     }
 

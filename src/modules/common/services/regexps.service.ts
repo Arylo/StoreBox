@@ -121,7 +121,7 @@ export class RegexpsService extends BaseService {
             () => RegexpsModel.find({ })
                 .skip((page - 1) * perNum).limit(perNum)
                 .populate("link").exec(),
-            3000
+            50
         );
     }
 
@@ -142,7 +142,7 @@ export class RegexpsService extends BaseService {
             return this.loadAndCache(
                 FLAG,
                 () => RegexpsModel.find(conditions).populate("link").exec(),
-                3000
+                50
             );
         } else if (opts.appends && opts.appends.length > 0) {
             // 追加Categroy
@@ -156,14 +156,14 @@ export class RegexpsService extends BaseService {
             return this.loadAndCache(
                 FLAG,
                 () => RegexpsModel.find(conditions).populate("link").exec(),
-                3000
+                50
             );
         } else {
             const FLAG = "default_scan_regexps";
             return this.loadAndCache(
                 FLAG,
                 () => RegexpsModel.find(DEF_CONDITIONS).populate("link").exec(),
-                3000
+                50
             );
         }
     }

@@ -75,7 +75,7 @@ describe("Upload Good with Append categories", () => {
 
         const { status, body: result } = await files.uploadFile(
             request, filepath, { query: {
-                "append": await categories.getNameById(targetId)
+                "append": encodeURI(await categories.getNameById(targetId))
             }}
         );
         status.should.be.eql(400);

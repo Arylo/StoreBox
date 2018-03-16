@@ -17,7 +17,7 @@ export abstract class BaseService {
     private cache;
 
     protected setCache(cache) {
-        // this.cache = cache;
+        this.cache = cache;
     }
 
     protected loadAndCache<T>(
