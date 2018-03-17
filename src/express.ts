@@ -34,6 +34,7 @@ export const initExpress = () => {
         saveUninitialized: true,
         cookie: { secure: false, maxAge: 7200 * 1000 }
     };
+    /* istanbul ignore if */
     if (!isTest) {
         sessionOpts.store = new RedisStore({
             url: config.redis.url

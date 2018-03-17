@@ -40,9 +40,9 @@ export class FilesController {
     ) {
         let obj: GoodDoc;
         try {
-            obj = await this.goodsSvr.get({
+            obj = (await this.goodsSvr.get({
                 _id: params.id, category: params.cid
-            });
+            }))[0];
         } catch (error) {
             throw new BadRequestException(error.toString());
         }

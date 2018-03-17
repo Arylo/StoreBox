@@ -1,7 +1,9 @@
-import { Component } from "@nestjs/common";
+import { Component, BadRequestException } from "@nestjs/common";
 import { ObjectId } from "@models/common";
 import { Model as SystemModel } from "@models/System";
 import { Model as UsergroupsModel } from "@models/Usergroup";
+
+import { systemLogger } from "../helper/log";
 
 @Component()
 export class SystemService {
@@ -17,6 +19,7 @@ export class SystemService {
             key: SystemService.DEFAULT_USERGROUP_FLAG
         }).exec();
         if (!gid) {
+            systemLogger.warn(`Miss ${SystemService.DEFAULT_USERGROUP_FLAG}`);
             gid = (await UsergroupsModel.findOne().exec())._id;
             this.setDefaultUsergroup(gid);
         }
@@ -27,8 +30,13 @@ export class SystemService {
      * Set Default Usergroup ID
      * @param gid Usergroup ID
      */
-    public setDefaultUsergroup(gid: ObjectId) {
-        return SystemModel.findOneAndUpdate(
+    public async setDefaultUsergroup(gid: ObjectId) {
+        const doc = await UsergroupsModel.findById(gid).exec();
+        if (!doc) {
+            throw new BadRequestException("The ID isnt a Usergroup ID");
+        }
+        return SystemModel
+            .findOneAndUpdate(
                 { key: SystemService.DEFAULT_USERGROUP_FLAG }, { value: gid },
                 { upsert: true }
             )

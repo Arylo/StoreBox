@@ -25,7 +25,7 @@ export class GoodsService extends BaseService {
     }
 
     public get(cond: object, opts?: IGetOptions) {
-        let p = GoodsModels.findOne(cond);
+        let p = GoodsModels.find(cond);
         p = this.documentQueryProcess(p, opts);
         return p.exec();
     }
@@ -127,10 +127,8 @@ export class GoodsService extends BaseService {
      * Get Good by Good ID
      * @param id Good ID
      */
-    public getById(id: ObjectId, opts?: IGetOptions) {
-        let p = GoodsModels.findById(id);
-        p = this.documentQueryProcess(p, opts);
-        return p.exec();
+    public async getById(id: ObjectId, opts?: IGetOptions) {
+        return (await this.get({ _id: id }, opts))[0];
     }
 
     /**
