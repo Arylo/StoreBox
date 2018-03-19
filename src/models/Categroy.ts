@@ -5,9 +5,15 @@ import { DEF_PER_COUNT } from "@dtos/page";
 import { isArray } from "util";
 import { reduce, includes, difference } from "lodash";
 import { MongoError } from "mongodb";
-import Cache =  require("schedule-cache");
+import { config } from "@utils/config";
+import keyv =  require("keyv");
 
-export const cache = Cache.create(`${Date.now()}${Math.random()}`);
+import { isTest } from "../modules/common/helper/env";
+
+export const cache = new keyv({
+    uri: isTest ? undefined : config.redis.url,
+    namespace: "Categories"
+});
 
 export const FLAG = "categories";
 export type CategoryDoc = IDoc<ICategory>;

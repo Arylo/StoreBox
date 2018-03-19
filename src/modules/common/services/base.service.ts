@@ -1,8 +1,8 @@
 import { DEF_PER_COUNT } from "@dtos/page";
 import { UtilService } from "@services/util";
 import { DocumentQuery, ModelPopulateOptions } from "mongoose";
-
-type TimeType = number | string;
+import keyv = require("keyv");
+import isPromise = require("is-promise");
 
 export interface IGetOptions {
     populate?: Array<string | ModelPopulateOptions>;
@@ -14,28 +14,30 @@ export abstract class BaseService {
     protected readonly DEF_UPDATE_OPTIONS = {
         runValidators: true, context: "query"
     };
-    private cache;
+    private cache: keyv;
 
-    protected setCache(cache) {
+    protected setCache(cache: keyv) {
         this.cache = cache;
     }
 
-    protected loadAndCache<T>(
-        FLAG: string, value: () => T, time?: TimeType
-    ): T {
+    protected async loadAndCache<T>(
+        FLAG: string, value: () => Promise<T>, time?: number
+    ): Promise<T>;
+    protected async loadAndCache<T>(
+        FLAG: string, value: () => T, time = 1000 * 60 * 5 // 5 min
+    ): Promise<T> {
         if (!this.cache) {
             return value();
         }
-        const c = this.cache.get(FLAG);
+        const c: T = await this.cache.get(FLAG);
         if (c) {
             return c;
         }
-        const val = value();
-        if (time) {
-            this.cache.put(FLAG, val, time);
-        } else {
-            this.cache.put(FLAG, val);
+        let val = value();
+        if (isPromise(val)) {
+            val = await val;
         }
+        await this.cache.set(FLAG, val, time);
         return val;
     }
 

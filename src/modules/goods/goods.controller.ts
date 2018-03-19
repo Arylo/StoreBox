@@ -134,8 +134,9 @@ export class GoodsAdminController {
         } catch (error) {
             if (cb) {
                 cb("Good", error);
+            } else {
+                throw error;
             }
-            return;
         }
         const newFilePath =
             `${config.paths.upload}/${categories[0]._id}/${obj.file.filename}`;
@@ -222,22 +223,18 @@ export class GoodsAdminController {
         if (goods.length === 0) {
             throw new BadRequestException("The Collection no good");
         } else {
-            try {
-                const collections = await this.collectionsSvr.create({
-                    goods: goods.reduce((arr, good) => {
-                        arr.push(good._id);
-                        return arr;
-                    }, []),
-                    creator: uploaderId
-                });
-                const collection =
-                    isArray(collections) ? collections[0] : collections;
-                return this.collectionsSvr.getById(collection._id, {
-                    populate: [ "goods" ]
-                });
-            } catch (error) {
-                throw new BadRequestException(error.toString());
-            }
+            const collections = await this.collectionsSvr.create({
+                goods: goods.reduce((arr, good) => {
+                    arr.push(good._id);
+                    return arr;
+                }, []),
+                creator: uploaderId
+            });
+            const collection =
+                isArray(collections) ? collections[0] : collections;
+            return this.collectionsSvr.getById(collection._id, {
+                populate: [ "goods" ]
+            });
         }
     }
 

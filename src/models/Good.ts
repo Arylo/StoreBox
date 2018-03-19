@@ -5,9 +5,15 @@ import {
 import { IValues, Flag as ValueFlag } from "@models/Value";
 import { IUser, FLAG as UserFlag } from "@models/User";
 import { ICategory, FLAG as CategoryFlag } from "@models/Categroy";
-import Cache =  require("schedule-cache");
+import { config } from "@utils/config";
+import keyv =  require("keyv");
 
-const cache = Cache.create(`${Date.now()}${Math.random()}`);
+import { isTest } from "../modules/common/helper/env";
+
+export const cache = new keyv({
+    uri: isTest ? undefined : config.redis.url,
+    namespace: "Goods"
+});
 
 export const FLAG = "goods";
 export type GoodDoc = IDoc<IGoods>;

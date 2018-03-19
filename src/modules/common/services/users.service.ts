@@ -98,7 +98,10 @@ export class UsersService extends BaseService {
      * 返回总数
      */
     public conut() {
-        return UsersModel.count({ }).exec();
+        return this.loadAndCache(
+            "count",
+            () => UsersModel.count({ }).exec()
+        );
     }
 
     /**
@@ -108,9 +111,13 @@ export class UsersService extends BaseService {
      * @param opts.page {number} 页数
      */
     public list(opts = this.DEF_PER_OBJ) {
-        return UsersModel.find().select("-password")
-            .skip((opts.page - 1) * opts.perNum).limit(opts.perNum)
-            .exec();
+        const Flag = `list_${opts.perNum}_${opts.page}`;
+        return this.loadAndCache(
+            Flag,
+            () => UsersModel.find().select("-password")
+                .skip((opts.page - 1) * opts.perNum).limit(opts.perNum)
+                .exec()
+        );
     }
 
     /**

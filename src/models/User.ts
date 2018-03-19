@@ -3,10 +3,15 @@ import * as md5 from "md5";
 import { config } from "@utils/config";
 import { ObjectId, existsValidator } from "@models/common";
 import { DEF_PER_COUNT } from "@dtos/page";
-import Cache =  require("schedule-cache");
 import { Base, IDoc, IDocRaw, MODIFY_MOTHODS } from "./common";
+import keyv =  require("keyv");
 
-const cache = Cache.create(`${Date.now()}${Math.random()}`);
+import { isTest } from "../modules/common/helper/env";
+
+export const cache = new keyv({
+    uri: isTest ? undefined : config.redis.url,
+    namespace: "Users"
+});
 
 export const FLAG = "users";
 
