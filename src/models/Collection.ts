@@ -4,11 +4,17 @@ import {
 } from "@models/common";
 import { IGoods, FLAG as GoodFlag, Model as GoodsModels } from "@models/Good";
 import { IUser, FLAG as UserFlag } from "@models/User";
-import Cache =  require("schedule-cache");
+import { config } from "@utils/config";
+import keyv =  require("keyv");
+
+import { isTest } from "../modules/common/helper/env";
+
+export const cache = new keyv({
+    uri: isTest ? undefined : config.redis.url,
+    namespace: "Collections"
+});
 
 export const FLAG = "collections";
-
-export const cache = Cache.create(`${Date.now()}${Math.random()}`);
 
 const Definition: SchemaDefinition = {
     name: {

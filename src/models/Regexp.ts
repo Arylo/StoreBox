@@ -4,12 +4,17 @@ import {
 } from "@models/common";
 import { ICategory, FLAG as CF, Model as CM } from "@models/Categroy";
 import { DEF_PER_COUNT } from "@dtos/page";
-import Cache =  require("schedule-cache");
 import isRegExp = require("@utils/isRegExp");
+import { config } from "@utils/config";
+import keyv =  require("keyv");
 
 import { INewRegexp } from "../modules/regexps/regexps.dto";
+import { isTest } from "../modules/common/helper/env";
 
-export const cache = Cache.create(`${Date.now()}${Math.random()}`);
+export const cache = new keyv({
+    uri: isTest ? undefined : config.redis.url,
+    namespace: "Regexps"
+});
 
 const Definition: SchemaDefinition = {
     name: { type: String, required: true, unique: true },

@@ -92,18 +92,30 @@ export class RegexpsService extends BaseService {
     }
 
     public count() {
-        const FLAG = "totalCount";
+        const FLAG = "total";
         return this.loadAndCache(
             FLAG,
             () => RegexpsModel.count({ }).exec()
         );
     }
 
-    public getById(id: ObjectId, opts?: IGetOptions) {
-        let p = RegexpsModel.findById(id)
-            .populate({ path: "link", populate: { path: "pid" } });
+    public get(conditions: object, opts?: IGetOptions) {
+        let p = RegexpsModel.find(conditions);
         p = this.documentQueryProcess(p, opts);
         return p.exec();
+    }
+
+    public async getById(id: ObjectId, opts?: IGetOptions) {
+        const extraPopulate = { path: "link", populate: { path: "pid" } };
+        if (!opts) {
+            opts = { };
+        }
+        if (opts.populate) {
+            opts.populate.push(extraPopulate);
+        } else {
+            opts.populate = [ extraPopulate ];
+        }
+        return (await this.get({ _id: id }, opts))[0];
     }
 
     /**
@@ -129,6 +141,9 @@ export class RegexpsService extends BaseService {
         const DEF_CONDITIONS = {
             link: { $exists: true }, hidden: false
         };
+        const DEF_OPTIONS = {
+            populate: [ "link" ]
+        };
 
         if (opts.categroies && opts.categroies.length > 0) {
             // 指定Categroy
@@ -141,7 +156,10 @@ export class RegexpsService extends BaseService {
             };
             return this.loadAndCache(
                 FLAG,
-                () => RegexpsModel.find(conditions).populate("link").exec(),
+                async () => {
+                    const result = await this.get(conditions, DEF_OPTIONS);
+                    return result.map((item) => item.toObject());
+                },
                 50
             );
         } else if (opts.appends && opts.appends.length > 0) {
@@ -155,14 +173,20 @@ export class RegexpsService extends BaseService {
             };
             return this.loadAndCache(
                 FLAG,
-                () => RegexpsModel.find(conditions).populate("link").exec(),
+                async () => {
+                    const result = await this.get(conditions, DEF_OPTIONS);
+                    return result.map((item) => item.toObject());
+                },
                 50
             );
         } else {
             const FLAG = "default_scan_regexps";
             return this.loadAndCache(
                 FLAG,
-                () => RegexpsModel.find(DEF_CONDITIONS).populate("link").exec(),
+                async () => {
+                    const result = await this.get(DEF_CONDITIONS, DEF_OPTIONS);
+                    return result.map((item) => item.toObject());
+                },
                 50
             );
         }
@@ -176,7 +200,7 @@ export class RegexpsService extends BaseService {
         const result = await this.getRegexps(opts);
         const list = [ ];
         result.forEach((item) => {
-            const obj = item.toObject();
+            const obj = item;
             const reg = new RegExp(obj.value);
             if (reg.test(name)) {
                 list.push(obj.link);

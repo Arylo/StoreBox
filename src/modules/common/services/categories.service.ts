@@ -109,7 +109,9 @@ export class CategoriesService extends BaseService {
     }
 
     public count() {
-        return CategoriesModel.count({ }).exec();
+        return this.loadAndCache(
+            "count", () => CategoriesModel.count({ }).exec()
+        );
     }
 
     public async add(ctx: object) {

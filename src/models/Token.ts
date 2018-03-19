@@ -3,10 +3,15 @@ import {
     Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS, existsValidator
 } from "@models/common";
 import { IUser, FLAG as UserFlag } from "@models/User";
+import { config } from "@utils/config";
+import keyv =  require("keyv");
 
-import Cache =  require("schedule-cache");
+import { isTest } from "../modules/common/helper/env";
 
-export const cache = Cache.create(`${Date.now()}${Math.random()}`);
+export const cache = new keyv({
+    uri: isTest ? undefined : config.redis.url,
+    namespace: "Tokens"
+});
 
 export const Flag = "tokens";
 
