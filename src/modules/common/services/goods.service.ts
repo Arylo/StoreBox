@@ -9,7 +9,12 @@ import { config } from "@utils/config";
 import fs = require("fs-extra");
 
 @Component()
-export class GoodsService extends BaseService {
+export class GoodsService extends BaseService<IGoods> {
+
+    constructor() {
+        super();
+        this.setModel(GoodsModels);
+    }
 
     private getConditionsByCids(cids: ObjectId[]) {
         return cids.length === 1 ? {
@@ -25,24 +30,21 @@ export class GoodsService extends BaseService {
     }
 
     public get(cond: object, opts?: IGetOptions) {
-        let p = GoodsModels.find(cond);
-        p = this.documentQueryProcess(p, opts);
-        return p.exec();
+        return this.find(cond, opts);
     }
 
     public listByCategoryId(cid: ObjectId, pageObj = this.DEF_PER_OBJ) {
         return this.loadAndCache(
             `list_category_${cid.toString()}`,
-            () => GoodsModels.find({ category: cid })
-                .populate("uploader")
-                .populate("attributes")
-                .select("-category")
-                .exec(),
-            50
+            () => this.findObjects({ category: cid }, Object.assign({
+                populate: [ "uploader", "attributes" ],
+                select: "-category"
+            }, pageObj)),
+            1000
         );
     }
 
-    public async countByCids(cids: ObjectId | ObjectId[]) {
+    public countByCids(cids: ObjectId | ObjectId[]) {
         if (!isArray(cids)) {
             cids = [ cids ];
         }
@@ -50,17 +52,15 @@ export class GoodsService extends BaseService {
             return [ ];
         }
         const conditions = this.getConditionsByCids(cids);
-        return await GoodsModels.count(conditions).exec();
+        return this.total(conditions);
     }
 
-    public async countByUids(
-        uids: ObjectId | ObjectId[], perNum = this.DEF_PER_OBJ.perNum
-    ) {
+    public countByUids(uids: ObjectId | ObjectId[]) {
         if (!isArray(uids)) {
             uids = [ uids ];
         }
         const conditions = this.getConditionsByUids(uids);
-        return await GoodsModels.count(conditions).exec();
+        return this.total(conditions);
     }
 
     /**
@@ -74,34 +74,28 @@ export class GoodsService extends BaseService {
             cids = [ cids ];
         }
         const conditions = this.getConditionsByCids(cids);
-        return GoodsModels.find(conditions)
-            .skip((opts.page - 1) * opts.perNum).limit(opts.perNum)
-            .populate("uploader attributes")
-            .sort({ updatedAt: -1 })
-            .exec();
+        return this.find(conditions, Object.assign({
+            populate: "uploader attributes",
+            sort: { updatedAt: -1 }
+        }, opts));
     }
 
     private getConditionsByUids(uids: ObjectId[]) {
-        let conditions;
         switch (uids.length) {
             case 0:
-                conditions = { };
-                break;
+                return { };
             case 1:
-                conditions = {
+                return {
                     uploader: uids[0]
                 };
-                break;
             default:
-                conditions = {
+                return {
                     $or: uids.reduce((arr, uid) => {
                         arr.push({ uploader: uid });
                         return arr;
                     }, [ ])
                 };
-                break;
         }
-        return conditions;
     }
 
     /**
@@ -115,48 +109,40 @@ export class GoodsService extends BaseService {
             uids = [ uids ];
         }
         const conditions = this.getConditionsByUids(uids);
-        return GoodsModels.find(conditions)
-            .skip((opts.page - 1) * opts.perNum).limit(opts.perNum)
-            .select("-uploader")
-            .populate("attributes")
-            .sort({ updatedAt: -1 })
-            .exec();
+        return this.find(conditions, Object.assign({
+            select: "-uploader",
+            populate: "attributes",
+            sort: { updatedAt: -1 }
+        }, opts));
     }
 
     /**
      * Get Good by Good ID
      * @param id Good ID
      */
-    public async getById(id: ObjectId, opts?: IGetOptions) {
-        return (await this.get({ _id: id }, opts))[0];
+    public getById(id: ObjectId, opts?: IGetOptions) {
+        return super.findById(id, opts);
     }
 
     /**
      * Edit Good by Good ID
      * @param id Good ID
      */
-    public async editById(id: ObjectId, ctx: object) {
-        try {
-            await GoodsModels
-                .update({ _id: id }, ctx, this.DEF_UPDATE_OPTIONS)
-                .exec();
-        } catch (error) {
-            throw new BadRequestException(error.toString());
-        }
+    public editById(id: ObjectId, ctx: object) {
+        return this.modifyById(id, ctx);
     }
 
     public add(ctx: object) {
-        return GoodsModels.create(ctx);
+        return this.create(ctx);
     }
 
     public async remove(id: ObjectId) {
-        const doc = await this.getById(id);
-        if (!doc) {
+        const good = await this.findObjectById(id);
+        if (!good) {
             throw new BadRequestException("Non Exist Good ID");
         }
-        const good = doc.toObject();
+        this.deleteById(id);
         try {
-            await GoodsModels.findByIdAndRemove(id).exec();
             if (good.attributes.length > 0) {
                 const cond = (good.attributes as ObjectId[])
                     .reduce((obj, item) => {

@@ -1,19 +1,20 @@
 import { Component, BadRequestException } from "@nestjs/common";
 import { Model as UsersModel } from "@models/User";
-import { Model as UsergroupsModel } from "@models/Usergroup";
+import { Model as UsergroupsModel, IUsergroups } from "@models/Usergroup";
 import { Model as UserUsergroupsModel } from "@models/User-Usergroup";
 import { ObjectId } from "@models/common";
 import { BaseService } from "@services/base";
 
 @Component()
-export class UsergroupsService extends BaseService {
+export class UsergroupsService extends BaseService<IUsergroups> {
 
-    public async add(obj: object) {
-        try {
-            return await UsergroupsModel.create(obj);
-        } catch (error) {
-            throw new BadRequestException(error.toString());
-        }
+    constructor() {
+        super();
+        this.setModel(UsergroupsModel);
+    }
+
+    public add(obj: object) {
+        return this.create(obj);
     }
 
     public async edit(id: ObjectId, obj: object) {
@@ -31,7 +32,7 @@ export class UsergroupsService extends BaseService {
     }
 
     public getGroup(gid: ObjectId) {
-        return UsergroupsModel.findById(gid).exec();
+        return this.findById(gid);
     }
 
     public async getGroupUsers(
@@ -48,16 +49,18 @@ export class UsergroupsService extends BaseService {
     }
 
     public count() {
-        return UsergroupsModel.count({ }).exec();
+        return this.total({ });
     }
 
     public list(pageObj = this.DEF_PER_OBJ) {
         const perNum = pageObj.perNum || this.DEF_PER_OBJ.perNum;
         const page = pageObj.page || this.DEF_PER_OBJ.page;
-        return UsergroupsModel.find({ })
-            .skip((page - 1) * perNum).limit(perNum)
-            .sort({ createdAt: -1 })
-            .exec();
+        return this.loadAndCache(
+            `list_${perNum}_${page}`,
+            () => this.findObjects({ }, {
+                perNum, page, sort: { createdAt: -1 }
+            })
+        );
     }
 
     /**
@@ -68,8 +71,8 @@ export class UsergroupsService extends BaseService {
         if ((await this.count()) === 1) {
             throw new BadRequestException("Cant delete unique group");
         }
+        const p = await this.deleteById(gid);
         try {
-            const p = await UsergroupsModel.findByIdAndRemove(gid).exec();
             await UserUsergroupsModel.findOneAndRemove({
                 usergroup: gid
             }).exec();

@@ -11,20 +11,21 @@ interface IIdMap {
 }
 
 @Component()
-export class CategoriesService extends BaseService {
+export class CategoriesService extends BaseService<ICategory> {
 
     constructor(private readonly goodsSvr: GoodsService) {
         super();
         super.setCache(cache);
+        super.setModel(CategoriesModel);
     }
 
     private getIdMap() {
         return this.loadAndCache("IdMap", async () => {
             // { parentId: childrenIds }
             const map: IIdMap = { };
-            const docs = await CategoriesModel.find().select("_id pid").exec();
-            docs.forEach((doc) => {
-                const category = doc.toObject();
+            const categories =
+                await this.findObjects({ }, { select: "_id pid" });
+            categories.forEach((category) => {
                 let index;
                 if (!category.pid) {
                     index = "*";
@@ -77,13 +78,12 @@ export class CategoriesService extends BaseService {
                 return arr;
             }, [])
         };
-        const p = (await this.get(conditions, {
+        const p = (await this.findObjects(conditions, {
                 populate: [
                     "attributes",
                     { path: "pid", populate: { path: "pid" } }
                 ]
             }))
-            .map((item) => item.toObject())
             .map((item) => {
                 item.tags = Array.from(new Set(this.getTags(item)));
                 delete item.pid;
@@ -103,44 +103,27 @@ export class CategoriesService extends BaseService {
      * @return {Promise}
      */
     public async list(opts = this.DEF_PER_OBJ) {
-        return CategoriesModel.find({ })
-            .skip((opts.page - 1) * opts.perNum).limit(opts.perNum)
-            .exec();
+        return this.find({ }, opts);
     }
 
     public count() {
-        return this.loadAndCache(
-            "count", () => CategoriesModel.count({ }).exec()
-        );
+        return this.total({ });
     }
 
-    public async add(ctx: object) {
-        try {
-            return await CategoriesModel.create(ctx);
-        } catch (error) {
-            throw new BadRequestException(error.toString());
-        }
+    public add(ctx: object) {
+        return this.create(ctx);
     }
 
     public get(cond: object, opts?: IGetOptions) {
-        let p = CategoriesModel.find(cond);
-        p = this.documentQueryProcess(p, opts);
-        return p.exec();
+        return this.find(cond, opts);
     }
 
     public async getById(id: ObjectId, opts?: IGetOptions) {
-        const arr = await this.get({ _id: id }, opts);
-        return arr.length === 0 ? null : arr[0];
+        return this.findById(id, opts);
     }
 
-    public async editById(id: ObjectId, ctx: object) {
-        try {
-            return await CategoriesModel
-                .update({ _id: id }, ctx, this.DEF_UPDATE_OPTIONS)
-                .exec();
-        } catch (error) {
-            throw new BadRequestException(error.toString());
-        }
+    public editById(id: ObjectId, ctx: object) {
+        return this.modifyById(id, ctx);
     }
 
     public async removeById(id: ObjectId) {
@@ -148,17 +131,12 @@ export class CategoriesService extends BaseService {
         if (goods.length > 0) {
             throw new BadRequestException("Some Good in the category");
         }
-        const map = await this.getIdMap();
-        if (map[id.toString()] && map[id.toString()].length > 0) {
+        if ((await this.getChildrenIds(id)).length > 0) {
             throw new BadRequestException(
                 "The Category have some child categories"
             );
         }
-        try {
-            return await CategoriesModel.findByIdAndRemove(id).exec();
-        } catch (error) {
-            throw new BadRequestException(error.toString());
-        }
+        return this.deleteById(id);
     }
 
 }

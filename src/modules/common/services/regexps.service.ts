@@ -1,11 +1,11 @@
 import { Component, BadRequestException } from "@nestjs/common";
 import { ObjectId } from "@models/common";
 import {
-    Model as RegexpsModel, cache, RegexpDoc, IRegexpDoc
+    Model as RegexpsModel, cache, RegexpDoc, IRegexpDoc, IRegexp
 } from "@models/Regexp";
 import { Model as CategroiesModel, ICategory } from "@models/Categroy";
 import { DEF_PER_COUNT } from "@dtos/page";
-import { isUndefined } from "util";
+import { isArray } from "util";
 import { BaseService, IGetOptions } from "@services/base";
 
 export interface IGetRegexpsOptions {
@@ -14,11 +14,12 @@ export interface IGetRegexpsOptions {
 }
 
 @Component()
-export class RegexpsService extends BaseService {
+export class RegexpsService extends BaseService<IRegexp> {
 
     constructor() {
         super();
-        super.setCache(cache);
+        this.setCache(cache);
+        this.setModel(RegexpsModel);
         // Update
         setTimeout(() => {
             // Add Hidden Label
@@ -33,11 +34,7 @@ export class RegexpsService extends BaseService {
      * 新增规则
      */
     public async create(obj: IRegexpDoc) {
-        try {
-            return await RegexpsModel.create(obj);
-        } catch (error) {
-            throw new BadRequestException(error.toString());
-        }
+        return super.create(obj);
     }
 
     /**
@@ -100,9 +97,7 @@ export class RegexpsService extends BaseService {
     }
 
     public get(conditions: object, opts?: IGetOptions) {
-        let p = RegexpsModel.find(conditions);
-        p = this.documentQueryProcess(p, opts);
-        return p.exec();
+        return this.find(conditions, opts);
     }
 
     public async getById(id: ObjectId, opts?: IGetOptions) {
@@ -110,7 +105,7 @@ export class RegexpsService extends BaseService {
         if (!opts) {
             opts = { };
         }
-        if (opts.populate) {
+        if (opts.populate && isArray(opts.populate)) {
             opts.populate.push(extraPopulate);
         } else {
             opts.populate = [ extraPopulate ];
@@ -130,10 +125,11 @@ export class RegexpsService extends BaseService {
         const FLAG = `list_${perNum}_${page}`;
         return this.loadAndCache(
             FLAG,
-            () => RegexpsModel.find({ })
-                .skip((page - 1) * perNum).limit(perNum)
-                .populate("link").exec(),
-            50
+            () => this.findObjects({ }, {
+                perNum, page,
+                populate: "link"
+            }),
+            1000
         );
     }
 
@@ -155,12 +151,7 @@ export class RegexpsService extends BaseService {
                 }, [ ])
             };
             return this.loadAndCache(
-                FLAG,
-                async () => {
-                    const result = await this.get(conditions, DEF_OPTIONS);
-                    return result.map((item) => item.toObject());
-                },
-                50
+                FLAG, () => this.findObjects(conditions, DEF_OPTIONS), 1000
             );
         } else if (opts.appends && opts.appends.length > 0) {
             // 追加Categroy
@@ -172,22 +163,12 @@ export class RegexpsService extends BaseService {
                 }, [ DEF_CONDITIONS ])
             };
             return this.loadAndCache(
-                FLAG,
-                async () => {
-                    const result = await this.get(conditions, DEF_OPTIONS);
-                    return result.map((item) => item.toObject());
-                },
-                50
+                FLAG, () => this.findObjects(conditions, DEF_OPTIONS), 1000
             );
         } else {
             const FLAG = "default_scan_regexps";
             return this.loadAndCache(
-                FLAG,
-                async () => {
-                    const result = await this.get(DEF_CONDITIONS, DEF_OPTIONS);
-                    return result.map((item) => item.toObject());
-                },
-                50
+                FLAG, () => this.findObjects(DEF_CONDITIONS, DEF_OPTIONS), 1000
             );
         }
     }

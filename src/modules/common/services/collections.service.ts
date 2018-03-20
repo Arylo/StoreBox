@@ -1,59 +1,46 @@
 import { Component, Param, BadRequestException } from "@nestjs/common";
 import { UidDto } from "@dtos/ids";
-import { Model as CollectionsModel, cache } from "@models/Collection";
+import {
+    Model as CollectionsModel, cache, ICollections
+} from "@models/Collection";
 import { ObjectId } from "@models/common";
 import { DEF_PER_COUNT } from "@dtos/page";
 import { IEditCollection } from "../../../modules/collections/collections.dto";
 import { BaseService, IGetOptions } from "@services/base";
 
 @Component()
-export class CollectionsService extends BaseService {
+export class CollectionsService extends BaseService<ICollections> {
 
     constructor() {
         super();
         this.setCache(cache);
+        this.setModel(CollectionsModel);
     }
 
-    public async create(obj) {
-        try {
-            return await CollectionsModel.create(obj);
-        } catch (error) {
-            throw new BadRequestException(error.toString());
-        }
+    public create(obj: object) {
+        return super.create(obj);
     }
 
-    public async edit(cid: ObjectId, ctx: IEditCollection) {
-        try {
-            return await CollectionsModel
-                .update({ _id: cid }, ctx, this.DEF_UPDATE_OPTIONS)
-                .exec();
-        } catch (error) {
-            throw new BadRequestException(error.toString());
-        }
+    public edit(cid: ObjectId, ctx: IEditCollection) {
+        return this.modifyById(cid, ctx);
     }
 
     public list(uid: ObjectId, pageObj = this.DEF_PER_OBJ) {
-        const perNum = pageObj.perNum;
-        const page = pageObj.page;
+        const perNum = pageObj.perNum || this.DEF_PER_OBJ.perNum;
+        const page = pageObj.page || this.DEF_PER_OBJ.page;
         return this.loadAndCache(
             `list_${uid.toString()}_${perNum}_${page}`,
-            () => {
-                return CollectionsModel.find({ creator: uid })
-                    .skip((page - 1) * perNum).limit(perNum)
-                    .sort({ updatedAt: -1 })
-                    .populate("creator")
-                    .populate("goods")
-                    .exec();
-            },
-            50
+            () => this.findObjects({ creator: uid }, {
+                sort: { updatedAt: -1 },
+                page, perNum,
+                populate: [ "creator", "goods" ]
+            }),
+            1000
         );
     }
 
     public count(uid: ObjectId) {
-        return this.loadAndCache(
-            `count_${uid.toString()}`,
-            () => CollectionsModel.count({ creator: uid }).exec()
-        );
+        return this.total({ creator: uid });
     }
 
     private readonly GET_OPTIONS: IGetOptions = {
@@ -65,12 +52,10 @@ export class CollectionsService extends BaseService {
      * @param name Collection Name
      */
     public getByName(name: string, opts = this.GET_OPTIONS) {
-        let p = CollectionsModel.findOne({ name });
-        p = this.documentQueryProcess(p, opts);
         return this.loadAndCache(
             `getByName_${name}`,
-            () => p.exec(),
-            50
+            () => this.findObject({ name }, opts),
+            1000
         );
     }
 
@@ -79,21 +64,15 @@ export class CollectionsService extends BaseService {
      * @param id Collection ID
      */
     public getById(id: ObjectId, opts = this.GET_OPTIONS) {
-        let p = CollectionsModel.findById(id);
-        p = this.documentQueryProcess(p, opts);
         return this.loadAndCache(
             `getById_${id.toString()}`,
-            () => p.exec(),
-            50
+            () => this.findObjectById(id, opts),
+            1000
         );
     }
 
-    public async remove(cid: ObjectId) {
-        try {
-            return await CollectionsModel.findByIdAndRemove(cid).exec();
-        } catch (error) {
-            throw new BadRequestException(error.toString());
-        }
+    public remove(cid: ObjectId) {
+        return this.deleteById(cid);
     }
 
 }

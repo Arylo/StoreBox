@@ -1,16 +1,18 @@
 import { Component, BadRequestException } from "@nestjs/common";
 import { ObjectId } from "@models/common";
-import { Model as UsersModel, UserDoc } from "@models/User";
+import { Model as UsersModel, UserDoc, IUser, cache } from "@models/User";
 import { Model as UserUsergroupsModel } from "@models/User-Usergroup";
 import { IUsergroups } from "@models/Usergroup";
 import { SystemService } from "@services/system";
 import { BaseService, IGetOptions } from "@services/base";
 
 @Component()
-export class UsersService extends BaseService {
+export class UsersService extends BaseService<IUser> {
 
     constructor(private readonly sysSvr: SystemService) {
         super();
+        this.setCache(cache);
+        this.setModel(UsersModel);
     }
 
     public async addUser(obj, gid?: ObjectId) {
@@ -29,8 +31,8 @@ export class UsersService extends BaseService {
     }
 
     public async removeUser(uid: ObjectId) {
+        await this.deleteById(uid);
         try {
-            await UsersModel.removeUser(uid);
             await UserUsergroupsModel.remove({ user: uid }).exec();
         } catch (error) {
             throw new BadRequestException(error.toString());
@@ -52,8 +54,8 @@ export class UsersService extends BaseService {
     public async getUsergroups(
         uid: ObjectId, pageObj = this.DEF_PER_OBJ
     ) {
-        const perNum = pageObj.perNum;
-        const page = pageObj.page;
+        const perNum = pageObj.perNum || this.DEF_PER_OBJ.perNum;
+        const page = pageObj.page || this.DEF_PER_OBJ.page;
         const groups = await UserUsergroupsModel
             .find({ user: uid }).populate("usergroup")
             .skip((page - 1) * perNum).limit(perNum)
@@ -77,13 +79,7 @@ export class UsersService extends BaseService {
         if (Object.keys(content).length === 0) {
             throw new BadRequestException("Empty Content");
         }
-        try {
-            return await UsersModel
-                .update({ _id: id }, content, this.DEF_UPDATE_OPTIONS)
-                .exec();
-        } catch (error) {
-            throw new BadRequestException(error.toString());
-        }
+        return this.modifyById(id, content);
     }
 
     public async passwd(id: ObjectId, oldPass: string, newPass: string) {
@@ -98,10 +94,7 @@ export class UsersService extends BaseService {
      * 返回总数
      */
     public conut() {
-        return this.loadAndCache(
-            "count",
-            () => UsersModel.count({ }).exec()
-        );
+        return this.total({ });
     }
 
     /**
@@ -111,12 +104,15 @@ export class UsersService extends BaseService {
      * @param opts.page {number} 页数
      */
     public list(opts = this.DEF_PER_OBJ) {
-        const Flag = `list_${opts.perNum}_${opts.page}`;
+        const perNum = opts.perNum || this.DEF_PER_OBJ.perNum;
+        const page = opts.page || this.DEF_PER_OBJ.page;
+        const Flag = `list_${perNum}_${page}`;
         return this.loadAndCache(
             Flag,
-            () => UsersModel.find().select("-password")
-                .skip((opts.page - 1) * opts.perNum).limit(opts.perNum)
-                .exec()
+            () => this.findObjects({ }, {
+                select: "-password",
+                perNum, page
+            })
         );
     }
 
@@ -125,8 +121,6 @@ export class UsersService extends BaseService {
      * @param id User ID
      */
     public getById(id: ObjectId, opts?: IGetOptions) {
-        let p = UsersModel.findById(id);
-        p = this.documentQueryProcess(p, opts);
-        return p.exec();
+        return this.findById(id, opts);
     }
 }

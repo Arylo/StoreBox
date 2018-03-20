@@ -18,6 +18,7 @@ export class SystemService {
         let gid: any = await SystemModel.findOne({
             key: SystemService.DEFAULT_USERGROUP_FLAG
         }).exec();
+        /* istanbul ignore if */
         if (!gid) {
             systemLogger.warn(`Miss ${SystemService.DEFAULT_USERGROUP_FLAG}`);
             gid = (await UsergroupsModel.findOne().exec())._id;
@@ -32,6 +33,7 @@ export class SystemService {
      */
     public async setDefaultUsergroup(gid: ObjectId) {
         const doc = await UsergroupsModel.findById(gid).exec();
+        /* istanbul ignore if */
         if (!doc) {
             throw new BadRequestException("The ID isnt a Usergroup ID");
         }
