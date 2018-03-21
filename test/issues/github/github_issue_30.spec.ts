@@ -4,7 +4,7 @@ import { Model as RegexpsModel } from "@models/Regexp";
 import { newName } from "../../helpers/utils";
 
 /**
- * Fix [Issue 30](https://github.com/Arylo/StoreBox/issues/30)
+ * Fix [Issue 30](https://github.com/BoxSystem/StoreBox-Api/issues/30)
  */
 describe("Fix Issues", () => {
 

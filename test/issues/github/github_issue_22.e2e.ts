@@ -8,7 +8,7 @@ import auth = require("@db/auth");
 import { newName } from "../../helpers/utils";
 
 /**
- * Fix [Issue 22](https://github.com/Arylo/StoreBox/issues/22)
+ * Fix [Issue 22](https://github.com/BoxSystem/StoreBox-Api/issues/22)
  */
 describe("Fix Issues", () => {
 

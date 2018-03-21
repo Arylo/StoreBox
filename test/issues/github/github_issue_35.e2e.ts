@@ -9,7 +9,7 @@ import { newName } from "../../helpers/utils";
 
 /**
  * The Feature of Edit User
- * Fix [Issue 35](https://github.com/Arylo/StoreBox/issues/35)
+ * Fix [Issue 35](https://github.com/BoxSystem/StoreBox-Api/issues/35)
  */
 describe("Fix Issues", () => {
 

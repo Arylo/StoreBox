@@ -6,7 +6,7 @@ import * as server from "../../helpers/server";
 import { newName } from "../../helpers/utils";
 
 /**
- * Fix [Issue 2](http://git.pbr.link/BoxSystem/StoreBox/issues/2)
+ * Fix [Issue 2](http://git.pbr.link/Arylo/StoreBox/issues/2)
  */
 describe("Fix Issues", () => {
 

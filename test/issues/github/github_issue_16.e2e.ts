@@ -7,7 +7,7 @@ import { init } from "../../helpers/server";
 import auth = require("@db/auth");
 
 /**
- * Fix [Issue 16](https://github.com/Arylo/StoreBox/issues/16)
+ * Fix [Issue 16](https://github.com/BoxSystem/StoreBox-Api/issues/16)
  */
 describe("Fix Issues", () => {
 

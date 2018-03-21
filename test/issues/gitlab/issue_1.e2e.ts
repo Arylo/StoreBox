@@ -8,7 +8,7 @@ import * as files from "../../helpers/files";
 import goods = require("@db/goods");
 
 /**
- * Fix [Issue 1](http://git.pbr.link/BoxSystem/StoreBox/issues/1)
+ * Fix [Issue 1](http://git.pbr.link/Arylo/StoreBox/issues/1)
  */
 describe("Fix Issues", () => {
 
