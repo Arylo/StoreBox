@@ -20,14 +20,15 @@ export class RegexpsService extends BaseService<IRegexp> {
         super();
         this.setCache(cache);
         this.setModel(RegexpsModel);
+    }
+
+    protected async beforeAll() {
         // Update
-        setTimeout(() => {
-            // Add Hidden Label
-            RegexpsModel.update(
-                { hidden: { $exists: false } }, { hidden: false },
-                { multi: true }
-            ).exec();
-        }, 3000);
+        // Add Hidden Label
+        await RegexpsModel.update(
+            { hidden: { $exists: false } }, { hidden: false },
+            { multi: true }
+        ).exec();
     }
 
     /**

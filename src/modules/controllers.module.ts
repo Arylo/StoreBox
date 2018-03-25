@@ -15,6 +15,7 @@ import {
 } from "./collections/collections.admin.controller";
 import { TokensAdminController } from "./tokens/tokens.controller";
 import { UsergroupsAdminController } from "./usergroups/usergroups.controller";
+import { SystemController } from "./system/system.controller";
 // endregion Controllers
 
 // region Middlewares
@@ -48,7 +49,8 @@ export const controllers = [
     RegexpsAdminController,
     CategoriesAdminController, GoodsAdminController,
     TokensAdminController,
-    CollectionsController, CollectionsAdminController
+    CollectionsController, CollectionsAdminController,
+    SystemController
 ];
 
 export const services = [

@@ -4,7 +4,6 @@ import { config } from "@utils/config";
 import { Model as UsersModel } from "@models/User";
 import { Model as UsergroupsModel } from "@models/Usergroup";
 import { Model as UserUsergroupsModel } from "@models/User-Usergroup";
-import { Model as SystemModel } from "@models/System";
 import { SystemService } from "@services/system";
 import { systemLogger } from "../common/helper/log";
 
@@ -55,10 +54,7 @@ export const injectData = async () => {
                     usergroup: group._id
                 };
             });
-        await SystemModel.findOneAndUpdate(
-            { key: SystemService.DEFAULT_USERGROUP_FLAG },
-            { value: group._id.toString() }, { upsert: true }
-        ).exec();
+        await new SystemService().setDefaultUsergroup(group._id);
         await UserUsergroupsModel.create(conditions);
     }
 };
