@@ -3,11 +3,12 @@ import {
     NotFoundException, UseGuards, Query, HttpStatus, HttpCode
 } from "@nestjs/common";
 import { ApiUseTags, ApiImplicitParam, ApiOperation } from "@nestjs/swagger";
-import { Model as GoodsModels, GoodDoc } from "@models/Good";
+import { GoodDoc } from "@models/Good";
 import { config } from "@utils/config";
 import { Roles } from "@decorators/roles";
 import { RolesGuard } from "@guards/roles";
 import { ParseIntPipe } from "@pipes/parse-int";
+import { GoodsService } from "@services/goods";
 
 import { Response } from "express";
 import pathExists = require("path-exists");
@@ -25,6 +26,8 @@ import { DownlaodDto } from "./files.dto";
 @ApiUseTags("Good Download")
 export class FilesController {
 
+    constructor(private readonly goodsSvr: GoodsService) { }
+
     @Roles("guest")
     @Get("/categories/:cid/goods/:id")
     // region Swagger Docs
@@ -35,26 +38,22 @@ export class FilesController {
     public async downloadFile(
         @Req() req, @Res() res: Response, @Param() params: DownlaodDto
     ) {
-        let obj: GoodDoc;
-        try {
-            obj = await GoodsModels
-                .findOne({_id: params.id, category: params.cid})
-                .exec();
-        } catch (error) {
-            throw new BadRequestException(error.toString());
-        }
+        const obj = (await this.goodsSvr.get({
+            _id: params.id, category: params.cid
+        }))[0];
+
         if (!obj) {
             throw new NotFoundException();
         }
 
         const good = obj.toObject();
-        const filepath =
-            `${config.paths.upload}/${params.cid}/${good.filename}`;
+        const filepath = this.goodsSvr.getFilepath(good);
 
         if (!good.active) {
             throw new BadRequestException("Disallow download the File");
         }
         res.download(filepath, good.originname, (err) => {
+            /* istanbul ignore if */
             if (err) {
                 // Recode Error
             }

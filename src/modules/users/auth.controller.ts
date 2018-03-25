@@ -7,10 +7,9 @@ import {
 } from "@nestjs/swagger";
 import uuid = require("uuid");
 import basicAuth = require("basic-auth");
-import { Model as UserModel, UserDoc  } from "@models/User";
-import { Model as TokensModel } from "@models/Token";
 import { RolesGuard } from "@guards/roles";
 import { TokensService } from "@services/tokens";
+import { UsersService } from "@services/users";
 import { LoginBodyDto, LoginQueryDto, LoginRespone } from "./auth.dto";
 
 @UseGuards(RolesGuard)
@@ -18,7 +17,10 @@ import { LoginBodyDto, LoginQueryDto, LoginRespone } from "./auth.dto";
 @Controller("api/v1/auth")
 export class AuthAdminController {
 
-    constructor(private readonly tokensSvr: TokensService) { }
+    constructor(
+        private readonly usersSvr: UsersService,
+        private readonly tokensSvr: TokensService
+    ) { }
 
     @Post("login")
     @ApiOperation({ title: "Login System" })
@@ -31,12 +33,8 @@ export class AuthAdminController {
         @Session() session,
         @Body() ctx: LoginBodyDto, @Query() query: LoginQueryDto
     ) {
-        let user: UserDoc = null;
-        try {
-            user = await UserModel.isVaild(ctx.username, ctx.password);
-        } catch (err) {
-            throw new BadRequestException(err.toString());
-        }
+        const user =
+            await this.usersSvr.isVaild(ctx.username, ctx.password);
         session.loginUser = user.toObject().username;
         session.loginUserId = user.toObject()._id;
         const obj = new LoginRespone();
@@ -45,13 +43,9 @@ export class AuthAdminController {
         obj.id = user.toObject()._id;
         if (query.token) {
             const token = uuid();
-            try {
-                await this.tokensSvr.create({
-                    token, user: session.loginUserId
-                });
-            } catch (error) {
-                throw new BadRequestException(error.toString());
-            }
+            await this.tokensSvr.create({
+                token, user: session.loginUserId
+            });
             obj.token = token;
         }
         obj.expires = session.cookie.maxAge || session.cookie.originalMaxAge;

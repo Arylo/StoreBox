@@ -1,9 +1,14 @@
 import { model, SchemaDefinition, Model as M, SchemaTypes } from "mongoose";
-import { Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS } from "@models/common";
+import {
+    Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS, existsValidator
+} from "@models/common";
 import { IGoods, FLAG as GoodFlag, Model as GoodsModels } from "@models/Good";
 import { IUser, FLAG as UserFlag } from "@models/User";
+import newCache  = require("@utils/newCache");
 
 export const FLAG = "collections";
+
+export const cache = newCache(FLAG);
 
 const Definition: SchemaDefinition = {
     name: {
@@ -43,15 +48,7 @@ const CollectionsSchema = new Base(Definition).createSchema();
 CollectionsSchema.path("name").validate({
     isAsync: true,
     validator: async function nameValidator(val, respond) {
-        if (!this.isNew) {
-            const id = this.getQuery()._id;
-            const col = await Model.findById(id).exec();
-            if (col.toObject().name === val) {
-                return respond(true);
-            }
-        }
-        const result = await Model.findOne({ name: val }).exec();
-        respond(result ? false : true);
+        respond(await existsValidator.bind(this)(Model, "name", val));
     },
     message: "The name is existed"
 });
@@ -78,5 +75,11 @@ CollectionsSchema.path("goods").validate({
     message: "Good ID is nonexist"
 });
 // endregion validators
+
+for (const method of MODIFY_MOTHODS) {
+    CollectionsSchema.post(method, () => {
+        cache.clear();
+    });
+}
 
 export const Model = model(FLAG, CollectionsSchema) as M<CollectionDoc>;

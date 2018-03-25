@@ -19,8 +19,28 @@ interface paths {
     backup: string;
 }
 
+interface redis {
+    url: string;
+}
+
+interface IDefaults {
+    user: IDefaultUser;
+    group: IDefaultUsergroup;
+}
+
+interface IDefaultUser {
+    name: string;
+    pass: string;
+}
+
+interface IDefaultUsergroup {
+    name: string;
+}
+
 export interface ConfigObj {
+    redis: redis;
     server: server;
     db: db;
     paths: paths;
+    defaults: IDefaults;
 }

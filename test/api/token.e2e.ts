@@ -1,9 +1,9 @@
 import supertest = require("supertest");
-import faker = require("faker");
 import { TokensService } from "@services/tokens";
 
 import { connect, drop, newUser } from "../helpers/database";
 import { init } from "../helpers/server";
+import { newName, newIds } from "../helpers/utils";
 
 describe("Token E2E Test", () => {
 
@@ -14,10 +14,7 @@ describe("Token E2E Test", () => {
         return connect();
     });
 
-    const ids = {
-        users: [ ],
-        tokens: [ ]
-    };
+    const ids = newIds();
 
     after(() => {
         return drop(ids);
@@ -28,12 +25,12 @@ describe("Token E2E Test", () => {
     });
 
     const users = [{
-        name: faker.name.firstName(),
-        pass: faker.random.words(),
+        name: newName(),
+        pass: newName(),
         id: ""
     }, {
-        name: faker.name.firstName(),
-        pass: faker.random.words(),
+        name: newName(),
+        pass: newName(),
         id: ""
     }];
 

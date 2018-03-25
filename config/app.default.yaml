@@ -1,5 +1,9 @@
 server:
   port: 9000
+redis:
+  host: 127.0.0.1
+  port: 6379
+  url:
 db:
   type: mongo
   host: 0.0.0.0
@@ -11,3 +15,9 @@ paths:
   log: log
   resource: resource
   backup: backup
+defaults:
+  user:
+    name: root
+    pass: admin
+  group:
+    name: admin

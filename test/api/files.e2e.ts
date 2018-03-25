@@ -1,12 +1,12 @@
 import supertest = require("supertest");
 import path = require("path");
-import faker = require("faker");
 import { HttpStatus } from "@nestjs/common";
 
 import { connect, drop, addCategoryAndRegexp, newUser } from "../helpers/database";
 import { uploadFile } from "../helpers/files";
-import { sleep } from "../helpers/utils";
+import { sleep, newIds } from "../helpers/utils";
 import { init, initWithAuth } from "../helpers/server";
+import auth = require("@db/auth");
 
 describe("Files E2E Api", () => {
 
@@ -16,12 +16,7 @@ describe("Files E2E Api", () => {
         connect();
     });
 
-    const ids = {
-        users: [ ],
-        regexps: [ ],
-        categories: [ ],
-        goods: [ ]
-    };
+    const ids = newIds();
 
     after(() => {
         return drop(ids);
@@ -35,17 +30,8 @@ describe("Files E2E Api", () => {
         return `/files/categories/${cid}/goods/${id}`;
     };
 
-    const user = {
-        name: faker.name.firstName(),
-        pass: faker.random.words()
-    };
-    step("Login", async () => {
-        const doc = await newUser(user.name, user.pass);
-        ids.users.push(doc._id);
-        await request.post("/api/v1/auth/login")
-            .send({
-                username: user.name, password: user.pass
-            }).then();
+    before("login", async () => {
+        ids.users.push((await auth.login(request))[0]);
     });
 
     let cid = "";
@@ -54,8 +40,10 @@ describe("Files E2E Api", () => {
     step("Upload File", async () => {
         const docs = await addCategoryAndRegexp(/^icon_.+64x64\.png$/);
         cid = docs[0]._id;
-        const uploadInfo = await uploadFile(request, uploadFilepath);
-        id = uploadInfo.body._id;
+        const { body: result, status } =
+            await uploadFile(request, uploadFilepath);
+        status.should.be.eql(201);
+        id = result._id;
         ids.categories.push(docs[0]._id);
         ids.regexps.push(docs[1]._id);
         ids.goods.push(id);

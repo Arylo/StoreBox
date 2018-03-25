@@ -3,7 +3,7 @@ import { ApiModelPropertyOptional, ApiModelProperty } from "@nestjs/swagger";
 import { PerPageDto } from "@dtos/page";
 
 export class GoodsQueryDto extends PerPageDto {
-    @ApiModelPropertyOptional({ type: String })
+    @ApiModelPropertyOptional({ type: String, isArray: true })
     @IsString({
         each: true
     })

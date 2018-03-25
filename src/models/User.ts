@@ -1,14 +1,14 @@
 import { model, SchemaDefinition, Model as M } from "mongoose";
 import * as md5 from "md5";
 import { config } from "@utils/config";
-import { ObjectId } from "@models/common";
+import { ObjectId, existsValidator } from "@models/common";
 import { DEF_PER_COUNT } from "@dtos/page";
-import Cache =  require("schedule-cache");
 import { Base, IDoc, IDocRaw, MODIFY_MOTHODS } from "./common";
-
-const cache = Cache.create(`${Date.now()}${Math.random()}`);
+import newCache  = require("@utils/newCache");
 
 export const FLAG = "users";
+
+export const cache = newCache(FLAG);
 
 const Definition: SchemaDefinition = {
     username: { type: String, required: true, trim: true },
@@ -32,7 +32,7 @@ const UsersSchema = new Base(Definition).createSchema();
 UsersSchema.path("username").validate({
     isAsync: true,
     validator: async function usernameModifyValidator(val, respond) {
-        if (!this.isNew) {
+        if (this && !this.isNew) {
             const id = this.getQuery()._id;
             const col = await Model.findById(id).exec();
             return respond(col.toObject().username === val);
@@ -45,11 +45,12 @@ UsersSchema.path("username").validate({
 UsersSchema.path("username").validate({
     isAsync: true,
     validator: async function usernameExistValidator(val, respond) {
-        if (!this.isNew) {
+        if (this && !this.isNew) {
             return respond(true);
         }
-        const result = await Model.findOne({ username: val }).exec();
-        respond(result ? false : true);
+        respond(await existsValidator.bind(this)(
+            Model, "username", val, { update: false }
+        ));
     },
     message: "The username is existed"
 });
@@ -61,14 +62,6 @@ const encryptStr = (pwd: string) => {
 };
 
 // region static methods
-UsersSchema.static("countUsers", async (perNum = 1) => {
-    const FLAG = `page_count_${perNum}`;
-    if (cache.get(FLAG)) {
-        return cache.get(FLAG);
-    }
-    cache.put(FLAG, Math.ceil((await Model.count({ }).exec()) / perNum));
-    return cache.get(FLAG);
-});
 
 UsersSchema.static("addUser", (username: string, password: string) => {
     const newObj = {
@@ -86,12 +79,6 @@ UsersSchema.static("removeUser", (id: ObjectId) => {
         }
         return Model.findByIdAndRemove(id).select("-password").exec();
     });
-});
-
-UsersSchema.static("list", (perNum = DEF_PER_COUNT, page = 1) => {
-    return Model.find().select("-password")
-        .skip((page - 1) * perNum).limit(perNum)
-        .exec();
 });
 
 UsersSchema.static("passwd", (id: ObjectId, oldP: string, newP: string) => {
@@ -153,14 +140,6 @@ interface IUserModel<T extends UserDoc> extends M<T> {
      */
     removeUser(id: ObjectId): Promise<T>;
     /**
-     * 获取用户列表
-     *
-     * @param  perNum {number} 每页数量
-     * @param  page {number} 页数
-     * @return {Promise}
-     */
-    list(perNum?: number, page?: number): Promise<T[]>;
-    /**
      * 修改用户密码
      *
      * @param  id {ObjectID} 用户名ID
@@ -177,10 +156,6 @@ interface IUserModel<T extends UserDoc> extends M<T> {
      * @return {Promise}
      */
     isVaild(username: string, password: string): Promise<T>;
-    /**
-     * 返回总页数
-     */
-    countUsers(perNum?: number): Promise<number>;
 }
 
 // region Validators

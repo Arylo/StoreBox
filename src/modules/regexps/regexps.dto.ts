@@ -1,4 +1,4 @@
-import { IsString, IsMongoId, IsOptional } from "class-validator";
+import { IsString, IsMongoId, IsOptional, IsBoolean } from "class-validator";
 import { ObjectId } from "@models/common";
 import { ApiModelProperty, ApiModelPropertyOptional } from "@nestjs/swagger";
 
@@ -17,6 +17,7 @@ export class EditRegexpRawDot implements IRegexp {
     public name?: string;
     public value?: string;
     public link?: ObjectId;
+    public hidden?: boolean;
 }
 
 export class NewRegexp implements INewRegexp {
@@ -45,4 +46,8 @@ export class EditRegexpDot implements IRegexp {
     @IsOptional()
     @IsMongoId()
     public readonly link: ObjectId;
+    @ApiModelPropertyOptional({ type: Boolean })
+    @IsOptional()
+    @IsBoolean()
+    public readonly hidden: boolean;
 }

@@ -5,6 +5,11 @@ db:
   container_name: storebox_db
   restart: always
 
+cache:
+  image: redis
+  container_name: storebox_cache
+  restart: always
+
 svr:
   build: ..
   ports:
@@ -16,5 +21,6 @@ svr:
     - ./app.yaml:/usr/src/app/config/app.yaml:ro
   links:
     - db
+    - cache
   container_name: storebox_svr
   restart: always

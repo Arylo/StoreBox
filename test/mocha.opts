@@ -6,7 +6,7 @@
 --reporter mochawesome
 --reporter-options reportDir=./coverage/mochawesome
 --recursive
---timeout 10000
+--timeout 50000
 --exit
 ./test/**/*.spec.ts
 ./test/**/*.e2e.ts

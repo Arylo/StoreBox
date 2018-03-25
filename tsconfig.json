@@ -6,6 +6,7 @@
       "mongoose",
       "node"
     ],
+    "strictFunctionTypes": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "importHelpers": true,
@@ -33,9 +34,13 @@
         "./src/modules/common/dtos/*.dto",
         "./dist/modules/common/dtos/*.dto"
       ],
+      "@interceptors/*": [
+        "./src/modules/common/interceptors/*.interceptor",
+        "./dist/modules/common/interceptors/*.interceptor"
+      ],
       "@services/*": [
-        "./src/modules/common/services/*.service",
-        "./dist/modules/common/services/*.service"
+        "./src/services/*.service",
+        "./dist/services/*.service"
       ]
     }
   },

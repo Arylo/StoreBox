@@ -1,10 +1,11 @@
 import supertest = require("supertest");
-import faker = require("faker");
 
 import {
     connect, drop, newUser, addCategoryAndRegexp
 } from "../helpers/database";
 import { init } from "../helpers/server";
+import auth = require("@db/auth");
+import { newName, newIds } from "../helpers/utils";
 
 describe("User's Goods E2E Api", () => {
 
@@ -14,9 +15,7 @@ describe("User's Goods E2E Api", () => {
         return connect();
     });
 
-    const ids = {
-        users: [ ]
-    };
+    const ids = newIds();
 
     after(() => {
         return drop(ids);
@@ -29,17 +28,15 @@ describe("User's Goods E2E Api", () => {
     describe("Self Goods", () => {
 
         const user = {
-            name: faker.name.firstName(),
-            pass: faker.random.words(),
+            name: newName(),
+            pass: newName(),
             id: ""
         };
-        step("Login", async () => {
-            const doc = await newUser(user.name, user.pass);
-            ids.users.push(doc._id);
-            await request.post("/api/v1/auth/login")
-                .send({
-                    username: user.name, password: user.pass
-                }).then();
+
+        before("login", async () => {
+            const id = (await auth.login(request, user.name, user.pass))[0];
+            ids.users.push(id);
+            user.id = id;
         });
 
         step("Status Code isnt 500", async () => {
@@ -57,18 +54,15 @@ describe("User's Goods E2E Api", () => {
     describe("User's Goods", () => {
 
         const user = {
-            name: faker.name.firstName(),
-            pass: faker.random.words(),
+            name: newName(),
+            pass: newName(),
             id: ""
         };
-        step("Login", async () => {
-            const doc = await newUser(user.name, user.pass);
-            ids.users.push(doc._id);
-            user.id = doc._id;
-            await request.post("/api/v1/auth/login")
-                .send({
-                    username: user.name, password: user.pass
-                }).then();
+
+        before("login", async () => {
+            const id = (await auth.login(request, user.name, user.pass))[0];
+            ids.users.push(id);
+            user.id = id;
         });
 
         step("Status Code isnt 500", async () => {
