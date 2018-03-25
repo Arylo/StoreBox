@@ -6,7 +6,7 @@ import { BaseService, IGetOptions } from "@services/base";
 import { isURL } from "validator";
 import * as typescript from "typescript";
 
-import { systemLogger } from "../helper/log";
+import { systemLogger } from "../modules/common/helper/log";
 
 export enum DEFAULTS {
     USERGROUP_FLAG = "DEFAULT_USERGROUP",
@@ -172,7 +172,7 @@ export class SystemService extends BaseService<ISystem> {
         return {
             version: {
                 typescript: typescript.version,
-                api: require("../../../../package.json").version,
+                api: require("../../package.json").version,
                 node: process.versions
             },
             env: {
