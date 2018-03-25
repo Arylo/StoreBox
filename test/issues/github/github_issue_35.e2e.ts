@@ -5,7 +5,7 @@ import {
 } from "../../helpers/database";
 import { init } from "../../helpers/server";
 import auth = require("@db/auth");
-import { newName } from "../../helpers/utils";
+import { newName, newIds } from "../../helpers/utils";
 
 /**
  * The Feature of Edit User
@@ -19,9 +19,7 @@ describe("Fix Issues", () => {
         return connect();
     });
 
-    const ids = {
-        users: [ ]
-    };
+    const ids = newIds();
 
     after(() => {
         return drop(ids);

@@ -20,14 +20,16 @@ import { remove } from "./files";
 
 config.db.database = "storebox-test";
 
-interface IIds {
+export interface IIds {
     values?: ObjectId[];
     goods?: ObjectId[];
     regexps?: ObjectId[];
     users?: ObjectId[];
-    categories?: ObjectId[];
     tokens?: ObjectId[];
+    categories?: ObjectId[];
     collections?: ObjectId[];
+    usergroups?: ObjectId[];
+    userusergroups?: ObjectId[];
 }
 
 /**
@@ -37,14 +39,6 @@ export const connect = connectDatabase;
 
 export const drop = async (ids?: IIds) => {
     await sleep(250);
-    if (!ids) {
-        await ValuesModel.remove({ }).exec();
-        await GoodsModels.remove({ }).exec();
-        await RegexpsModel.remove({ }).exec();
-        await UsersModel.remove({ }).exec();
-        await CategoriesModel.remove({ }).exec();
-        return;
-    }
     const MODEL_IDMETHOD_MAP = {
         "values": ValuesModel,
         "goods": GoodsModels,

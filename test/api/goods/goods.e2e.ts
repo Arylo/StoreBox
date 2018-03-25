@@ -5,7 +5,7 @@ import { connect, drop, addCategoryAndRegexp } from "../../helpers/database";
 import { uploadFile } from "../../helpers/files";
 import { init } from "../../helpers/server";
 import auth = require("@db/auth");
-import { newName } from "../../helpers/utils";
+import { newName, newIds } from "../../helpers/utils";
 
 describe("Goods E2E Api", () => {
 
@@ -19,13 +19,7 @@ describe("Goods E2E Api", () => {
         connect();
     });
 
-    const ids = {
-        users: [ ],
-        categories: [ ],
-        values: [ ],
-        regexps: [ ],
-        goods: [ ]
-    };
+    const ids = newIds();
 
     after(() => {
         return drop(ids);

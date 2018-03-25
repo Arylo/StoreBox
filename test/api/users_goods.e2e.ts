@@ -5,7 +5,7 @@ import {
 } from "../helpers/database";
 import { init } from "../helpers/server";
 import auth = require("@db/auth");
-import { newName } from "../helpers/utils";
+import { newName, newIds } from "../helpers/utils";
 
 describe("User's Goods E2E Api", () => {
 
@@ -15,9 +15,7 @@ describe("User's Goods E2E Api", () => {
         return connect();
     });
 
-    const ids = {
-        users: [ ]
-    };
+    const ids = newIds();
 
     after(() => {
         return drop(ids);

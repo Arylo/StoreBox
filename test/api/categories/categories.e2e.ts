@@ -1,3 +1,4 @@
+import { newIds } from "../../helpers/utils";
 import supertest = require("supertest");
 
 import { connect, drop, newUser } from "../../helpers/database";
@@ -13,11 +14,7 @@ describe("Categories E2E Api", () => {
         return connect();
     });
 
-    const ids = {
-        users: [ ],
-        categories: [ ],
-        values: [ ]
-    };
+    const ids = newIds();
 
     after(() => {
         return drop(ids);

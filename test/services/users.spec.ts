@@ -3,7 +3,7 @@ import { SystemService } from "@services/system";
 import { Model as UsersModel } from "@models/User";
 import db = require("../helpers/database");
 import { newUser } from "../helpers/database";
-import { newName } from "../helpers/utils";
+import { newName, newIds } from "../helpers/utils";
 
 describe("Users Service Test Unit", () => {
 
@@ -13,9 +13,8 @@ describe("Users Service Test Unit", () => {
         return db.connect();
     });
 
-    const ids = {
-        users: [ ]
-    };
+    const ids = newIds();
+
     after(() => {
         return db.drop(ids);
     });

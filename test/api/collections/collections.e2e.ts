@@ -10,7 +10,7 @@ import {
 } from "../../helpers/database";
 import { init } from "../../helpers/server";
 import { uploadFiles } from "../../helpers/files";
-import { sleep, newName } from "../../helpers/utils";
+import { sleep, newName, newIds } from "../../helpers/utils";
 import auth = require("@db/auth");
 import goodsDb = require("@db/goods");
 import files = require("../../helpers/files");
@@ -23,13 +23,7 @@ describe("Collections E2E Api", () => {
         return connect();
     });
 
-    const ids = {
-        users: [ ],
-        categories: [ ],
-        regexps: [ ],
-        collections: [ ],
-        goods: [ ]
-    };
+    const ids = newIds();
 
     after(() => {
         return drop(ids);

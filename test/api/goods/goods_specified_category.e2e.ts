@@ -7,7 +7,7 @@ import categories = require("@db/categories");
 import * as regexps from "@db/regexps";
 import * as goods from "@db/goods";
 import { init } from "../../helpers/server";
-import { newName } from "../../helpers/utils";
+import { newName, newIds } from "../../helpers/utils";
 
 describe("Upload Good with specified categories", () => {
 
@@ -21,12 +21,8 @@ describe("Upload Good with specified categories", () => {
         return db.connect();
     });
 
-    const ids = {
-        categories: [ ],
-        regexps: [ ],
-        users: [ ],
-        goods: [ ]
-    };
+    const ids = newIds();
+
     after(() => {
         return db.drop(ids);
     });

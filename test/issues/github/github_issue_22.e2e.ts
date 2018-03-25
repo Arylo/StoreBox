@@ -5,7 +5,7 @@ import {
 } from "../../helpers/database";
 import { init } from "../../helpers/server";
 import auth = require("@db/auth");
-import { newName } from "../../helpers/utils";
+import { newName, newIds } from "../../helpers/utils";
 
 /**
  * Fix [Issue 22](https://github.com/BoxSystem/StoreBox-Api/issues/22)
@@ -18,9 +18,7 @@ describe("Fix Issues", () => {
         return connect();
     });
 
-    const ids = {
-        users: [ ]
-    };
+    const ids = newIds();
 
     after(() => {
         return drop(ids);

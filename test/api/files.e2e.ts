@@ -4,7 +4,7 @@ import { HttpStatus } from "@nestjs/common";
 
 import { connect, drop, addCategoryAndRegexp, newUser } from "../helpers/database";
 import { uploadFile } from "../helpers/files";
-import { sleep } from "../helpers/utils";
+import { sleep, newIds } from "../helpers/utils";
 import { init, initWithAuth } from "../helpers/server";
 import auth = require("@db/auth");
 
@@ -16,12 +16,7 @@ describe("Files E2E Api", () => {
         connect();
     });
 
-    const ids = {
-        users: [ ],
-        regexps: [ ],
-        categories: [ ],
-        goods: [ ]
-    };
+    const ids = newIds();
 
     after(() => {
         return drop(ids);

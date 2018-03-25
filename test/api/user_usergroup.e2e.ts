@@ -5,6 +5,7 @@ import { init } from "../helpers/server";
 import { newUsergroup } from "@db/usergroups";
 import { newUser, newUserWithUsergroup } from "@db/user";
 import auth = require("@db/auth");
+import { newIds } from "../helpers/utils";
 
 describe("User's Usergroup E2E Api", () => {
 
@@ -14,10 +15,7 @@ describe("User's Usergroup E2E Api", () => {
         return connect();
     });
 
-    const ids = {
-        users: [ ],
-        usergroups: [ ]
-    };
+    const ids = newIds();
 
     after(() => {
         return drop(ids);

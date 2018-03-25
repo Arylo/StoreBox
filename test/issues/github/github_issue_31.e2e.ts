@@ -11,6 +11,7 @@ import * as files from "../../helpers/files";
 
 import { config } from "@utils/config";
 import auth = require("@db/auth");
+import { newIds } from "../../helpers/utils";
 
 /**
  * Fix [Issue 31](https://github.com/BoxSystem/StoreBox-Api/issues/31)
@@ -23,11 +24,7 @@ describe("Fix Issues", () => {
         return connect();
     });
 
-    const ids = {
-        users: [ ],
-        categories: [ ],
-        regexps: [ ]
-    };
+    const ids = newIds();
 
     after(() => {
         return drop(ids);

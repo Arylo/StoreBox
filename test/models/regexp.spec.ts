@@ -2,7 +2,7 @@ import * as db from "../helpers/database";
 import * as md5 from "md5";
 import { Model as RegexpsModel, RegexpDoc } from "@models/Regexp";
 import { Model as CategoryModel, ICategoryRaw } from "@models/Categroy";
-import { newName } from "../helpers/utils";
+import { newName, newIds } from "../helpers/utils";
 
 describe("RegExp Model", () => {
 
@@ -20,10 +20,8 @@ describe("RegExp Model", () => {
         Category = result.toObject() as ICategoryRaw;
     });
 
-    const ids = {
-        categories: [ ],
-        regexps: [ ]
-    };
+    const ids = newIds();
+
     afterEach(() => {
         return db.drop(ids);
     });

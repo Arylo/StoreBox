@@ -3,7 +3,7 @@ import categories = require("@db/categories");
 import auth = require("@db/auth");
 import * as db from "../../helpers/database";
 import * as server from "../../helpers/server";
-import { newName } from "../../helpers/utils";
+import { newName, newIds } from "../../helpers/utils";
 
 /**
  * Fix [Issue 2](http://git.pbr.link/Arylo/StoreBox/issues/2)
@@ -16,11 +16,7 @@ describe("Fix Issues", () => {
         return db.connect();
     });
 
-    const ids = {
-        users: [ ],
-        categories: [ ],
-        regexps: [ ]
-    };
+    const ids = newIds();
 
     after(() => {
         return db.drop(ids);
