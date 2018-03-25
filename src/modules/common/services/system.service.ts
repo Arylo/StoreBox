@@ -23,6 +23,21 @@ export class SystemService extends BaseService<ISystem> {
         super.setModel(SystemModel);
     }
 
+    private readonly DEFAULTS_MAPS = {
+        [DEFAULTS.USERGROUP_FLAG]: {
+            get: this.getDefaultUsergroup.name,
+            set: this.setDefaultUsergroup.name
+        },
+        [DEFAULTS.GOOD_URL_FLAG]: {
+            get: this.getDefaultGoodUrl.name,
+            set: this.setDefaultGoodUrl.name
+        },
+        [DEFAULTS.COLLECTION_URL_FLAG]: {
+            get: this.getDefaultCollectionUrl.name,
+            set: this.setDefaultCollectionUrl.name
+        }
+    };
+
     private async checkUsergroupId(gid: ObjectId) {
         const doc = await UsergroupsModel.findById(gid).exec();
         /* istanbul ignore if */
@@ -88,14 +103,14 @@ export class SystemService extends BaseService<ISystem> {
         });
     }
 
-    public async setDefaultGoodUrl(url: string) {
+    public setDefaultGoodUrl(url: string) {
         if (url.length !== 0) {
             if (!url.includes("{{gid}}")) {
                 throw new BadRequestException("Url must include `{{gid}}`");
             }
             this.checkUrl(url);
         }
-        return await this.setValue(DEFAULTS.GOOD_URL_FLAG, url);
+        return this.setValue(DEFAULTS.GOOD_URL_FLAG, url);
     }
 
     public getDefaultCollectionUrl() {
@@ -106,44 +121,49 @@ export class SystemService extends BaseService<ISystem> {
         });
     }
 
-    public async setDefaultCollectionUrl(url: string) {
+    public setDefaultCollectionUrl(url: string) {
         if (url.length !== 0) {
             if (!url.includes("{{cid}}")) {
                 throw new BadRequestException("Url must include `{{cid}}`");
             }
             this.checkUrl(url);
         }
-        return await this.setValue(DEFAULTS.COLLECTION_URL_FLAG, url);
+        return this.setValue(DEFAULTS.COLLECTION_URL_FLAG, url);
     }
     // endregion Default Urls
 
     public get() {
         return this.loadAndCache("get", async () => {
-            const objs = await this.findObjects({ }, { select: "key value" });
+            const objs: Array<{ key: string, value: string }> =
+                await this.findObjects({ }, { select: "key value -_id" });
             const keys = objs.reduce((arr, item) => {
                 arr.push(item.key);
                 return arr;
             }, [ ]);
-            objs.push(...Object.keys(DEFAULTS).reduce((arr, key) => {
-                if (!~keys.indexOf(key)) {
-                    arr.push({
-                        key, value: ""
-                    });
+            if (objs.length === Object.keys(DEFAULTS).length) {
+                return objs;
+            }
+            for (const k of Object.keys(DEFAULTS)) {
+                if (!!~keys.indexOf(DEFAULTS[k])) {
+                    continue;
                 }
-                return arr;
-            }, [ ]) as any[]);
+                const key = DEFAULTS[k];
+                objs.push({
+                    key, value: await this[this.DEFAULTS_MAPS[key].get]()
+                });
+            }
             return objs;
         });
     }
 
-    public set(key: DEFAULTS, value: string) {
+    public set(key: DEFAULTS, value: any) {
         switch (key) {
             case DEFAULTS.USERGROUP_FLAG:
-            return this.setDefaultUsergroup(value);
+            return this[this.DEFAULTS_MAPS[key].set](value);
             case DEFAULTS.GOOD_URL_FLAG:
-            return this.setDefaultGoodUrl(value);
+            return this[this.DEFAULTS_MAPS[key].set](value);
             case DEFAULTS.COLLECTION_URL_FLAG:
-            return this.setDefaultCollectionUrl(value);
+            return this[this.DEFAULTS_MAPS[key].set](value);
         }
         throw new BadRequestException("What do you want to set up");
     }

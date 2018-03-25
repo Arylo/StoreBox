@@ -1,3 +1,4 @@
+import { DefResDto } from "@dtos/res";
 import { Controller, Get, UseGuards, Put, Body } from "@nestjs/common";
 import { SystemService } from "@services/system";
 import { RolesGuard } from "@guards/roles";
@@ -15,7 +16,7 @@ export class SystemController {
 
     constructor(private readonly systemSvr: SystemService) { }
 
-    @Roles("guest")
+    @Roles("admin", "token")
     @Get("/vars")
     public getVars() {
         return this.systemSvr.get();
@@ -23,8 +24,9 @@ export class SystemController {
 
     @Roles("admin")
     @Put("/vars")
-    public setVars(@Body() body: EditSystemVarDto) {
-        return this.systemSvr.set(body.key, body.value);
+    public async setVars(@Body() body: EditSystemVarDto) {
+        await this.systemSvr.set(body.key, body.value);
+        return new DefResDto();
     }
 
     @Roles("admin")
