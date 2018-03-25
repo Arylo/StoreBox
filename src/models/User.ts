@@ -4,16 +4,11 @@ import { config } from "@utils/config";
 import { ObjectId, existsValidator } from "@models/common";
 import { DEF_PER_COUNT } from "@dtos/page";
 import { Base, IDoc, IDocRaw, MODIFY_MOTHODS } from "./common";
-import keyv =  require("keyv");
-
-import { isTest } from "../modules/common/helper/env";
-
-export const cache = new keyv({
-    uri: isTest ? undefined : config.redis.url,
-    namespace: "Users"
-});
+import newCache  = require("@utils/newCache");
 
 export const FLAG = "users";
+
+export const cache = newCache(FLAG);
 
 const Definition: SchemaDefinition = {
     username: { type: String, required: true, trim: true },

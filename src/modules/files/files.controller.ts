@@ -38,14 +38,10 @@ export class FilesController {
     public async downloadFile(
         @Req() req, @Res() res: Response, @Param() params: DownlaodDto
     ) {
-        let obj: GoodDoc;
-        try {
-            obj = (await this.goodsSvr.get({
-                _id: params.id, category: params.cid
-            }))[0];
-        } catch (error) {
-            throw new BadRequestException(error.toString());
-        }
+        const obj = (await this.goodsSvr.get({
+            _id: params.id, category: params.cid
+        }))[0];
+
         if (!obj) {
             throw new NotFoundException();
         }
@@ -57,6 +53,7 @@ export class FilesController {
             throw new BadRequestException("Disallow download the File");
         }
         res.download(filepath, good.originname, (err) => {
+            /* istanbul ignore if */
             if (err) {
                 // Recode Error
             }

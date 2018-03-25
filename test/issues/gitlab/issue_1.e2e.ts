@@ -3,7 +3,7 @@ import categories = require("@db/categories");
 import auth = require("@db/auth");
 import * as db from "../../helpers/database";
 import * as server from "../../helpers/server";
-import { newName } from "../../helpers/utils";
+import { newName, newIds } from "../../helpers/utils";
 import * as files from "../../helpers/files";
 import goods = require("@db/goods");
 
@@ -18,12 +18,7 @@ describe("Fix Issues", () => {
         return db.connect();
     });
 
-    const ids = {
-        users: [ ],
-        categories: [ ],
-        regexps: [ ],
-        goods: [ ]
-    };
+    const ids = newIds();
 
     after(() => {
         return db.drop(ids);

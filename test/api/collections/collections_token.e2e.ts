@@ -11,6 +11,7 @@ import {
 } from "../../helpers/database";
 import { init } from "../../helpers/server";
 import { uploadFiles, newFile } from "../../helpers/files";
+import { newIds } from "../../helpers/utils";
 
 describe("Token to Upload Files Api", () => {
 
@@ -20,13 +21,7 @@ describe("Token to Upload Files Api", () => {
         return connect();
     });
 
-    const ids = {
-        users: [ ],
-        tokens: [ ],
-        collections: [ ],
-        categories: [ ],
-        regexps: [ ]
-    };
+    const ids = newIds();
 
     after(() => {
         return drop(ids);

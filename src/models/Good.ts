@@ -5,17 +5,12 @@ import {
 import { IValues, Flag as ValueFlag } from "@models/Value";
 import { IUser, FLAG as UserFlag } from "@models/User";
 import { ICategory, FLAG as CategoryFlag } from "@models/Categroy";
-import { config } from "@utils/config";
-import keyv =  require("keyv");
-
-import { isTest } from "../modules/common/helper/env";
-
-export const cache = new keyv({
-    uri: isTest ? undefined : config.redis.url,
-    namespace: "Goods"
-});
+import newCache  = require("@utils/newCache");
 
 export const FLAG = "goods";
+
+export const cache = newCache(FLAG);
+
 export type GoodDoc = IDoc<IGoods>;
 
 const Definition: SchemaDefinition = {

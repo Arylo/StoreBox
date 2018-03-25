@@ -5,17 +5,12 @@ import { DEF_PER_COUNT } from "@dtos/page";
 import { isArray } from "util";
 import { reduce, includes, difference } from "lodash";
 import { MongoError } from "mongodb";
-import { config } from "@utils/config";
-import keyv =  require("keyv");
-
-import { isTest } from "../modules/common/helper/env";
-
-export const cache = new keyv({
-    uri: isTest ? undefined : config.redis.url,
-    namespace: "Categories"
-});
+import newCache  = require("@utils/newCache");
 
 export const FLAG = "categories";
+
+export const cache = newCache(FLAG);
+
 export type CategoryDoc = IDoc<ICategory>;
 
 const Definition: SchemaDefinition = {

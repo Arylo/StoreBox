@@ -29,6 +29,7 @@ abstract class ModelService<D extends IDocRaw> {
     }
 
     private checkModel() {
+        /* istanbul ignore if */
         if (!this.model) {
             throw new BadGatewayException("Lost Model");
         }
@@ -52,33 +53,36 @@ abstract class ModelService<D extends IDocRaw> {
 
     public async create(obj: object) {
         this.checkModel();
-        await this.beforeAll();
-        await this.beforeEach();
+        await this.runBeforeAll();
+        await this.runBeforeEach();
         try {
             return await this.model.create(obj);
         } catch (error) {
+            /* istanbul ignore next */
             throw new BadRequestException(error.toString());
         }
     }
 
     public async delete(cond: object) {
         this.checkModel();
-        await this.beforeAll();
-        await this.beforeEach();
+        await this.runBeforeAll();
+        await this.runBeforeEach();
         try {
             return await this.model.findOneAndRemove(cond).exec();
         } catch (error) {
+            /* istanbul ignore next */
             throw new BadRequestException(error.toString());
         }
     }
 
     public async deleteById(id: ObjectId) {
         this.checkModel();
-        await this.beforeAll();
-        await this.beforeEach();
+        await this.runBeforeAll();
+        await this.runBeforeEach();
         try {
             return await this.model.findByIdAndRemove(id).exec();
         } catch (error) {
+            /* istanbul ignore next */
             throw new BadRequestException(error.toString());
         }
     }
@@ -87,20 +91,21 @@ abstract class ModelService<D extends IDocRaw> {
         id: ObjectId, ctx: object, opts = this.DEF_UPDATE_OPTIONS
     ) {
         this.checkModel();
-        await this.beforeAll();
-        await this.beforeEach();
+        await this.runBeforeAll();
+        await this.runBeforeEach();
         const options = Object.assign({ }, this.DEF_UPDATE_OPTIONS, opts);
         try {
             return await this.model.update({ _id: id }, ctx, options).exec();
         } catch (error) {
+            /* istanbul ignore next */
             throw new BadRequestException(error.toString());
         }
     }
 
     protected async find(cond: object, opts?: IGetOptions) {
         this.checkModel();
-        await this.beforeAll();
-        await this.beforeEach();
+        await this.runBeforeAll();
+        await this.runBeforeEach();
         const p = this.model.find(cond);
         return this.documentQueryProcess(p, opts).exec();
     }
@@ -113,8 +118,8 @@ abstract class ModelService<D extends IDocRaw> {
 
     protected async findOne(cond: object, opts?: IGetOptions) {
         this.checkModel();
-        await this.beforeAll();
-        await this.beforeEach();
+        await this.runBeforeAll();
+        await this.runBeforeEach();
         const p = this.model.findOne(cond);
         return this.documentQueryProcess(p, opts).exec();
     }
@@ -127,8 +132,8 @@ abstract class ModelService<D extends IDocRaw> {
 
     protected async findById(id: ObjectId, opts?: IGetOptions) {
         this.checkModel();
-        await this.beforeAll();
-        await this.beforeEach();
+        await this.runBeforeAll();
+        await this.runBeforeEach();
         const p = this.model.findById(id);
         return this.documentQueryProcess(p, opts).exec();
     }
@@ -141,8 +146,8 @@ abstract class ModelService<D extends IDocRaw> {
 
     protected async total(cond: object = { }) {
         this.checkModel();
-        await this.beforeAll();
-        await this.beforeEach();
+        await this.runBeforeAll();
+        await this.runBeforeEach();
         return this.model.count(cond).exec();
     }
 

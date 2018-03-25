@@ -25,7 +25,7 @@
       "@pipes/*": [ "./src/modules/common/pipes/*.pipe" ],
       "@guards/*": [ "./src/modules/common/guards/*.guard" ],
       "@dtos/*": [ "./src/modules/common/dtos/*.dto" ],
-      "@services/*": [ "./src/modules/common/services/*.service" ],
+      "@services/*": [ "./src/services/*.service" ],
       "@interceptors/*": [ "./src/modules/common/interceptors/*.interceptor" ],
       "@db/*": [ "./test/helpers/database/*" ]
     }

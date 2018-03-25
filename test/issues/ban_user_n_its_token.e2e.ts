@@ -5,7 +5,7 @@ import { init } from "../helpers/server";
 import { UsersService } from "@services/users";
 import { TokensService } from "@services/tokens";
 import { SystemService } from "@services/system";
-import { newName } from "../helpers/utils";
+import { newName, newIds } from "../helpers/utils";
 
 describe("Fix Issues", () => {
 
@@ -17,10 +17,7 @@ describe("Fix Issues", () => {
         return connect();
     });
 
-    const ids = {
-        users: [ ],
-        tokens: [ ]
-    };
+    const ids = newIds();
 
     after(() => {
         return drop(ids);

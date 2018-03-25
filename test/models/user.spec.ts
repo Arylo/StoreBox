@@ -2,6 +2,7 @@ import * as db from "../helpers/database";
 import * as md5 from "md5";
 import { Model as UsersModel } from "@models/User";
 import { Observer, Observable, Subject } from "rxjs";
+import { newIds } from "../helpers/utils";
 
 describe("User Model", () => {
 
@@ -15,9 +16,8 @@ describe("User Model", () => {
         return db.connect();
     });
 
-    const ids = {
-        users: [ ]
-    };
+    const ids = newIds();
+
     after(() => {
         return db.drop(ids);
     });

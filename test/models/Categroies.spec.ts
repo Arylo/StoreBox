@@ -2,7 +2,7 @@ import { Model as CategoriesModel } from "@models/Categroy";
 import { Model as ValuesModel } from "@models/Value";
 import db = require("../helpers/database");
 import { addCategories } from "../helpers/database/categories";
-import { newName } from "../helpers/utils";
+import { newName, newIds } from "../helpers/utils";
 
 describe("Category Model", () => {
 
@@ -10,9 +10,8 @@ describe("Category Model", () => {
         return db.connect();
     });
 
-    const ids = {
-        categories: [ ]
-    };
+    const ids = newIds();
+
     after(() => {
         return db.drop(ids);
     });

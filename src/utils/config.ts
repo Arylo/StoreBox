@@ -57,5 +57,5 @@ try {
 
 export const config = configModule.getConfig() as ConfigObj;
 
-import { systemLogger } from "../modules/common/helper/log";
+import { systemLogger } from "./log";
 systemLogger.debug(config);

@@ -3,17 +3,11 @@ import {
     Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS, existsValidator
 } from "@models/common";
 import { IUser, FLAG as UserFlag } from "@models/User";
-import { config } from "@utils/config";
-import keyv =  require("keyv");
+import newCache  = require("@utils/newCache");
 
-import { isTest } from "../modules/common/helper/env";
+export const FLAG = "tokens";
 
-export const cache = new keyv({
-    uri: isTest ? undefined : config.redis.url,
-    namespace: "Tokens"
-});
-
-export const Flag = "tokens";
+export const cache = newCache(FLAG);
 
 const Definition: SchemaDefinition = {
     token: { type: String, unique: true, index: true },
@@ -64,7 +58,7 @@ for (const method of MODIFY_MOTHODS) {
     });
 }
 
-export const Model = model(Flag, TokensSchema) as M<TokenDoc>;
+export const Model = model(FLAG, TokensSchema) as M<TokenDoc>;
 
 const getCount = (userId: ObjectId): Promise<number> => {
     return Model.count({ user: userId }).exec();

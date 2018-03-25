@@ -1,6 +1,8 @@
 import { Component, BadRequestException } from "@nestjs/common";
 import { ObjectId } from "@models/common";
-import { Model as CategoriesModel, cache, ICategoryRaw, ICategory } from "@models/Categroy";
+import {
+    Model as CategoriesModel, cache, ICategoryRaw, ICategory
+} from "@models/Categroy";
 import { isFunction, isArray } from "util";
 import { BaseService, IGetOptions } from "@services/base";
 import { difference } from "lodash";

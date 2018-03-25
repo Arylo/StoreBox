@@ -3,7 +3,7 @@ import { TokensService } from "@services/tokens";
 
 import { connect, drop, newUser } from "../helpers/database";
 import { init } from "../helpers/server";
-import { newName } from "../helpers/utils";
+import { newName, newIds } from "../helpers/utils";
 
 describe("Token E2E Test", () => {
 
@@ -14,10 +14,7 @@ describe("Token E2E Test", () => {
         return connect();
     });
 
-    const ids = {
-        users: [ ],
-        tokens: [ ]
-    };
+    const ids = newIds();
 
     after(() => {
         return drop(ids);

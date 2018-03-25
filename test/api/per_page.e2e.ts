@@ -4,7 +4,7 @@ import {
 } from "../helpers/database";
 import { init } from "../helpers/server";
 import auth = require("@db/auth");
-import { newName } from "../helpers/utils";
+import { newName, newIds } from "../helpers/utils";
 
 describe("the E2E Api of display item count Per page", () => {
 
@@ -14,11 +14,8 @@ describe("the E2E Api of display item count Per page", () => {
         return connect();
     });
 
-    const ids = {
-        users: [ ],
-        regexps: [ ],
-        categories: [ ]
-    };
+    const ids = newIds();
+
     after(() => {
         return drop(ids);
     });

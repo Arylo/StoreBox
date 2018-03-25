@@ -5,16 +5,13 @@ import {
 import { ICategory, FLAG as CF, Model as CM } from "@models/Categroy";
 import { DEF_PER_COUNT } from "@dtos/page";
 import isRegExp = require("@utils/isRegExp");
-import { config } from "@utils/config";
-import keyv =  require("keyv");
+import newCache  = require("@utils/newCache");
 
 import { INewRegexp } from "../modules/regexps/regexps.dto";
-import { isTest } from "../modules/common/helper/env";
 
-export const cache = new keyv({
-    uri: isTest ? undefined : config.redis.url,
-    namespace: "Regexps"
-});
+export const FLAG = "regexps";
+
+export const cache = newCache(FLAG);
 
 const Definition: SchemaDefinition = {
     name: { type: String, required: true, unique: true },
@@ -68,8 +65,6 @@ RegexpSchema.static("removeRegexp", (id: ObjectId) => {
 });
 
 // endregion static methods
-
-export const FLAG = "regexps";
 
 interface IRegexpModel<T extends RegexpDoc> extends M<T> {
     /**
