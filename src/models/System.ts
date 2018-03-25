@@ -7,7 +7,7 @@ import { isTest } from "../modules/common/helper/env";
 
 export const cache = new keyv({
     uri: isTest ? undefined : config.redis.url,
-    namespace: "Categories"
+    namespace: "System"
 });
 
 const Definition: SchemaDefinition = {
@@ -22,7 +22,7 @@ export interface ISystem extends IDocRaw {
 
 const SystemSchema = new Base(Definition).createSchema();
 
-export const Flag = "sys";
+export const Flag = "system";
 
 export type SystemDoc = IDoc<ISystem>;
 
