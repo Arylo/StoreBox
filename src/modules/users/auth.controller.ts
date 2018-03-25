@@ -34,7 +34,7 @@ export class AuthAdminController {
         @Body() ctx: LoginBodyDto, @Query() query: LoginQueryDto
     ) {
         const user =
-            await this.usersSvr.isVaild(ctx.username, ctx.password);;
+            await this.usersSvr.isVaild(ctx.username, ctx.password);
         session.loginUser = user.toObject().username;
         session.loginUserId = user.toObject()._id;
         const obj = new LoginRespone();

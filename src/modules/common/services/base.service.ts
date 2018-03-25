@@ -34,8 +34,26 @@ abstract class ModelService<D extends IDocRaw> {
         }
     }
 
+    protected runBeforeAll() {
+        return Promise.resolve(this.beforeAll());
+    }
+
+    protected beforeAll(): Promise<any> {
+        return Promise.resolve({ });
+    }
+
+    private runBeforeEach() {
+        return Promise.resolve(this.beforeEach());
+    }
+
+    protected beforeEach(): Promise<any> {
+        return Promise.resolve({ });
+    }
+
     public async create(obj: object) {
         this.checkModel();
+        await this.beforeAll();
+        await this.beforeEach();
         try {
             return await this.model.create(obj);
         } catch (error) {
@@ -45,6 +63,8 @@ abstract class ModelService<D extends IDocRaw> {
 
     public async delete(cond: object) {
         this.checkModel();
+        await this.beforeAll();
+        await this.beforeEach();
         try {
             return await this.model.findOneAndRemove(cond).exec();
         } catch (error) {
@@ -54,6 +74,8 @@ abstract class ModelService<D extends IDocRaw> {
 
     public async deleteById(id: ObjectId) {
         this.checkModel();
+        await this.beforeAll();
+        await this.beforeEach();
         try {
             return await this.model.findByIdAndRemove(id).exec();
         } catch (error) {
@@ -65,6 +87,8 @@ abstract class ModelService<D extends IDocRaw> {
         id: ObjectId, ctx: object, opts = this.DEF_UPDATE_OPTIONS
     ) {
         this.checkModel();
+        await this.beforeAll();
+        await this.beforeEach();
         const options = Object.assign({ }, this.DEF_UPDATE_OPTIONS, opts);
         try {
             return await this.model.update({ _id: id }, ctx, options).exec();
@@ -73,8 +97,10 @@ abstract class ModelService<D extends IDocRaw> {
         }
     }
 
-    protected find(cond: object, opts?: IGetOptions) {
+    protected async find(cond: object, opts?: IGetOptions) {
         this.checkModel();
+        await this.beforeAll();
+        await this.beforeEach();
         const p = this.model.find(cond);
         return this.documentQueryProcess(p, opts).exec();
     }
@@ -85,8 +111,10 @@ abstract class ModelService<D extends IDocRaw> {
         });
     }
 
-    protected findOne(cond: object, opts?: IGetOptions) {
+    protected async findOne(cond: object, opts?: IGetOptions) {
         this.checkModel();
+        await this.beforeAll();
+        await this.beforeEach();
         const p = this.model.findOne(cond);
         return this.documentQueryProcess(p, opts).exec();
     }
@@ -97,8 +125,10 @@ abstract class ModelService<D extends IDocRaw> {
         });
     }
 
-    protected findById(id: ObjectId, opts?: IGetOptions) {
+    protected async findById(id: ObjectId, opts?: IGetOptions) {
         this.checkModel();
+        await this.beforeAll();
+        await this.beforeEach();
         const p = this.model.findById(id);
         return this.documentQueryProcess(p, opts).exec();
     }
@@ -109,8 +139,10 @@ abstract class ModelService<D extends IDocRaw> {
         });
     }
 
-    protected total(cond: object = { }) {
+    protected async total(cond: object = { }) {
         this.checkModel();
+        await this.beforeAll();
+        await this.beforeEach();
         return this.model.count(cond).exec();
     }
 
@@ -168,6 +200,12 @@ export abstract class BaseService<D extends IDocRaw = IDocRaw> extends ModelServ
         }
         await this.cache.set(FLAG, val, time);
         return val;
+    }
+
+    protected runBeforeAll() {
+        return this.loadAndCache("_RunBeforeAll_", () => {
+            return super.runBeforeAll();
+        });
     }
 
     protected DEF_PER_OBJ = UtilService.DEF_PER_OBJ;

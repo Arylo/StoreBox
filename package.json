@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "clean": "rimraf dist tmp",
-    "tsc": "tsc -P .",
+    "tsc": "tsc --locale zh-cn --pretty -P .",
     "build": "npm run clean && npm run tsc",
     "prestart": "npm run build",
     "start-svr": "node -r tsconfig-paths/register index.js",
