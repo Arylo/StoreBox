@@ -4,8 +4,8 @@ import { config } from "@utils/config";
 import { initExpress } from "./express";
 import { ApplicationModule } from "./modules/app.module";
 import { ValidationPipe } from "@pipes/validation";
-import { systemLogger } from "./modules/common/helper/log";
-import { isDevelopment } from "./modules/common/helper/env";
+import { systemLogger } from "@utils/log";
+import { isDevelopment } from "@utils/env";
 
 const bootstrap = async () => {
     const server = initExpress();

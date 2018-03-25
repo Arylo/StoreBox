@@ -4,7 +4,7 @@ import {
 } from "@nestjs/common";
 import {
     getMeta, downloadLogger, apiLogger, accessLogger, systemLogger
-} from "../helper/log";
+} from "@utils/log";
 
 const access: RequestHandler = (req, res, next) => {
     // const logger = accessLogger;

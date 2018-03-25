@@ -4,17 +4,11 @@ import {
 } from "@models/common";
 import { IGoods, FLAG as GoodFlag, Model as GoodsModels } from "@models/Good";
 import { IUser, FLAG as UserFlag } from "@models/User";
-import { config } from "@utils/config";
-import keyv =  require("keyv");
-
-import { isTest } from "../modules/common/helper/env";
-
-export const cache = new keyv({
-    uri: isTest ? undefined : config.redis.url,
-    namespace: "Collections"
-});
+import newCache  = require("@utils/newCache");
 
 export const FLAG = "collections";
+
+export const cache = newCache(FLAG);
 
 const Definition: SchemaDefinition = {
     name: {

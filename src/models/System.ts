@@ -1,14 +1,10 @@
 import { model, SchemaDefinition, Model as M } from "mongoose";
 import { Base, IDoc, IDocRaw, MODIFY_MOTHODS } from "./common";
-import { config } from "@utils/config";
-import keyv =  require("keyv");
+import newCache  = require("@utils/newCache");
 
-import { isTest } from "../modules/common/helper/env";
+export const FLAG = "system";
 
-export const cache = new keyv({
-    uri: isTest ? undefined : config.redis.url,
-    namespace: "System"
-});
+export const cache = newCache(FLAG);
 
 const Definition: SchemaDefinition = {
     key: { type: String, required: true },
@@ -22,8 +18,6 @@ export interface ISystem extends IDocRaw {
 
 const SystemSchema = new Base(Definition).createSchema();
 
-export const Flag = "system";
-
 export type SystemDoc = IDoc<ISystem>;
 
 for (const method of MODIFY_MOTHODS) {
@@ -32,4 +26,4 @@ for (const method of MODIFY_MOTHODS) {
     });
 }
 
-export const Model: M<SystemDoc> = model(Flag, SystemSchema);
+export const Model: M<SystemDoc> = model(FLAG, SystemSchema);

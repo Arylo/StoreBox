@@ -6,7 +6,7 @@ import { BaseService, IGetOptions } from "@services/base";
 import { isURL } from "validator";
 import * as typescript from "typescript";
 
-import { systemLogger } from "../modules/common/helper/log";
+import { systemLogger } from "@utils/log";
 
 export enum DEFAULTS {
     USERGROUP_FLAG = "DEFAULT_USERGROUP",
