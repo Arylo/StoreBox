@@ -17,7 +17,7 @@ ADD ./config /usr/src/app/config
 
 RUN npm run tsc && \
     npm prune --production && \
-    npm install cross-env tsconfig-paths --save-dev && \
+    npm install cross-env tsconfig-paths typescript tslib --save-dev && \
     npm install pm2 --global && \
     npm cache clean -f && \
     rm -rf ./package-lock.json
