@@ -12,15 +12,15 @@ Store PandoraBox Firmware Images and its packages
 ## Docker Edition
 
 ```bash
-docker pull arylo/storebox
-docker run -p 9000:9000 arylo/storebox
+docker pull arylo/storebox-api
+docker run -p 9000:9000 arylo/storebox-api
 ```
 
 or
 
 ```bash
-docker build -t arylo/storebox .
-docker run -p 9000:9000 arylo/storebox
+docker build -t arylo/storebox-api .
+docker run -p 9000:9000 arylo/storebox-api
 ```
 
 ### Docker-compose
