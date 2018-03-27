@@ -1,4 +1,6 @@
 import { CollectionsService } from "@services/collections";
+import { UsersService } from "@services/users";
+import { SystemService } from "@services/system";
 import { Model as UsersModel } from "@models/User";
 import db = require("../helpers/database");
 import { newName } from "../helpers/utils";
@@ -6,13 +8,16 @@ import { newName } from "../helpers/utils";
 describe("Collections Service Test Unit", () => {
 
     let collectionsSvr: CollectionsService;
+    let usersSvr: UsersService;
 
     before(() => {
         return db.connect();
     });
 
-    beforeEach(() => {
+    beforeEach(async () => {
         collectionsSvr = new CollectionsService();
+        usersSvr = new UsersService(new SystemService());
+        await usersSvr.conut(); // UserModel Init
     });
 
     it("Fail to Create a Collection with Empty Good # 0", async () => {

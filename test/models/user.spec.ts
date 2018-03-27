@@ -2,7 +2,7 @@ import * as db from "../helpers/database";
 import * as md5 from "md5";
 import { Model as UsersModel } from "@models/User";
 import { Observer, Observable, Subject } from "rxjs";
-import { newIds } from "../helpers/utils";
+import { newIds, newName } from "../helpers/utils";
 
 describe("User Model", () => {
 
@@ -23,8 +23,8 @@ describe("User Model", () => {
     });
 
     beforeEach(() => {
-        user.username = md5(Date.now() + "");
-        user.password = md5(Date.now() + "");
+        user.username = newName();
+        user.password = newName();
         return UsersModel.addUser(user.username, user.password)
             .then((result) => {
                 user.id = result._id.toString();
@@ -32,16 +32,10 @@ describe("User Model", () => {
             }).catch(console.log);
     });
 
-    afterEach(() => {
-        return UsersModel.removeUser(user.id).then(() => {
-            user.id = "";
-        });
-    });
-
     it("Add User", async () => {
         const user = {
-            username: md5(Date.now() + ""),
-            password: md5(Date.now() + ""),
+            username: newName(),
+            password: newName(),
         };
         let result;
         // 添加测试用户
@@ -58,6 +52,7 @@ describe("User Model", () => {
         UsersModel.removeUser(id);
     });
 
+    // Mothod move to service
     it.skip("User List", async () => {
         // const results = await UsersModel.list();
         // results.should.be.an.Array();

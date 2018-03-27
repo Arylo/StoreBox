@@ -43,7 +43,7 @@ abstract class ModelService<D extends IDocRaw> {
         return Promise.resolve({ });
     }
 
-    private runBeforeEach() {
+    protected runBeforeEach() {
         return Promise.resolve(this.beforeEach());
     }
 
