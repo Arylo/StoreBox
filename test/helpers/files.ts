@@ -5,16 +5,16 @@ import faker = require("faker");
 import fs = require("fs-extra");
 import { sleep } from "./utils";
 
-interface IUploadFileOptions {
+export interface IUploadFileOptions {
     query?: {
         [key: string]: string
     };
 }
 
 /* tslint:disable:no-empty-interface */
-interface IUploadFilesOptions extends IUploadFileOptions { }
+export interface IUploadFilesOptions extends IUploadFileOptions { }
 
-const addQuery = (url: string, opts: IUploadFileOptions) => {
+export const addQuery = (url: string, opts: IUploadFileOptions) => {
     if (opts.query && Object.keys(opts.query).length > 0) {
         const query = [ ];
         for (const key of Object.keys(opts.query)) {

@@ -1,21 +1,16 @@
-import supertest = require("supertest");
 import faker = require("faker");
-import { basename } from "path";
-import fs = require("fs-extra");
-import { Model as TokensModel } from "@models/Token";
-import { config } from "@utils/config";
-import { Model as GoodsModels } from "@models/Good";
 
 import {
-    connect, drop, newUser, addCategoryAndRegexp
+    connect, drop, addCategoryAndRegexp
 } from "../../helpers/database";
 import { init } from "../../helpers/server";
-import { uploadFiles, newFile } from "../../helpers/files";
 import { newIds } from "../../helpers/utils";
+import { TokenRequest, GuestRequest } from "../../helpers/request";
+import * as files from "../../helpers/files";
 
 describe("Token to Upload Files Api", () => {
 
-    let request: supertest.SuperTest<supertest.Test>;
+    let request: TokenRequest;
 
     before(() => {
         return connect();
@@ -27,30 +22,23 @@ describe("Token to Upload Files Api", () => {
         return drop(ids);
     });
 
-    before(async () => {
-        request = await init();
+    const filepaths = [ ];
+
+    after(() => {
+        return files.remove(filepaths);
+    });
+
+    before("login", async () => {
+        const req = new GuestRequest(await init(), ids, filepaths);
+        request = await req.loginWithToken();
     });
 
     const FILE_COUNST = 10;
-    const filepaths = [ ];
     const prefix = `${faker.random.word()}_`;
     before(async () => {
         // Generator Files
         for (let i = 0; i < FILE_COUNST; i++) {
-            filepaths.push(await newFile(`${prefix}${faker.random.uuid()}`));
-        }
-    });
-
-    after(async () => {
-        for (const filepath of filepaths) {
-            fs.removeSync(filepath);
-            const good = (await GoodsModels.findOne({
-                originname: basename(filepath)
-            }).exec()).toObject();
-            fs.removeSync(
-                `${config.paths.upload}/${good.category}/${good.filename}`
-            );
-            await GoodsModels.findByIdAndRemove(good._id).exec();
+            await request.newFile(`${prefix}${faker.random.uuid()}`);
         }
     });
 
@@ -62,37 +50,11 @@ describe("Token to Upload Files Api", () => {
         ids.regexps.push(docs[1]._id);
     });
 
-    const user = {
-        name: faker.name.firstName(),
-        pass: faker.random.words(),
-        token: ""
-    };
-    step("Login", async () => {
-        const doc = await newUser(user.name, user.pass);
-        ids.users.push(doc._id);
-        const {
-            body: result
-        } = await request.post("/api/v1/auth/login?token=true")
-            .send({
-                username: user.name, password: user.pass
-            }).then();
-        result.should.have.property("token");
-        ids.tokens.push(
-            (await TokensModel.findOne({ token: result.token }).exec())._id
-        );
-        user.token = result.token;
-    });
-
-    step("Logout", () => {
-        return request.post("/api/v1/auth/logout").then();
-    });
-
     let name = "";
     step("Upload Files", async () => {
         const {
             body: result, status
-        } = await uploadFiles(request, filepaths);
-        ids.collections.push(result._id);
+        } = await request.uploadFiles(filepaths);
         status.should.be.eql(201);
         result.should.have.properties("name", "_id", "goods");
         name = result.name;

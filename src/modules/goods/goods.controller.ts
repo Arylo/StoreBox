@@ -132,6 +132,7 @@ export class GoodsAdminController {
                 active: true
             })).toObject();
         } catch (error) {
+            fs.remove(obj.file.path);
             if (cb) {
                 cb("Good", error);
             } else {
@@ -168,7 +169,7 @@ export class GoodsAdminController {
             appends: await this.getCategoriesIds(query.append || [])
         };
 
-        return await this.fileProcess(
+        return this.fileProcess(
             { file, uploader: uploaderId, opt: fileProcessOpts },
             (type, error) => {
                 if (type === "Categories") {
@@ -179,7 +180,7 @@ export class GoodsAdminController {
                     }
                 }
                 if (type === "Good") {
-                    throw new BadRequestException(error.toString());
+                    throw error;
                 }
             }
         );

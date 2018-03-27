@@ -20,8 +20,7 @@ export const newUser = (username?: string, password?: string) => {
 export const newUserWithUsergroup = (
     username = newName(), password = newName(), gid?: ObjectId
 ) => {
-    init();
-    return usersSvr.addUser({
+    return init().addUser({
         username, password
     }, gid);
 };

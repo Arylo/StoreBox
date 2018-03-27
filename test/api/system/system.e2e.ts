@@ -1,34 +1,26 @@
 import { Model as SystemModel } from "@models/System";
-import supertest = require("supertest");
-import {
-    connect, drop
-} from "../../helpers/database";
+import { connect, drop } from "../../helpers/database";
 import { init } from "../../helpers/server";
 import auth = require("@db/auth");
-import { newName } from "../../helpers/utils";
+import { newName, newIds } from "../../helpers/utils";
+import { AdminRequest, GuestRequest } from "../../helpers/request";
 
-describe("Collections E2E Api", () => {
+describe("System E2E Api", () => {
 
-    let request: supertest.SuperTest<supertest.Test>;
+    let request: AdminRequest;
 
     before(() => {
         return connect();
     });
 
-    const ids = {
-        users: [ ]
-    };
+    const ids = newIds();
 
     after(() => {
         return drop(ids);
     });
 
-    before(async () => {
-        request = await init();
-    });
-
     before("login", async () => {
-        ids.users.push((await auth.login(request))[0]);
+        request = await new GuestRequest(await init(), ids).login();
     });
 
     after(async () => {
