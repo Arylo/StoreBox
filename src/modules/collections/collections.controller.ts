@@ -9,6 +9,7 @@ import { Roles } from "@decorators/roles";
 import { GetCollectionNameDto } from "./collections.dto";
 import { PerPageDto } from "@dtos/page";
 import { ParseIntPipe } from "@pipes/parse-int";
+import { LogsService } from "@services/logs";
 
 @UseGuards(RolesGuard)
 @Controller("/collections")
@@ -17,7 +18,10 @@ import { ParseIntPipe } from "@pipes/parse-int";
 // endregion Swagger Docs
 export class CollectionsController {
 
-    constructor(private readonly collectionsSvr: CollectionsService) { }
+    constructor(
+        private readonly collectionsSvr: CollectionsService,
+        private readonly logsSvr: LogsService
+    ) { }
 
     @Roles("guest")
     @Get("/:name")
@@ -29,25 +33,27 @@ export class CollectionsController {
         @Param() param: GetCollectionNameDto,
         @Query(new ParseIntPipe()) query: PerPageDto
     ) {
-        const doc = await this.collectionsSvr.getByName(param.name);
+        const doc = await this.collectionsSvr.getObjectByName(param.name);
         if (!doc) {
             return null;
         }
-        let obj;
-        obj = doc.toObject();
-        obj.creator = obj.creator.nickname;
-        obj.goods.map((good) => {
+        const obj = doc;
+        // obj = doc.toObject();
+        obj.creator = obj.creator.nickname as any;
+        const goods = [ ];
+        for (const good of obj.goods) {
             const keys = [
                 "__v", "uploader", "hidden"
             ];
             for (const key of keys) {
                 delete good[key];
             }
-            return good;
-        });
-        obj.goods = UtilService.toListRespone(obj.goods, {
-            perNum: obj.goods.length
-        });
+            good.downloaded = await this.logsSvr.goodDownloadCount(good._id);
+            goods.push(good);
+        }
+        obj.goods = UtilService.toListRespone(goods, {
+            perNum: goods.length
+        }) as any;
         return obj;
     }
 

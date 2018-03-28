@@ -9,6 +9,7 @@ import { CollectionDoc } from "@models/Collection";
 import { ObjectId } from "@models/common";
 import { RolesGuard } from "@guards/roles";
 import { CollectionsService } from "@services/collections";
+import { LogsService } from "@services/logs";
 import { UtilService } from "@services/util";
 import { Roles } from "@decorators/roles";
 import { ParseIntPipe } from "@pipes/parse-int";
@@ -27,7 +28,10 @@ import {
 // endregion Swagger Docs
 export class CollectionsAdminController {
 
-    constructor(private readonly collectionsSvr: CollectionsService) { }
+    constructor(
+        private readonly collectionsSvr: CollectionsService,
+        private readonly logsSvr: LogsService
+    ) { }
 
     private async getCollectionsRes(uid: ObjectId, query: PerPageDto) {
         const arr = await this.collectionsSvr.list(uid, {
@@ -102,12 +106,17 @@ export class CollectionsAdminController {
     @ApiOperation({ title: "Get One Collection's Info" })
     // endregion Swagger Docs
     public async getCollection(@Param() param: CCidDto) {
-        const obj = await this.collectionsSvr.getById(param.cid);
+        const obj = await this.collectionsSvr.getObjectById(param.cid);
         if (!obj) {
             return null;
         }
-        obj.goods = UtilService.toListRespone(obj.goods as any[], {
-            perNum: obj.goods.length
+        const goods = [ ];
+        for (const good of obj.goods) {
+            good.downloaded = await this.logsSvr.goodDownloadCount(good._id);
+            goods.push(good);
+        }
+        obj.goods = UtilService.toListRespone(goods, {
+            perNum: goods.length
         }) as any;
         return obj;
     }
