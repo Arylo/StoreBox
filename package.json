@@ -53,6 +53,7 @@
     "@types/supertest": "^2.0.4",
     "@types/useragent": "^2.1.1",
     "@types/uuid": "^3.4.3",
+    "@types/validator": "^9.4.0",
     "cross-env": "^5.1.1",
     "faker": "^4.1.0",
     "mocha": "^4.0.1",
@@ -87,7 +88,7 @@
     "helmet": "^3.11.0",
     "is-promise": "^2.1.0",
     "keyv": "^3.0.0",
-    "lodash": "^4.17.4",
+    "lodash": "^4.17.5",
     "md5": "^2.2.1",
     "md5-file": "^3.2.3",
     "mongoose": "^4.13.2",
@@ -97,6 +98,7 @@
     "rxjs": "^5.5.2",
     "useragent": "^2.2.1",
     "uuid": "^3.1.0",
+    "validator": "^9.4.1",
     "y-config": "^1.1.5"
   }
 }
