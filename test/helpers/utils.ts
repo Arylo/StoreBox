@@ -23,6 +23,7 @@ export const newIds = (): IIds => {
         categories: [ ],
         collections: [ ],
         usergroups: [ ],
-        userusergroups: [ ]
+        userusergroups: [ ],
+        logs: [ ]
     };
 };

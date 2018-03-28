@@ -125,6 +125,14 @@ export class GoodsService extends BaseService<IGoods> {
     }
 
     /**
+     * Get Good by Good ID
+     * @param id Good ID
+     */
+    public getObjectById(id: ObjectId, opts?: IGetOptions) {
+        return super.findObjectById(id, opts);
+    }
+
+    /**
      * Edit Good by Good ID
      * @param id Good ID
      */

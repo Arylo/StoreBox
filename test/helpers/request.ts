@@ -1,13 +1,17 @@
+import path = require("path");
 import supertest = require("supertest");
 import auth = require("@db/auth");
-import { IIds } from "./database";
+import { IIds, addCategoryAndRegexp } from "./database";
 import { newUser } from "@db/user";
 import { Model as TokensModel } from "@models/Token";
 import { isNumber } from "util";
-import { newName } from "./utils";
+import { newName, sleep } from "./utils";
 import {
     IUploadFileOptions, addQuery, IUploadFilesOptions, newFile
 } from "./files";
+import { ObjectId } from "@models/common";
+import { LogsService } from "@services/logs";
+import { Model as LogsModel } from "@models/Log";
 
 type ST = supertest.SuperTest<supertest.Test>;
 
@@ -61,6 +65,38 @@ class BaseRequest {
         return this;
     }
 
+    /**
+     * New A Category And add a regexp to it
+     * @param regexp It will new one file and filename will as the regexp value if non-exist value
+     * @param pid Parent Category ID
+     */
+    public async addCategoryWithRegexp(regexp?: RegExp, pid?: ObjectId) {
+        if (!regexp) {
+            if (this.newFilepaths.length === 0) {
+                throw new TypeError("No New File");
+            }
+            await this.newFile();
+            const filepath = this.newFilepaths[this.newFilepaths.length - 1];
+            const filename = path.basename(filepath);
+            regexp = new RegExp(`^${filename}$`);
+        }
+        const docs = await addCategoryAndRegexp(regexp, pid);
+        this.ids.categories.push(docs[0]._id);
+        this.ids.regexps.push(docs[1]._id);
+        return this;
+    }
+
+    public async downloadFile(cid: ObjectId, gid: ObjectId) {
+        const url =
+            `/files/categories/${cid.toString()}/goods/${gid.toString()}`;
+        const ref = await this.get(url).then();
+        const key = `good_${gid.toString()}`;
+        this.ids.logs.push(
+            ...(await LogsModel.find({ key }).exec()).map((log) => log._id)
+        );
+        return ref;
+    }
+
 }
 
 export class GuestRequest extends BaseRequest {
@@ -107,6 +143,10 @@ class LoginedRequest extends BaseRequest {
         return new GuestRequest(this.req, this.ids, this.filepaths);
     }
 
+    /**
+     * Upload File to StoreBox
+     * @param filepath if filepath is empty value, it will upload last new file. if havnt new-file, will genertor one.
+     */
     public async uploadFile(filepath?: string, opts: IUploadFileOptions = { }) {
         let url = "/api/v1/goods";
         url = addQuery(url, opts);
@@ -157,6 +197,16 @@ class LoginedRequest extends BaseRequest {
 }
 
 export class AdminRequest extends LoginedRequest {
+
+    public async addCollection(goods: ObjectId[], name = newName()) {
+        const { status, body } = await this.post("/api/v1/collections")
+            .send({ name, goods }).then();
+        if (status === 201) {
+            this.ids.collections.push(body._id);
+        }
+        await sleep(200);
+        return this;
+    }
 
 }
 

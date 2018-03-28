@@ -34,6 +34,7 @@ import { isArray } from "util";
 import { CreateValueDto, EditValueDto } from "../values/values.dto";
 import { GoodAttributeParamDto, UploadQueryDto, EditBodyDto } from "./goods.dto";
 import { RegexpCountCheckInterceptor } from "@interceptors/regexp-count-check";
+import { LogsService } from "@services/logs";
 
 @UseGuards(RolesGuard)
 @Controller("api/v1/goods")
@@ -47,7 +48,8 @@ export class GoodsAdminController {
         private readonly collectionsSvr: CollectionsService,
         private readonly regexpSvr: RegexpsService,
         private readonly categoriesSvr: CategoriesService,
-        private readonly goodsSvr: GoodsService
+        private readonly goodsSvr: GoodsService,
+        private readonly logsSvr: LogsService
     ) { }
 
     private toMd5sum(filepath: string) {
@@ -233,7 +235,7 @@ export class GoodsAdminController {
             });
             const collection =
                 isArray(collections) ? collections[0] : collections;
-            return this.collectionsSvr.getById(collection._id, {
+            return this.collectionsSvr.getObjectById(collection._id, {
                 populate: [ "goods" ]
             });
         }
@@ -248,13 +250,14 @@ export class GoodsAdminController {
     public async get(@Param() param: GidDto) {
         let obj;
         try {
-            obj = await this.goodsSvr.getById(param.gid, {
+            obj = await this.goodsSvr.getObjectById(param.gid, {
                 populate: [
                     "attributes",
                     { path: "uploader", select: "nickname" },
                     { path: "category", select: "name attributes tags" }
                 ]
             });
+            obj.downloaded = await this.logsSvr.goodDownloadCount(param.gid);
         } catch (error) {
             throw new BadRequestException(error.toString());
         }

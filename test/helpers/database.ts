@@ -10,6 +10,7 @@ import { Model as CollectionsModel } from "@models/Collection";
 import { Model as CategoriesModel, CategoryDoc } from "@models/Categroy";
 import { Model as UsergroupsModel } from "@models/Usergroup";
 import { Model as UserUsergroupsModel } from "@models/User-Usergroup";
+import { Model as LogsModel } from "@models/Log";
 
 import { connectDatabase } from "../../src/modules/database/database.providers";
 import { newUser as newUserFn } from "./database/user";
@@ -30,6 +31,7 @@ export interface IIds {
     collections?: ObjectId[];
     usergroups?: ObjectId[];
     userusergroups?: ObjectId[];
+    logs?: ObjectId[];
 }
 
 /**
@@ -48,7 +50,8 @@ export const drop = async (ids?: IIds) => {
         "categories": CategoriesModel,
         "collections": CollectionsModel,
         "usergroups": UsergroupsModel,
-        "userusergroups": UserUsergroupsModel
+        "userusergroups": UserUsergroupsModel,
+        "logs": LogsModel
     };
     for (const method of Object.keys(MODEL_IDMETHOD_MAP)) {
         const model = MODEL_IDMETHOD_MAP[method];
