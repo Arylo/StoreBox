@@ -1,4 +1,4 @@
-# Store Box
+# StoreBox-Api
 
 Store PandoraBox Firmware Images and its packages
 
