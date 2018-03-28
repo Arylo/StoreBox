@@ -6,7 +6,7 @@ import connectRedis = require("connect-redis");
 import { config } from "@utils/config";
 import helmet = require("helmet");
 
-import { error } from "./modules/common/middlewares/logger.middleware";
+import { error } from "./middlewares/logger.middleware";
 import { isTest } from "@utils/env";
 
 const RedisStore = connectRedis(session);

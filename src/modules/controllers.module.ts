@@ -21,14 +21,14 @@ import { SystemController } from "./system/system.controller";
 // region Middlewares
 import {
     UploadFileMiddleware, UploadFilesMiddleware
-} from "./common/middlewares/upload.middleware";
+} from "../middlewares/upload.middleware";
 import {
     ApiLoggerMiddleware, DownloadLoggerMiddleware
-} from "./common/middlewares/logger.middleware";
-import { RolesMiddleware } from "./common/middlewares/roles.middleware";
+} from "../middlewares/logger.middleware";
+import { RolesMiddleware } from "../middlewares/roles.middleware";
 import {
     ReloadSessionMiddleware
-} from "./common/middlewares/reloadSession.middleware";
+} from "../middlewares/reloadSession.middleware";
 // endregion Middlewares
 
 // region Services
