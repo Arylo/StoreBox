@@ -241,22 +241,6 @@ export class CategoriesAdminController {
         if (!curCategory) {
             throw new BadGatewayException("Non Exist Category");
         }
-        let parentCategory;
-        if (ctx.pid) {
-            parentCategory = await this.categoriesSvr.getById(ctx.pid, {
-                populate: [
-                    "attributes",
-                    {
-                        path: "pid", populate: { path: "pid" }
-                    }
-                ]
-            });
-            if (!parentCategory) {
-                throw new BadRequestException(
-                    "The Parent Category isnt exist!"
-                );
-            }
-        }
         await this.categoriesSvr.editById(param.cid, ctx);
         return new DefResDto();
     }
