@@ -2,7 +2,7 @@
 
 Store PandoraBox Firmware Images and its packages
 
-[![Travis](https://img.shields.io/travis/BoxSystem/StoreBox-Api.svg?style=flat-square)](https://travis-ci.org/BoxSystem/StoreBox-Api)
+[![Travis](https://img.shields.io/travis/BoxSystem/StoreBox-Api.svg?style=flat-square&logo=travis)](https://travis-ci.org/BoxSystem/StoreBox-Api)
 [![Coveralls](https://img.shields.io/coveralls/github/BoxSystem/StoreBox-Api.svg?style=flat-square)](https://coveralls.io/github/BoxSystem/StoreBox-Api)
 [![Known Vulnerabilities](https://snyk.io/test/github/BoxSystem/StoreBox-Api/badge.svg?style=flat-square)](https://snyk.io/test/github/BoxSystem/StoreBox-Api)
 [![TypeScript](https://img.shields.io/badge/Language-Typescript-blue.svg?style=flat-square&maxAge=7200)](http://www.typescriptlang.org/)
