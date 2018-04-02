@@ -86,10 +86,13 @@ class BaseRequest {
         return this;
     }
 
-    public async downloadFile(cid: ObjectId, gid: ObjectId) {
+    public async downloadFile(cid: ObjectId, gid: ObjectId, opts?) {
         const url =
             `/files/categories/${cid.toString()}/goods/${gid.toString()}`;
-        const ref = await this.get(url).then();
+        const ref = await Object.keys(opts || { }).reduce((req, key) => {
+            req = req[key](opts[key]);
+            return req;
+        }, this.get(url)).then();
         const key = `good_${gid.toString()}`;
         this.ids.logs.push(
             ...(await LogsModel.find({ key }).exec()).map((log) => log._id)
@@ -109,7 +112,8 @@ export class GuestRequest extends BaseRequest {
             const user = this.users[0];
             await this.req.post("/api/v1/auth/login").send(user).then();
         } else {
-            return (await this.newUser()).login(this.users.length - 1);
+            const req = await this.newUser(username + "", password);
+            return req.login(this.users.length - 1);
         }
         return new AdminRequest(this.req, this.ids, this.filepaths);
     }

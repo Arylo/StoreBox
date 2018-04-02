@@ -6,10 +6,12 @@ import { uploadFile } from "../../helpers/files";
 import { init } from "../../helpers/server";
 import auth = require("@db/auth");
 import { newName, newIds } from "../../helpers/utils";
+import { GuestRequest, AdminRequest } from "../../helpers/request";
+import * as files from "../../helpers/files";
 
 describe("Goods E2E Api", () => {
 
-    let request: supertest.SuperTest<supertest.Test>;
+    let request: AdminRequest;
 
     const user = {
         name: newName()
@@ -25,28 +27,28 @@ describe("Goods E2E Api", () => {
         return drop(ids);
     });
 
-    before(async () => {
-        request = await init();
+    const filepaths = [ ];
+
+    after(() => {
+        return files.remove(filepaths);
     });
 
     before("login", async () => {
-        ids.users.push((await auth.login(request, user.name))[0]);
+        const req = new GuestRequest(await init(), ids, filepaths);
+        request = await req.login(user.name);
     });
 
     step("Add Category", async () => {
-        const docs = await addCategoryAndRegexp(/^icon_.+_64x64\.png$/);
-        ids.categories.push(docs[0]._id);
-        ids.regexps.push(docs[1]._id);
+        await request.addCategoryWithRegexp(/^icon_.+_64x64\.png$/);
     });
 
     let result;
     step("Upload File", async () => {
         const filepath = `${__dirname}/../../files/icon_pandorabox_64x64.png`;
         // Create
-        result = await uploadFile(request, filepath);
+        result = await request.uploadFile(filepath);
         result = result.body;
 
-        ids.goods.push(result._id);
         result.should.have.properties([
             "_id", "originname", "category", "uploader"
         ]);
