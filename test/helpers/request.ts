@@ -12,6 +12,7 @@ import {
 import { ObjectId } from "@models/common";
 import { LogsService } from "@services/logs";
 import { Model as LogsModel } from "@models/Log";
+import { addCategories } from "@db/categories";
 
 type ST = supertest.SuperTest<supertest.Test>;
 
@@ -98,6 +99,26 @@ class BaseRequest {
             ...(await LogsModel.find({ key }).exec()).map((log) => log._id)
         );
         return ref;
+    }
+
+    /**
+     * Add 11 Categories
+     * ```
+     *          - 1 - 4
+     *          |
+     *      - 0 - 2 - 5 - 6 - 8
+     *      |   |       |
+     * pid -|   - 3     - 7
+     *      |
+     *      - 9 - 10
+     * ```
+     * @param pid Parent Category ID
+     * @returns Categories' ID
+     */
+    public async addCategories(pid?: ObjectId) {
+        const ids = await addCategories(pid);
+        this.ids.categories.push(...ids);
+        return ids;
     }
 
 }
