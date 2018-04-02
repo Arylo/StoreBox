@@ -1,6 +1,6 @@
 {
   "name": "storebox-api",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -27,7 +27,7 @@
   "author": "AryloYeung <arylo.open@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "@nestjs/testing": "4.6.1",
+    "@nestjs/testing": "4.6.6",
     "@types/basic-auth": "^1.1.2",
     "@types/bunyan": "^1.8.4",
     "@types/connect-redis": "0.0.7",
@@ -39,6 +39,7 @@
     "@types/hasha": "^3.0.0",
     "@types/helmet": "0.0.37",
     "@types/is-promise": "^2.1.0",
+    "@types/keyv": "^3.0.0",
     "@types/lodash": "^4.14.85",
     "@types/md5": "^2.1.32",
     "@types/mocha": "^2.2.44",
@@ -52,6 +53,7 @@
     "@types/supertest": "^2.0.4",
     "@types/useragent": "^2.1.1",
     "@types/uuid": "^3.4.3",
+    "@types/validator": "^9.4.0",
     "cross-env": "^5.1.1",
     "faker": "^4.1.0",
     "mocha": "^4.0.1",
@@ -65,13 +67,13 @@
     "ts-node": "^4.1.0",
     "tsconfig-paths": "^2.3.0",
     "tslint": "^5.8.0",
-    "typescript": "^2.6.1"
+    "typescript": "^2.7.2"
   },
   "dependencies": {
     "@keyv/redis": "^1.3.8",
-    "@nestjs/common": "4.6.5",
-    "@nestjs/core": "4.6.5",
-    "@nestjs/swagger": "1.1.4",
+    "@nestjs/common": "4.6.6",
+    "@nestjs/core": "4.6.6",
+    "@nestjs/swagger": "1.2.0",
     "basic-auth": "^2.0.0",
     "body-parser": "^1.18.2",
     "bunyan": "^1.8.12",
@@ -86,16 +88,17 @@
     "helmet": "^3.11.0",
     "is-promise": "^2.1.0",
     "keyv": "^3.0.0",
-    "lodash": "^4.17.4",
+    "lodash": "^4.17.5",
     "md5": "^2.2.1",
     "md5-file": "^3.2.3",
     "mongoose": "^4.13.2",
     "multer": "^1.3.0",
     "path-exists": "^3.0.0",
-    "reflect-metadata": "^0.1.10",
+    "reflect-metadata": "^0.1.12",
     "rxjs": "^5.5.2",
     "useragent": "^2.2.1",
     "uuid": "^3.1.0",
+    "validator": "^9.4.1",
     "y-config": "^1.1.5"
   }
 }

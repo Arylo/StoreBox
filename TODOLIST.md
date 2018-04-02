@@ -6,9 +6,11 @@
 - [x] 上传到指定Categroy
   - [x] 上传时追加Catogroy
 - [x] 整顿collectin info的goods 列表
-- [ ] Token 使用日志显示
-- [ ] Good 下载次数统计
-- [ ] 接入统计
+- [ ] 统计
+  - [ ] Token 使用日志显示
+  - [ ] 用户登录记录
+  - [x] Good 下载次数统计
+  - [ ] 接入统计
 - [x] 配置文件写入初始化用户账号密码
   - [ ] 接入AuthBox
 - [x] Redis 接入

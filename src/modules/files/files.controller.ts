@@ -9,6 +9,7 @@ import { Roles } from "@decorators/roles";
 import { RolesGuard } from "@guards/roles";
 import { ParseIntPipe } from "@pipes/parse-int";
 import { GoodsService } from "@services/goods";
+import { LogsService } from "@services/logs";
 
 import { Response } from "express";
 import pathExists = require("path-exists");
@@ -26,7 +27,10 @@ import { DownlaodDto } from "./files.dto";
 @ApiUseTags("Good Download")
 export class FilesController {
 
-    constructor(private readonly goodsSvr: GoodsService) { }
+    constructor(
+        private readonly goodsSvr: GoodsService,
+        private readonly logsSvr: LogsService
+    ) { }
 
     @Roles("guest")
     @Get("/categories/:cid/goods/:id")
@@ -52,6 +56,7 @@ export class FilesController {
         if (!good.active) {
             throw new BadRequestException("Disallow download the File");
         }
+        await this.logsSvr.stepGoodDownloadCount(params.id, req);
         res.download(filepath, good.originname, (err) => {
             /* istanbul ignore if */
             if (err) {

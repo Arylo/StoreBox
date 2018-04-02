@@ -26,7 +26,7 @@
       "@guards/*": [ "./src/modules/common/guards/*.guard" ],
       "@dtos/*": [ "./src/modules/common/dtos/*.dto" ],
       "@services/*": [ "./src/services/*.service" ],
-      "@interceptors/*": [ "./src/modules/common/interceptors/*.interceptor" ],
+      "@interceptors/*": [ "./src/interceptors/*.interceptor" ],
       "@db/*": [ "./test/helpers/database/*" ]
     }
   },

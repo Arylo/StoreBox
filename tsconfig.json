@@ -35,8 +35,8 @@
         "./dist/modules/common/dtos/*.dto"
       ],
       "@interceptors/*": [
-        "./src/modules/common/interceptors/*.interceptor",
-        "./dist/modules/common/interceptors/*.interceptor"
+        "./src/interceptors/*.interceptor",
+        "./dist/interceptors/*.interceptor"
       ],
       "@services/*": [
         "./src/services/*.service",

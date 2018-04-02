@@ -37,11 +37,17 @@ export const addCategories = async (pid?: ObjectId) => {
         [9, 10]
     ];
     for (const set of initGroups) {
-        await CategoriesModel.moveCategory(cids[set[1]], cids[set[0]]);
+        await CategoriesModel.findByIdAndUpdate(cids[set[1]], {
+            pid: cids[set[0]]
+        });
     }
     if (pid) {
-        await CategoriesModel.moveCategory(cids[9], pid);
-        await CategoriesModel.moveCategory(cids[0], pid);
+        await CategoriesModel.findByIdAndUpdate(cids[9], {
+            pid: pid
+        });
+        await CategoriesModel.findByIdAndUpdate(cids[0], {
+            pid: pid
+        });
     }
     await sleep(50);
     return cids;

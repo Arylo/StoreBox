@@ -53,41 +53,10 @@ const getIdGroups = (obj): string[] => {
     }
 };
 
-CategorySchema.static("moveCategory", async (id: ObjectId, pid: ObjectId) => {
-    const curCate = await Model.findById(id)
-        .exec();
-    const parentCate = await Model.findById(pid)
-        .select("_id pid")
-        .populate({
-            path: "pid", populate: { path: "pid", select: "pid" }, select: "pid"
-
-        })
-        .exec();
-    if (!curCate || !parentCate) {
-        return Promise.reject(
-            new MongoError("The ID Category isnt exist")
-        );
-    }
-
-    const idSet = new Set(getIdGroups(parentCate.toObject()));
-    if (idSet.size !== 1 && idSet.has(curCate._id.toString())) {
-        return Promise.reject(
-            new MongoError("It would bad loop, if set the Parent Category")
-        );
-    }
-    return Model.findByIdAndUpdate(id, {
-        pid: pid
-    }).exec();
-});
-
-export interface ICategoryModel<T extends CategoryDoc> extends M<T> {
-    moveCategory(id: ObjectId, pid: ObjectId): Promise<T>;
-}
-
 for (const method of MODIFY_MOTHODS) {
     CategorySchema.post(method, () => {
         cache.clear();
     });
 }
 
-export const Model = model(FLAG, CategorySchema) as ICategoryModel<CategoryDoc>;
+export const Model = model(FLAG, CategorySchema) as M<CategoryDoc>;

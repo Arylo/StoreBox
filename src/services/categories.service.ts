@@ -124,7 +124,21 @@ export class CategoriesService extends BaseService<ICategory> {
         return this.findById(id, opts);
     }
 
-    public editById(id: ObjectId, ctx: object) {
+    public async editById(id: ObjectId, ctx: any) {
+        if (ctx && ctx.pid) {
+            const parentCategory  = await this.getById(ctx.pid);
+            if (!parentCategory) {
+                throw new BadRequestException(
+                    "The Parent Category isnt exist!"
+                );
+            }
+            const pid = ctx.pid.toString();
+            if (!!~(await this.getChildrenIds(id)).indexOf(pid)) {
+                throw new BadRequestException(
+                    "It would bad loop, if set the Parent Category"
+                );
+            }
+        }
         return this.modifyById(id, ctx);
     }
 

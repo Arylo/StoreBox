@@ -36,13 +36,7 @@ export const connectDatabase = () => {
 };
 
 export const injectData = async () => {
-    let num = await UsersModel.count({ }).exec();
-    if (num === 0) {
-        return UsersModel.addUser(
-            config.defaults.user.name, config.defaults.user.pass
-        );
-    }
-    num = await UsergroupsModel.count({ }).exec();
+    const num = await UsergroupsModel.count({ }).exec();
     if (num === 0) {
         const group = await UsergroupsModel.create({
             name: config.defaults.group.name

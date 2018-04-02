@@ -29,23 +29,23 @@ describe("Category Model", () => {
         });
     });
 
-    describe("Loop Parent ID Checker", () => {
+    // describe("Loop Parent ID Checker", () => {
 
-        let cids = [ ];
-        before(async () => {
-            cids = await addCategories();
-            ids.categories.push(...cids);
-        });
+    //     let cids = [ ];
+    //     before(async () => {
+    //         cids = await addCategories();
+    //         ids.categories.push(...cids);
+    //     });
 
-        it("# 0", async () => {
-            let err;
-            try {
-                await CategoriesModel.moveCategory(cids[2], cids[6]);
-            } catch (error) {
-                err = error;
-            }
-            err.should.not.be.an.empty();
-        });
-    });
+    //     it("# 0", async () => {
+    //         let err;
+    //         try {
+    //             await CategoriesModel.moveCategory(cids[2], cids[6]);
+    //         } catch (error) {
+    //             err = error;
+    //         }
+    //         err.should.not.be.an.empty();
+    //     });
+    // });
 
 });

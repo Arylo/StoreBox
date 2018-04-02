@@ -1,6 +1,6 @@
 import {
     Controller, Post, Res, Body, Get, HttpStatus, HttpCode, Param,
-    BadRequestException, UseGuards, Delete, Query, BadGatewayException
+    BadRequestException, UseGuards, Delete, Query, BadGatewayException, Put
 } from "@nestjs/common";
 import {
     ApiBearerAuth, ApiUseTags, ApiResponse, ApiImplicitParam, ApiOperation
@@ -221,7 +221,7 @@ export class CategoriesAdminController {
     }
 
     @Roles("admin")
-    @Post("/:cid")
+    @Put("/:cid")
     // region Swagger Docs
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ title: "Edit Category" })
@@ -241,24 +241,14 @@ export class CategoriesAdminController {
         if (!curCategory) {
             throw new BadGatewayException("Non Exist Category");
         }
-        let parentCategory;
-        if (ctx.pid) {
-            parentCategory = await this.categoriesSvr.getById(ctx.pid, {
-                populate: [
-                    "attributes",
-                    {
-                        path: "pid", populate: { path: "pid" }
-                    }
-                ]
-            });
-            if (!parentCategory) {
-                throw new BadRequestException(
-                    "The Parent Category isnt exist!"
-                );
-            }
-        }
         await this.categoriesSvr.editById(param.cid, ctx);
         return new DefResDto();
+    }
+
+    @Roles("admin")
+    @Post("/:cid")
+    public editByPost(@Param() param: CidDto, @Body() ctx: EditCategoryDto) {
+        return this.edit(param, ctx);
     }
 
     @Roles("admin")

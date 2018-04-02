@@ -5,6 +5,7 @@ import { Model as UserUsergroupsModel } from "@models/User-Usergroup";
 import { IUsergroups } from "@models/Usergroup";
 import { SystemService } from "@services/system";
 import { BaseService, IGetOptions } from "@services/base";
+import { config } from "@utils/config";
 
 @Component()
 export class UsersService extends BaseService<IUser> {
@@ -15,7 +16,26 @@ export class UsersService extends BaseService<IUser> {
         this.setModel(UsersModel);
     }
 
+    protected async beforeEach() {
+        const num = await cache.get("total") ||
+            await UsersModel.count({ }).exec();
+        if (num !== 0) {
+            return;
+        }
+        const user = await UsersModel.addUser(
+            config.defaults.user.name, config.defaults.user.pass
+        );
+        const gid = await this.sysSvr.getDefaultUsergroup();
+        if (gid) {
+            await UserUsergroupsModel.create({
+                user: user._id, usergroup: gid
+            });
+        }
+    }
+
     public async addUser(obj, gid?: ObjectId) {
+        await this.runBeforeAll();
+        await this.runBeforeEach();
         try {
             const user = await UsersModel.addUser(obj.username, obj.password);
             if (!gid) {
@@ -40,6 +60,8 @@ export class UsersService extends BaseService<IUser> {
     }
 
     public async isVaild(username: string, password: string) {
+        await this.runBeforeAll();
+        await this.runBeforeEach();
         try {
             return await UsersModel.isVaild(username, password);
         } catch (err) {
@@ -54,6 +76,8 @@ export class UsersService extends BaseService<IUser> {
     public async getUsergroups(
         uid: ObjectId, pageObj = this.DEF_PER_OBJ
     ) {
+        await this.runBeforeAll();
+        await this.runBeforeEach();
         const perNum = pageObj.perNum || this.DEF_PER_OBJ.perNum;
         const page = pageObj.page || this.DEF_PER_OBJ.page;
         const groups = await UserUsergroupsModel

@@ -10,7 +10,9 @@ import { GoodsService } from "@services/goods";
 import { CategoriesService } from "@services/categories";
 import { Roles } from "@decorators/roles";
 import { ParseIntPipe } from "@pipes/parse-int";
+import { ToArrayPipe } from "@pipes/to-array";
 import { ListResponse, DEF_PER_COUNT } from "@dtos/page";
+import { LogsService } from "@services/logs";
 import { reduce } from "lodash";
 
 import { GoodsQueryDto } from "./goods.dto";
@@ -22,7 +24,8 @@ export class GoodsController {
 
     constructor(
         private readonly goodsSvr: GoodsService,
-        private readonly categoriesSvr: CategoriesService
+        private readonly categoriesSvr: CategoriesService,
+        private readonly logsSvr: LogsService
     ) { }
 
     @Roles("guest")
@@ -32,7 +35,9 @@ export class GoodsController {
     @ApiOperation({ title: "Get Good List" })
     @ApiResponse({ status: HttpStatus.OK, type: ListResponse })
     // endregion Swagger Docs
-    public async getList(@Query(new ParseIntPipe()) query: GoodsQueryDto) {
+    public async getList(
+        @Query(new ParseIntPipe(), new ToArrayPipe("tags")) query: GoodsQueryDto
+    ) {
         const categoryModels = await this.categoriesSvr.getByTags(query.tags);
         const categories = reduce(categoryModels, (obj, cate) => {
             obj[cate._id.toString()] = cate;
@@ -41,7 +46,6 @@ export class GoodsController {
         if (Object.keys(categories).length === 0) {
             return UtilService.toListRespone([ ]);
         }
-        const perNum = query.perNum || DEF_PER_COUNT;
 
         const cids = Object.keys(categories);
         const goods =
@@ -56,6 +60,7 @@ export class GoodsController {
                 good.attributes = Array.from(new Set(
                     good.attributes.concat(category.attributes)
                 )) as any;
+                good.downloaded = this.logsSvr.goodDownloadCount(good._id);
                 return good;
             });
         return UtilService.toListRespone(goods, Object.assign({
