@@ -21,6 +21,7 @@ import {
     NewCategoryDto, EditCategoryDto, CategoryAttributeParamDto
 } from "./categroies.dto";
 import { CreateValueDto, EditValueDto } from "../values/values.dto";
+import { ToArrayPipe } from "@pipes/to-array";
 
 @UseGuards(RolesGuard)
 @Controller("api/v1/categories")
@@ -227,7 +228,8 @@ export class CategoriesAdminController {
     @ApiOperation({ title: "Edit Category" })
     // endregion Swagger Docs
     public async edit(
-        @Param() param: CidDto, @Body() ctx: EditCategoryDto
+        @Param() param: CidDto,
+        @Body(new ToArrayPipe("tags")) ctx: EditCategoryDto
     ) {
         const curCategory =
             await this.categoriesSvr.getById(param.cid, {
@@ -247,7 +249,10 @@ export class CategoriesAdminController {
 
     @Roles("admin")
     @Post("/:cid")
-    public editByPost(@Param() param: CidDto, @Body() ctx: EditCategoryDto) {
+    public editByPost(
+        @Param() param: CidDto,
+        @Body(new ToArrayPipe("tags")) ctx: EditCategoryDto
+    ) {
         return this.edit(param, ctx);
     }
 

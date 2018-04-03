@@ -5,11 +5,15 @@ import {
 } from "@models/Categroy";
 import { isFunction, isArray } from "util";
 import { BaseService, IGetOptions } from "@services/base";
-import { difference } from "lodash";
+import * as lodash from "lodash";
 import { GoodsService } from "@services/goods";
 
 interface IIdMap {
     [parentId: string]: ObjectId[];
+}
+
+interface ITagMap {
+    [tag: string]: ObjectId[];
 }
 
 @Component()
@@ -43,59 +47,93 @@ export class CategoriesService extends BaseService<ICategory> {
         });
     }
 
-    public async getChildrenIds(pid: ObjectId) {
-        const map = await this.getIdMap();
-        const ids: ObjectId[] = [ ];
-        const childrenIds = map[pid.toString()];
-        if (childrenIds) {
-            ids.push(...childrenIds);
-            for (const id of childrenIds) {
-                ids.push(...(await this.getChildrenIds(id)));
+    private getTagMap() {
+        const allTagMap = async () => {
+            const map: ITagMap = { };
+            const categories =
+                await this.findObjects({ }, { select: "_id tags" });
+            for (const category of categories) {
+                const pids = await this.getChildrenIds(category._id);
+                for (const tag of category.tags || [ ]) {
+                    if (!map[tag]) {
+                        map[tag] = [ ];
+                    }
+                    map[tag].push(category._id.toString(), ...pids);
+                }
+            }
+            return map;
+        };
+        return this.loadAndCache("TagMap", allTagMap);
+    }
+
+    public getChildrenIds(pid: ObjectId) {
+        return this.loadAndCache(`ChildrenIds_${pid.toString()}`, async () => {
+            const map = await this.getIdMap();
+            const ids: ObjectId[] = [ ];
+            const childrenIds = map[pid.toString()];
+            if (childrenIds) {
+                ids.push(...childrenIds);
+                for (const id of childrenIds) {
+                    ids.push(...(await this.getChildrenIds(id)));
+                }
+            }
+            return ids;
+        });
+    }
+
+    public getParentIds(id: ObjectId) {
+        return this.loadAndCache(`ParentIds_${id.toString()}`, async () => {
+            const category = await this.findObjectById(id);
+            const ids: ObjectId[] = [ ];
+            if (category && category.pid) {
+                const pid = category.pid.toString();
+                ids.push(pid, ...await this.getParentIds(pid));
+            }
+            return ids;
+        });
+    }
+
+    public async getTags() {
+        const map = await this.getTagMap();
+        return Object.keys(map).sort();
+    }
+
+    public async getObjectsByTags(tags: string[], opts = { recursive: true }) {
+        let ids: ObjectId[] = [ ];
+        const tagMap = await this.getTagMap();
+        tags.forEach((tag) => {
+            if (tagMap[tag]) {
+                ids.push(...tagMap[tag]);
+            }
+        });
+        if (ids.length === 0) {
+            return [ ];
+        }
+        const counts = lodash.countBy(ids);
+        ids = Object.keys(counts).reduce((arr, id) => {
+            if (counts[id] >= tags.length) {
+                arr.push(id);
+            }
+            return arr;
+        }, [ ]);
+        if (opts.recursive) {
+            for (const id of Array.from(new Set(ids))) {
+                ids.push(...await this.getChildrenIds(id));
             }
         }
-        return ids;
-    }
-
-    private getTags(obj: ICategoryRaw | ICategory) {
-        const tags = obj.tags;
-        const pid = obj.pid as ICategoryRaw | void;
-        if (pid && pid.tags) {
-            return tags.concat(this.getTags(pid));
-        }
-        return tags;
-    }
-
-    public async getByTags(tags: string | string[]) {
-        if (!isArray(tags)) {
-            tags = [ tags ];
-        }
-        if (tags.length === 0) {
-            return Promise.resolve([ ]);
-        }
-        const conditions = tags.length === 1 ? {
-            tags: { $in: tags }
-        } : {
-            $or: tags.reduce((arr, tag) => {
-                arr.push({ tags: { $in: [ tag ] } });
-                return arr;
-            }, [])
-        };
-        const p = (await this.findObjects(conditions, {
-                populate: [
-                    "attributes",
-                    { path: "pid", populate: { path: "pid" } }
-                ]
-            }))
-            .map((item) => {
-                item.tags = Array.from(new Set(this.getTags(item)));
-                delete item.pid;
-                return item;
+        ids = Array.from(new Set(ids));
+        const cond = {
+            $or: ids.map((id) => {
+                return { _id: id };
             })
-            .filter((item) => {
-                const diffLength = difference(item.tags, tags).length;
-                return diffLength + tags.length === item.tags.length ;
-            });
-        return p;
+        };
+        const categories = await this.findObjects(cond);
+        return categories.map((category) => {
+            category.tags.push(...tags);
+            category.tags = Array.from(new Set(category.tags));
+            delete category.pid;
+            return category;
+        });
     }
 
     /**

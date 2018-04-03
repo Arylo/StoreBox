@@ -4,6 +4,7 @@ import auth = require("@db/auth");
 import { IIds, addCategoryAndRegexp } from "./database";
 import { newUser } from "@db/user";
 import { Model as TokensModel } from "@models/Token";
+import { Model as CategoriesModel } from "@models/Categroy";
 import { isNumber } from "util";
 import { newName, sleep } from "./utils";
 import {
@@ -76,7 +77,7 @@ class BaseRequest {
             if (this.newFilepaths.length === 0) {
                 throw new TypeError("No New File");
             }
-            await this.newFile();
+            // await this.newFile();
             const filepath = this.newFilepaths[this.newFilepaths.length - 1];
             const filename = path.basename(filepath);
             regexp = new RegExp(`^${filename}$`);
@@ -101,6 +102,18 @@ class BaseRequest {
         return ref;
     }
 
+    public async addCategory(pid?: ObjectId) {
+        const ctx: any = {
+            name: newName()
+        };
+        if (pid) {
+            ctx.pid = pid;
+        }
+        const result = await CategoriesModel.create(ctx);
+        this.ids.categories.push(result._id);
+        return this;
+    }
+
     /**
      * Add 11 Categories
      * ```
@@ -113,12 +126,11 @@ class BaseRequest {
      *      - 9 - 10
      * ```
      * @param pid Parent Category ID
-     * @returns Categories' ID
      */
     public async addCategories(pid?: ObjectId) {
         const ids = await addCategories(pid);
         this.ids.categories.push(...ids);
-        return ids;
+        return this;
     }
 
 }
