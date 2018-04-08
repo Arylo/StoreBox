@@ -36,7 +36,7 @@ export class GoodsController {
     @ApiResponse({ status: HttpStatus.OK, type: ListResponse })
     // endregion Swagger Docs
     public async getList(
-        @Query(new ParseIntPipe(), new ToArrayPipe("tags")) query: GoodsQueryDto
+        @Query(new ToArrayPipe("tags"), new ParseIntPipe()) query: GoodsQueryDto
     ) {
         const categoryModels =
             await this.categoriesSvr.getObjectsByTags(query.tags);

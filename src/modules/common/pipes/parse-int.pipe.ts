@@ -2,6 +2,7 @@ import { HttpException } from "@nestjs/common";
 import {
     PipeTransform, Pipe, ArgumentMetadata, HttpStatus
 } from "@nestjs/common";
+import { isString } from "util";
 
 @Pipe()
 export class ParseIntPipe implements PipeTransform<string> {
@@ -9,7 +10,7 @@ export class ParseIntPipe implements PipeTransform<string> {
         if (typeof(value) === "object") {
             for (const key of Object.keys(value)) {
                 const v = value[key];
-                if (!v || /\D/.test(v)) {
+                if (!v || !isString(v) || /\D/.test(v)) {
                     continue;
                 }
                 value[key] = parseInt(v, 10);
