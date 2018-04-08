@@ -1,6 +1,7 @@
 import { config } from "@utils/config";
 import { ObjectId } from "@models/common";
 
+// region import Models
 import { Model as ValuesModel } from "@models/Value";
 import { Model as GoodsModels } from "@models/Good";
 import { Model as RegexpsModel } from "@models/Regexp";
@@ -11,6 +12,8 @@ import { Model as CategoriesModel, CategoryDoc } from "@models/Categroy";
 import { Model as UsergroupsModel } from "@models/Usergroup";
 import { Model as UserUsergroupsModel } from "@models/User-Usergroup";
 import { Model as LogsModel } from "@models/Log";
+import { Model as TagsModel } from "@models/Tag";
+// endregion import Models
 
 import { connectDatabase } from "../../src/modules/database/database.providers";
 import { newUser as newUserFn } from "./database/user";
@@ -32,6 +35,7 @@ export interface IIds {
     usergroups?: ObjectId[];
     userusergroups?: ObjectId[];
     logs?: ObjectId[];
+    tags?: ObjectId[];
 }
 
 /**
@@ -51,7 +55,8 @@ export const drop = async (ids?: IIds) => {
         "collections": CollectionsModel,
         "usergroups": UsergroupsModel,
         "userusergroups": UserUsergroupsModel,
-        "logs": LogsModel
+        "logs": LogsModel,
+        "tags": TagsModel
     };
     for (const method of Object.keys(MODEL_IDMETHOD_MAP)) {
         const model = MODEL_IDMETHOD_MAP[method];

@@ -24,6 +24,8 @@ import {
     UsergroupsAdminController
 } from "./admin/usergroups/usergroups.controller";
 import { SystemController } from "./admin/system/system.controller";
+import { TagsAdminController } from "./admin/tags/tags.controller";
+import { TagsController } from "./public/tags/tags.controller";
 // endregion Controllers
 
 // region Middlewares
@@ -49,6 +51,7 @@ import { SystemService } from "@services/system";
 import { CategoriesService } from "@services/categories";
 import { GoodsService } from "@services/goods";
 import { LogsService } from "@services/logs";
+import { TagsService } from "@services/tags";
 // endregion Services
 
 export const controllers = [
@@ -59,13 +62,13 @@ export const controllers = [
     CategoriesAdminController, GoodsAdminController,
     TokensAdminController,
     CollectionsController, CollectionsAdminController,
-    SystemController
+    SystemController, TagsController, TagsAdminController
 ];
 
 export const services = [
     RegexpsService, CategoriesService, GoodsService,
     CollectionsService, TokensService, UsersService, UsergroupsService,
-    SystemService, LogsService
+    SystemService, LogsService, TagsService
 ];
 
 @Module({

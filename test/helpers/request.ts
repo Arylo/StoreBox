@@ -238,10 +238,21 @@ export class AdminRequest extends LoginedRequest {
     public async addCollection(goods: ObjectId[], name = newName()) {
         const { status, body } = await this.post("/api/v1/collections")
             .send({ name, goods }).then();
+        status.should.be.eql(201);
         if (status === 201) {
             this.ids.collections.push(body._id);
         }
         await sleep(200);
+        return this;
+    }
+
+    public async addTagGroup(name = newName(), tags: string[] = [ ]) {
+        const { status, body } = await this.post("/api/v1/tags")
+            .send({ name, tags }).then();
+        status.should.be.eql(201);
+        if (status === 201) {
+            this.ids.tags.push(body._id);
+        }
         return this;
     }
 

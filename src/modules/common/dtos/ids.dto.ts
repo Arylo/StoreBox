@@ -97,3 +97,10 @@ export class UidDto implements IUidDto {
     @IsMongoId()
     public readonly uid: ObjectId;
 }
+
+export interface ITidDto {
+    /**
+     * Tag Group ID
+     */
+    readonly tid: ObjectId;
+}
