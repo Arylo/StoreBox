@@ -3,6 +3,7 @@ import { init } from "../../helpers/server";
 import { newName, newIds } from "../../helpers/utils";
 import { AdminRequest, GuestRequest } from "../../helpers/request";
 import { addQuery } from "../../helpers/files";
+import files = require("../../helpers/files");
 
 describe("Good List By Tags E2E Api", () => {
 
@@ -18,8 +19,13 @@ describe("Good List By Tags E2E Api", () => {
         return drop(ids);
     });
 
+    const filepaths = [ ];
+    after(() => {
+        return files.remove(filepaths);
+    });
+
     before("Account Login", async () => {
-        request = await new GuestRequest(await init(), ids).login();
+        request = await new GuestRequest(await init(), ids, filepaths).login();
     });
 
     const cateStartPoint = 1;
