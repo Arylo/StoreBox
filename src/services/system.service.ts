@@ -5,6 +5,7 @@ import { Model as UsergroupsModel } from "@models/Usergroup";
 import { BaseService, IGetOptions } from "@services/base";
 import { isURL } from "validator";
 import * as typescript from "typescript";
+import readPkg = require("read-pkg");
 
 import { systemLogger } from "@utils/log";
 
@@ -172,7 +173,7 @@ export class SystemService extends BaseService<ISystem> {
         return {
             version: {
                 typescript: typescript.version,
-                api: require("../../package.json").version,
+                api: readPkg.sync().version,
                 node: process.versions
             },
             env: {

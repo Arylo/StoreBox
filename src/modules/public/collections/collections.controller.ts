@@ -6,7 +6,7 @@ import { CollectionsService } from "@services/collections";
 import { UtilService } from "@services/util";
 import { RolesGuard } from "@guards/roles";
 import { Roles } from "@decorators/roles";
-import { GetCollectionNameDto } from "./collections.dto";
+import { GetCollectionNameDto } from "@dtos/collections";
 import { PerPageDto } from "@dtos/page";
 import { ParseIntPipe } from "@pipes/parse-int";
 import { LogsService } from "@services/logs";

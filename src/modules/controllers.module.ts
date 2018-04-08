@@ -2,20 +2,28 @@ import { Module, MiddlewaresConsumer, RequestMethod } from "@nestjs/common";
 import { DatabaseModule } from "./database/database.module";
 
 // region Controllers
-import { UsersAdminController } from "./users/users.controller";
-import { AuthAdminController } from "./users/auth.controller";
-import { RegexpsAdminController } from "./regexps/regexps.controller";
-import { CategoriesAdminController } from "./categroies/categroies.controller";
-import { GoodsAdminController } from "./goods/goods.controller";
-import { FilesController } from "./files/files.controller";
-import { GoodsController } from "./files/goods.controller";
-import { CollectionsController } from "./collections/collections.controller";
+import { UsersAdminController } from "./admin/users/users.controller";
+import { AuthAdminController } from "./admin/users/auth.controller";
+import { RegexpsAdminController } from "./admin/regexps/regexps.controller";
+import {
+    CategoriesAdminController
+} from "./admin/categroies/categroies.controller";
+import { GoodsAdminController } from "./admin/goods/goods.controller";
+import { FilesController } from "./public/files/files.controller";
+import { GoodsController } from "./public/goods/goods.controller";
+import {
+    CollectionsController
+} from "./public/collections/collections.controller";
 import {
     CollectionsAdminController
-} from "./collections/collections.admin.controller";
-import { TokensAdminController } from "./tokens/tokens.controller";
-import { UsergroupsAdminController } from "./usergroups/usergroups.controller";
-import { SystemController } from "./system/system.controller";
+} from "./admin/collections/collections.controller";
+import {
+    TokensAdminController
+} from "./admin/tokens/tokens.controller";
+import {
+    UsergroupsAdminController
+} from "./admin/usergroups/usergroups.controller";
+import { SystemController } from "./admin/system/system.controller";
 // endregion Controllers
 
 // region Middlewares

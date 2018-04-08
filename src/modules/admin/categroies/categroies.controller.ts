@@ -10,6 +10,7 @@ import { Roles } from "@decorators/roles";
 import { RolesGuard } from "@guards/roles";
 import { ParseIntPipe } from "@pipes/parse-int";
 import { PerPageDto, ListResponse } from "@dtos/page";
+import { CreateValueDto, EditValueDto } from "@dtos/values";
 import { CidDto } from "@dtos/ids";
 import { DefResDto } from "@dtos/res";
 import { CategoriesService } from "@services/categories";
@@ -20,7 +21,6 @@ import md5 = require("md5");
 import {
     NewCategoryDto, EditCategoryDto, CategoryAttributeParamDto
 } from "./categroies.dto";
-import { CreateValueDto, EditValueDto } from "../values/values.dto";
 import { ToArrayPipe } from "@pipes/to-array";
 
 @UseGuards(RolesGuard)

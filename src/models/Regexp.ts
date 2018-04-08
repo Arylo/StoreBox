@@ -7,7 +7,7 @@ import { DEF_PER_COUNT } from "@dtos/page";
 import isRegExp = require("@utils/isRegExp");
 import newCache  = require("@utils/newCache");
 
-import { INewRegexp } from "../modules/regexps/regexps.dto";
+import { INewRegexp } from "../modules/admin/regexps/regexps.dto";
 
 export const FLAG = "regexps";
 
