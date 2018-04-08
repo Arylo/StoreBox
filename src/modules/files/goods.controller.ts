@@ -39,20 +39,22 @@ export class GoodsController {
     ) {
         const categoryModels =
             await this.categoriesSvr.getObjectsByTags(query.tags);
-        const categories = reduce(categoryModels, (obj, cate) => {
-            obj[cate._id.toString()] = cate;
-            return obj;
-        }, { });
-        if (Object.keys(categories).length === 0) {
+        // If No hit category
+        if (categoryModels.length === 0) {
             return UtilService.toListRespone([ ]);
         }
 
-        const cids = Object.keys(categories);
+        const categoryMap = reduce(categoryModels, (obj, cate) => {
+            obj[cate._id.toString()] = cate;
+            return obj;
+        }, { });
+
+        const cids = Object.keys(categoryMap);
         const goods =
             (await this.goodsSvr.getByCids(cids, query))
             .map((doc) => {
                 const good = doc.toObject() as IGoodsRaw;
-                const category = categories[good.category.toString()];
+                const category = categoryMap[good.category.toString()];
                 // delete good.category;
                 good.uploader = good.uploader.nickname as any;
                 good.tags =

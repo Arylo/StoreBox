@@ -33,13 +33,13 @@ export class GoodsService extends BaseService<IGoods> {
         return this.find(cond, opts);
     }
 
-    public listByCategoryId(cid: ObjectId, pageObj = this.DEF_PER_OBJ) {
+    public listByCategoryId(cid: ObjectId, opts = this.DEF_PER_OBJ) {
         return this.loadAndCache(
             `list_category_${cid.toString()}`,
             () => this.findObjects({ category: cid }, Object.assign({
                 populate: [ "uploader", "attributes" ],
                 select: "-category"
-            }, pageObj)),
+            }, Object.assign({ }, this.DEF_PER_OBJ, opts))),
             1000
         );
     }
@@ -77,7 +77,7 @@ export class GoodsService extends BaseService<IGoods> {
         return this.find(conditions, Object.assign({
             populate: "uploader attributes",
             sort: { updatedAt: -1 }
-        }, opts));
+        }, Object.assign({ }, this.DEF_PER_OBJ, opts)));
     }
 
     private getConditionsByUids(uids: ObjectId[]) {
@@ -113,7 +113,7 @@ export class GoodsService extends BaseService<IGoods> {
             select: "-uploader",
             populate: "attributes",
             sort: { updatedAt: -1 }
-        }, opts));
+        }, Object.assign({ }, this.DEF_PER_OBJ, opts)));
     }
 
     /**

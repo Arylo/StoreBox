@@ -121,10 +121,7 @@ export class CategoriesAdminController {
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        const arr = (await this.goodsSvr.listByCategoryId(param.cid))
-            .map((doc) => {
-                return doc.toObject();
-            });
+        const arr = await this.goodsSvr.listByCategoryId(param.cid);
         obj.goods = UtilService.toListRespone(arr, query);
         return obj;
     }

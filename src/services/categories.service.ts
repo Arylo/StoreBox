@@ -81,6 +81,7 @@ export class CategoriesService extends BaseService<ICategory> {
         });
     }
 
+    /* istanbul ignore next */
     public getParentIds(id: ObjectId) {
         return this.loadAndCache(`ParentIds_${id.toString()}`, async () => {
             const category = await this.findObjectById(id);
