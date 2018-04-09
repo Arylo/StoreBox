@@ -10,6 +10,7 @@ import { Roles } from "@decorators/roles";
 import { RolesGuard } from "@guards/roles";
 import { ParseIntPipe } from "@pipes/parse-int";
 import { PerPageDto, ListResponse } from "@dtos/page";
+import { CreateValueDto, EditValueDto } from "@dtos/values";
 import { CidDto } from "@dtos/ids";
 import { DefResDto } from "@dtos/res";
 import { CategoriesService } from "@services/categories";
@@ -20,7 +21,7 @@ import md5 = require("md5");
 import {
     NewCategoryDto, EditCategoryDto, CategoryAttributeParamDto
 } from "./categroies.dto";
-import { CreateValueDto, EditValueDto } from "../values/values.dto";
+import { ToArrayPipe } from "@pipes/to-array";
 
 @UseGuards(RolesGuard)
 @Controller("api/v1/categories")
@@ -120,10 +121,7 @@ export class CategoriesAdminController {
         } catch (error) {
             throw new BadRequestException(error.toString());
         }
-        const arr = (await this.goodsSvr.listByCategoryId(param.cid))
-            .map((doc) => {
-                return doc.toObject();
-            });
+        const arr = await this.goodsSvr.listByCategoryId(param.cid);
         obj.goods = UtilService.toListRespone(arr, query);
         return obj;
     }
@@ -227,7 +225,8 @@ export class CategoriesAdminController {
     @ApiOperation({ title: "Edit Category" })
     // endregion Swagger Docs
     public async edit(
-        @Param() param: CidDto, @Body() ctx: EditCategoryDto
+        @Param() param: CidDto,
+        @Body(new ToArrayPipe("tags")) ctx: EditCategoryDto
     ) {
         const curCategory =
             await this.categoriesSvr.getById(param.cid, {
@@ -247,7 +246,10 @@ export class CategoriesAdminController {
 
     @Roles("admin")
     @Post("/:cid")
-    public editByPost(@Param() param: CidDto, @Body() ctx: EditCategoryDto) {
+    public editByPost(
+        @Param() param: CidDto,
+        @Body(new ToArrayPipe("tags")) ctx: EditCategoryDto
+    ) {
         return this.edit(param, ctx);
     }
 

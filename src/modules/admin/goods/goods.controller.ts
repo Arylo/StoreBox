@@ -18,6 +18,7 @@ import { GidDto } from "@dtos/ids";
 import { IReqUser } from "@dtos/req";
 import { PerPageDto, ListResponse } from "@dtos/page";
 import { DefResDto } from "@dtos/res";
+import { CreateValueDto, EditValueDto } from "@dtos/values";
 import { ParseIntPipe } from "@pipes/parse-int";
 import { ToArrayPipe } from "@pipes/to-array";
 import { TokensService } from "@services/tokens";
@@ -31,8 +32,9 @@ import fs = require("fs-extra");
 import multer  = require("multer");
 import { isArray } from "util";
 
-import { CreateValueDto, EditValueDto } from "../values/values.dto";
-import { GoodAttributeParamDto, UploadQueryDto, EditBodyDto } from "./goods.dto";
+import {
+    GoodAttributeParamDto, UploadQueryDto, EditBodyDto
+} from "./goods.dto";
 import { RegexpCountCheckInterceptor } from "@interceptors/regexp-count-check";
 import { LogsService } from "@services/logs";
 

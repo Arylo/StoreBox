@@ -5,7 +5,7 @@ import {
 } from "@models/Collection";
 import { ObjectId } from "@models/common";
 import { DEF_PER_COUNT } from "@dtos/page";
-import { IEditCollection } from "../modules/collections/collections.dto";
+import { IEditCollection } from "@dtos/collections";
 import { BaseService, IGetOptions } from "@services/base";
 
 @Component()

@@ -18,7 +18,7 @@ import { CCidDto } from "@dtos/ids";
 import { DefResDto } from "@dtos/res";
 import {
     CreateCollectionDto, EditCollectionDto, ICollection, IEditCollection
-} from "./collections.dto";
+} from "@dtos/collections";
 
 @UseGuards(RolesGuard)
 @Controller("api/v1/collections")

@@ -1,21 +1,16 @@
-import * as supertest from "supertest";
 import db = require("../../helpers/database");
 import path = require("path");
 import files = require("../../helpers/files");
-import auth = require("@db/auth");
 import categories = require("@db/categories");
 import * as regexps from "@db/regexps";
 import * as goods from "@db/goods";
 import { init } from "../../helpers/server";
 import { newName, newIds } from "../../helpers/utils";
+import { GuestRequest, AdminRequest } from "../../helpers/request";
 
 describe("Upload Good with specified categories", () => {
 
-    let request: supertest.SuperTest<supertest.Test>;
-
-    before(async () => {
-        request = await init();
-    });
+    let request: AdminRequest;
 
     before(() => {
         return db.connect();
@@ -32,14 +27,14 @@ describe("Upload Good with specified categories", () => {
         return files.remove(filepaths);
     });
 
-    let cids = [ ];
-    before(async () => {
-        cids = await categories.addCategories();
-        ids.categories.push(...cids);
+    before("login", async () => {
+        request = await new GuestRequest(await init(), ids, filepaths).login();
     });
 
-    before("login", async () => {
-        ids.users.push((await auth.login(request))[0]);
+    let cids = [ ];
+    before(async () => {
+        await request.addCategories();
+        cids = ids.categories;
     });
 
     const targetIndex = 6;
@@ -48,9 +43,8 @@ describe("Upload Good with specified categories", () => {
         const targetId = ids.categories[targetIndex];
 
         for (let i = 0; i < 3; i++) {
-            const filepath = await files.newFile();
-            filepaths.push(filepath);
-            const filename = path.basename(filepath);
+            await request.newFile();
+            const filename = path.basename(filepaths[filepaths.length - 1]);
 
             const regDoc = await regexps.newRegexp({
                 name: newName(),
@@ -66,7 +60,7 @@ describe("Upload Good with specified categories", () => {
         const targetId = ids.categories[targetIndex];
         const filepath = filepaths[0];
 
-        const { status } = await files.uploadFile(request, filepath);
+        const { status } = await request.uploadFile(filepath);
         status.should.be.eql(400);
     });
 
@@ -75,8 +69,8 @@ describe("Upload Good with specified categories", () => {
         const filepath = filepaths[0];
         const filename = path.basename(filepath);
 
-        const { status } = await files.uploadFile(
-            request, filepath, { query: {
+        const { status } = await request.uploadFile(
+            filepath, { query: {
                 "category": encodeURI(await categories.getNameById(targetId))
             }}
         );
@@ -89,8 +83,8 @@ describe("Upload Good with specified categories", () => {
         const filepath = filepaths[1];
         const filename = path.basename(filepath);
 
-        const { status } = await files.uploadFile(
-            request, filepath, { query: {
+        const { status } = await request.uploadFile(
+            filepath, { query: {
                 "category": encodeURI(await categories.getNameById(targetId))
             }}
         );
@@ -103,8 +97,8 @@ describe("Upload Good with specified categories", () => {
         const filepath = filepaths[1];
         const filename = path.basename(filepath);
 
-        const { status } = await files.uploadFile(
-            request, filepath, { query: {
+        const { status } = await request.uploadFile(
+            filepath, { query: {
                 "category": encodeURI(await categories.getNameById(targetId))
             }}
         );
@@ -116,8 +110,8 @@ describe("Upload Good with specified categories", () => {
         const filepath = filepaths[2];
         const filename = path.basename(filepath);
 
-        const { status } = await files.uploadFile(
-            request, filepath, { query: {
+        const { status } = await request.uploadFile(
+            filepath, { query: {
                 "category": await categories.getNameById(targetId)
             }}
         );
@@ -129,8 +123,8 @@ describe("Upload Good with specified categories", () => {
         const filepath = filepaths[2];
         const filename = path.basename(filepath);
 
-        const { status } = await files.uploadFile(
-            request, filepath, { query: {
+        const { status } = await request.uploadFile(
+            filepath, { query: {
                 "category": await categories.getNameById(targetId)
             }}
         );

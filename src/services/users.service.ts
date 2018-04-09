@@ -6,6 +6,7 @@ import { IUsergroups } from "@models/Usergroup";
 import { SystemService } from "@services/system";
 import { BaseService, IGetOptions } from "@services/base";
 import { config } from "@utils/config";
+import sleep = require("@utils/sleep");
 
 @Component()
 export class UsersService extends BaseService<IUser> {
@@ -62,6 +63,7 @@ export class UsersService extends BaseService<IUser> {
     public async isVaild(username: string, password: string) {
         await this.runBeforeAll();
         await this.runBeforeEach();
+        await sleep(200);
         try {
             return await UsersModel.isVaild(username, password);
         } catch (err) {

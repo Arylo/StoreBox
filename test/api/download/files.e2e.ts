@@ -1,11 +1,11 @@
 import path = require("path");
 import { HttpStatus } from "@nestjs/common";
 
-import { connect, drop } from "../helpers/database";
-import * as files from "../helpers/files";
-import { sleep, newIds } from "../helpers/utils";
-import { init } from "../helpers/server";
-import { AdminRequest, GuestRequest } from "../helpers/request";
+import { connect, drop } from "../../helpers/database";
+import * as files from "../../helpers/files";
+import { sleep, newIds } from "../../helpers/utils";
+import { init } from "../../helpers/server";
+import { AdminRequest, GuestRequest } from "../../helpers/request";
 
 describe("Files E2E Api", () => {
 
@@ -38,7 +38,7 @@ describe("Files E2E Api", () => {
 
     let cid = "";
     let id = "";
-    const uploadFilepath = `${__dirname}/../files/icon_pandorabox_64x64.png`;
+    const uploadFilepath = `${__dirname}/../../files/icon_pandorabox_64x64.png`;
     step("Upload File", async () => {
         const docs = await request.addCategoryWithRegexp(/^icon_.+64x64\.png$/);
         cid = ids.categories[ids.categories.length - 1].toString();

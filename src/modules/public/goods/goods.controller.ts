@@ -9,8 +9,8 @@ import { RolesGuard } from "@guards/roles";
 import { GoodsService } from "@services/goods";
 import { CategoriesService } from "@services/categories";
 import { Roles } from "@decorators/roles";
-import { ParseIntPipe } from "@pipes/parse-int";
 import { ToArrayPipe } from "@pipes/to-array";
+import { ParseIntPipe } from "@pipes/parse-int";
 import { ListResponse, DEF_PER_COUNT } from "@dtos/page";
 import { LogsService } from "@services/logs";
 import { reduce } from "lodash";
@@ -36,23 +36,26 @@ export class GoodsController {
     @ApiResponse({ status: HttpStatus.OK, type: ListResponse })
     // endregion Swagger Docs
     public async getList(
-        @Query(new ParseIntPipe(), new ToArrayPipe("tags")) query: GoodsQueryDto
+        @Query(new ToArrayPipe("tags"), new ParseIntPipe()) query: GoodsQueryDto
     ) {
-        const categoryModels = await this.categoriesSvr.getByTags(query.tags);
-        const categories = reduce(categoryModels, (obj, cate) => {
-            obj[cate._id.toString()] = cate;
-            return obj;
-        }, { });
-        if (Object.keys(categories).length === 0) {
+        const categoryModels =
+            await this.categoriesSvr.getObjectsByTags(query.tags);
+        // If No hit category
+        if (categoryModels.length === 0) {
             return UtilService.toListRespone([ ]);
         }
 
-        const cids = Object.keys(categories);
+        const categoryMap = reduce(categoryModels, (obj, cate) => {
+            obj[cate._id.toString()] = cate;
+            return obj;
+        }, { });
+
+        const cids = Object.keys(categoryMap);
         const goods =
             (await this.goodsSvr.getByCids(cids, query))
             .map((doc) => {
                 const good = doc.toObject() as IGoodsRaw;
-                const category = categories[good.category.toString()];
+                const category = categoryMap[good.category.toString()];
                 // delete good.category;
                 good.uploader = good.uploader.nickname as any;
                 good.tags =

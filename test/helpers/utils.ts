@@ -24,6 +24,7 @@ export const newIds = (): IIds => {
         collections: [ ],
         usergroups: [ ],
         userusergroups: [ ],
-        logs: [ ]
+        logs: [ ],
+        tags: [ ]
     };
 };

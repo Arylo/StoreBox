@@ -2,20 +2,30 @@ import { Module, MiddlewaresConsumer, RequestMethod } from "@nestjs/common";
 import { DatabaseModule } from "./database/database.module";
 
 // region Controllers
-import { UsersAdminController } from "./users/users.controller";
-import { AuthAdminController } from "./users/auth.controller";
-import { RegexpsAdminController } from "./regexps/regexps.controller";
-import { CategoriesAdminController } from "./categroies/categroies.controller";
-import { GoodsAdminController } from "./goods/goods.controller";
-import { FilesController } from "./files/files.controller";
-import { GoodsController } from "./files/goods.controller";
-import { CollectionsController } from "./collections/collections.controller";
+import { UsersAdminController } from "./admin/users/users.controller";
+import { AuthAdminController } from "./admin/users/auth.controller";
+import { RegexpsAdminController } from "./admin/regexps/regexps.controller";
+import {
+    CategoriesAdminController
+} from "./admin/categroies/categroies.controller";
+import { GoodsAdminController } from "./admin/goods/goods.controller";
+import { FilesController } from "./public/files/files.controller";
+import { GoodsController } from "./public/goods/goods.controller";
+import {
+    CollectionsController
+} from "./public/collections/collections.controller";
 import {
     CollectionsAdminController
-} from "./collections/collections.admin.controller";
-import { TokensAdminController } from "./tokens/tokens.controller";
-import { UsergroupsAdminController } from "./usergroups/usergroups.controller";
-import { SystemController } from "./system/system.controller";
+} from "./admin/collections/collections.controller";
+import {
+    TokensAdminController
+} from "./admin/tokens/tokens.controller";
+import {
+    UsergroupsAdminController
+} from "./admin/usergroups/usergroups.controller";
+import { SystemController } from "./admin/system/system.controller";
+import { TagsAdminController } from "./admin/tags/tags.controller";
+import { TagsController } from "./public/tags/tags.controller";
 // endregion Controllers
 
 // region Middlewares
@@ -41,6 +51,7 @@ import { SystemService } from "@services/system";
 import { CategoriesService } from "@services/categories";
 import { GoodsService } from "@services/goods";
 import { LogsService } from "@services/logs";
+import { TagsService } from "@services/tags";
 // endregion Services
 
 export const controllers = [
@@ -51,13 +62,13 @@ export const controllers = [
     CategoriesAdminController, GoodsAdminController,
     TokensAdminController,
     CollectionsController, CollectionsAdminController,
-    SystemController
+    SystemController, TagsController, TagsAdminController
 ];
 
 export const services = [
     RegexpsService, CategoriesService, GoodsService,
     CollectionsService, TokensService, UsersService, UsergroupsService,
-    SystemService, LogsService
+    SystemService, LogsService, TagsService
 ];
 
 @Module({

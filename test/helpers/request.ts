@@ -4,6 +4,7 @@ import auth = require("@db/auth");
 import { IIds, addCategoryAndRegexp } from "./database";
 import { newUser } from "@db/user";
 import { Model as TokensModel } from "@models/Token";
+import { Model as CategoriesModel } from "@models/Categroy";
 import { isNumber } from "util";
 import { newName, sleep } from "./utils";
 import {
@@ -76,7 +77,7 @@ class BaseRequest {
             if (this.newFilepaths.length === 0) {
                 throw new TypeError("No New File");
             }
-            await this.newFile();
+            // await this.newFile();
             const filepath = this.newFilepaths[this.newFilepaths.length - 1];
             const filename = path.basename(filepath);
             regexp = new RegExp(`^${filename}$`);
@@ -101,6 +102,18 @@ class BaseRequest {
         return ref;
     }
 
+    public async addCategory(pid?: ObjectId) {
+        const ctx: any = {
+            name: newName()
+        };
+        if (pid) {
+            ctx.pid = pid;
+        }
+        const result = await CategoriesModel.create(ctx);
+        this.ids.categories.push(result._id);
+        return this;
+    }
+
     /**
      * Add 11 Categories
      * ```
@@ -113,12 +126,11 @@ class BaseRequest {
      *      - 9 - 10
      * ```
      * @param pid Parent Category ID
-     * @returns Categories' ID
      */
     public async addCategories(pid?: ObjectId) {
         const ids = await addCategories(pid);
         this.ids.categories.push(...ids);
-        return ids;
+        return this;
     }
 
 }
@@ -224,12 +236,24 @@ class LoginedRequest extends BaseRequest {
 export class AdminRequest extends LoginedRequest {
 
     public async addCollection(goods: ObjectId[], name = newName()) {
+        goods = goods.map((item) => item.toString());
         const { status, body } = await this.post("/api/v1/collections")
             .send({ name, goods }).then();
         if (status === 201) {
             this.ids.collections.push(body._id);
         }
+        status.should.be.eql(201);
         await sleep(200);
+        return this;
+    }
+
+    public async addTagGroup(name = newName(), tags: string[] = [ ]) {
+        const { status, body } = await this.post("/api/v1/tags")
+            .send({ name, tags }).then();
+        status.should.be.eql(201);
+        if (status === 201) {
+            this.ids.tags.push(body._id);
+        }
         return this;
     }
 

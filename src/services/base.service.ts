@@ -102,7 +102,7 @@ abstract class ModelService<D extends IDocRaw> {
         }
     }
 
-    protected async find(cond: object, opts?: IGetOptions) {
+    public async find(cond: object, opts?: IGetOptions) {
         this.checkModel();
         await this.runBeforeAll();
         await this.runBeforeEach();
@@ -110,13 +110,13 @@ abstract class ModelService<D extends IDocRaw> {
         return this.documentQueryProcess(p, opts).exec();
     }
 
-    protected findObjects(cond: object, opts?: IGetOptions) {
+    public findObjects(cond: object, opts?: IGetOptions) {
         return this.find(cond, opts).then((arr) => {
             return arr.map((item) => item.toObject());
         });
     }
 
-    protected async findOne(cond: object, opts?: IGetOptions) {
+    public async findOne(cond: object, opts?: IGetOptions) {
         this.checkModel();
         await this.runBeforeAll();
         await this.runBeforeEach();
@@ -124,13 +124,13 @@ abstract class ModelService<D extends IDocRaw> {
         return this.documentQueryProcess(p, opts).exec();
     }
 
-    protected findObject(cond: object, opts?: IGetOptions) {
+    public findObject(cond: object, opts?: IGetOptions) {
         return this.findOne(cond, opts).then((item) => {
             return !item ? null : item.toObject();
         });
     }
 
-    protected async findById(id: ObjectId, opts?: IGetOptions) {
+    public async findById(id: ObjectId, opts?: IGetOptions) {
         this.checkModel();
         await this.runBeforeAll();
         await this.runBeforeEach();
@@ -138,13 +138,13 @@ abstract class ModelService<D extends IDocRaw> {
         return this.documentQueryProcess(p, opts).exec();
     }
 
-    protected findObjectById(id: ObjectId, opts?: IGetOptions) {
+    public findObjectById(id: ObjectId, opts?: IGetOptions) {
         return this.findById(id, opts).then((item) => {
             return !item ? null : item.toObject();
         });
     }
 
-    protected async total(cond: object = { }) {
+    public async total(cond: object = { }) {
         this.checkModel();
         await this.runBeforeAll();
         await this.runBeforeEach();
@@ -222,7 +222,7 @@ export abstract class BaseService<D extends IDocRaw = IDocRaw> extends ModelServ
      */
     public calPageCount = UtilService.calPageCount;
 
-    protected total(cond: object = { }) {
+    public total(cond: object = { }) {
         const flag = Object.keys(cond).sort().reduce((f, key) => {
             return `${f}_${key}_${cond[key].toString()}`;
         }, "total");
