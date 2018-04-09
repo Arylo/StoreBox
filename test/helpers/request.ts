@@ -236,12 +236,13 @@ class LoginedRequest extends BaseRequest {
 export class AdminRequest extends LoginedRequest {
 
     public async addCollection(goods: ObjectId[], name = newName()) {
+        goods = goods.map((item) => item.toString());
         const { status, body } = await this.post("/api/v1/collections")
             .send({ name, goods }).then();
-        status.should.be.eql(201);
         if (status === 201) {
             this.ids.collections.push(body._id);
         }
+        status.should.be.eql(201);
         await sleep(200);
         return this;
     }

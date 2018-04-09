@@ -10,7 +10,7 @@ export interface ICollection {
     creator?: ObjectId;
 }
 
-const NAME_REGEXP = /^[\da-z]\w{2,}[\da-z]$/i;
+const NAME_REGEXP = /^[\da-z]\w{2}[\w ]*[\da-z]$/i;
 
 export class GetCollectionNameDto {
     @ApiModelProperty({
