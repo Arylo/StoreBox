@@ -10,6 +10,7 @@ import { GoodsService } from "@services/goods";
 import { CategoriesService } from "@services/categories";
 import { Roles } from "@decorators/roles";
 import { ToArrayPipe } from "@pipes/to-array";
+import { ParseIntPipe } from "@pipes/parse-int";
 import { ListResponse, DEF_PER_COUNT } from "@dtos/page";
 import { LogsService } from "@services/logs";
 import { reduce } from "lodash";
@@ -35,7 +36,7 @@ export class GoodsController {
     @ApiResponse({ status: HttpStatus.OK, type: ListResponse })
     // endregion Swagger Docs
     public async getList(
-        @Query(new ToArrayPipe("tags")) query: GoodsQueryDto
+        @Query(new ToArrayPipe("tags"), new ParseIntPipe()) query: GoodsQueryDto
     ) {
         const categoryModels =
             await this.categoriesSvr.getObjectsByTags(query.tags);

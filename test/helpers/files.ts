@@ -71,6 +71,9 @@ export const newFile = async (filename = newFilename()) => {
         fs.mkdirpSync(folderpath);
     }
     const filepath = `${folderpath}/${filename}`;
+    if (fs.existsSync(filepath)) {
+        return newFile();
+    }
     fs.writeFileSync(filepath, JSON.stringify({
         data: Math.random()
     }), { encoding: "utf-8" });

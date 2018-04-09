@@ -173,7 +173,6 @@ describe("Collections E2E Api", () => {
     });
 
     step("Add New Collection With Name Field", async () => {
-        await sleep(50);
         const goodIds = goods.filter((_, i) => i === 0)
             .reduce((arr, cur) => {
                 arr.push(cur._id);
@@ -190,7 +189,6 @@ describe("Collections E2E Api", () => {
     });
 
     step("Fail to Add New Collection With Same Name Field", async () => {
-        await sleep(50);
         const goodIds = goods.filter((_, i) => i === 0)
             .reduce((arr, cur) => {
                 arr.push(cur._id);
@@ -299,6 +297,18 @@ describe("Collections E2E Api", () => {
             body: result
         } = await request.get("/api/v1/users/collections").then();
         result.total.should.eql(2);
+    });
+
+    step("Display in public url", async () => {
+        const id = ids.collections[ids.collections.length - 1];
+        const { body: result } =
+            await request.get(`/api/v1/collections/${id}`).then();
+        const { status, body } =
+            await request.get(`/collections/${result.name}`).then();
+        status.should.be.eql(200);
+        body.should.have.property("name", result.name);
+        body.should.have.property("creator").which.is.a.String();
+        body.goods.should.have.property("total", result.goods.total);
     });
 
 });
