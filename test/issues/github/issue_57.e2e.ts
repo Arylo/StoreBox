@@ -26,7 +26,7 @@ describe("Fix Issues", () => {
     });
 
     before("login", async () => {
-        request = new GuestRequest(await init(), ids);
+        request = await new GuestRequest(await init(), ids);
     });
 
     describe("Github 57 [Get `/goods` Fail]", () => {

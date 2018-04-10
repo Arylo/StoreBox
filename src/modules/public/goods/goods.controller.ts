@@ -51,21 +51,27 @@ export class GoodsController {
         }, { });
 
         const cids = Object.keys(categoryMap);
-        const goods =
-            (await this.goodsSvr.getByCids(cids, query))
-            .map((doc) => {
-                const good = doc.toObject() as IGoodsRaw;
-                const category = categoryMap[good.category.toString()];
-                // delete good.category;
-                good.uploader = good.uploader.nickname as any;
-                good.tags =
-                    Array.from(new Set(good.tags.concat(category.tags)));
-                good.attributes = Array.from(new Set(
-                    good.attributes.concat(category.attributes)
-                )) as any;
-                good.downloaded = this.logsSvr.goodDownloadCount(good._id);
-                return good;
-            });
+        const goodDocs = await this.goodsSvr.getByCids(cids, query);
+        const goods = [ ];
+        for (const doc of goodDocs) {
+            const good = doc.toObject() as IGoodsRaw;
+            const category = categoryMap[good.category.toString()];
+            // delete good.category;
+            good.uploader = good.uploader.nickname as any;
+            // good.tags =
+            //     Array.from(new Set(good.tags.concat(category.tags)));
+            good.attributes = Array.from(new Set(
+                good.attributes.concat(category.attributes)
+            )) as any;
+            good.downloaded =
+                await this.logsSvr.goodDownloadCount(good._id);
+
+            for (const key of ["active", "hidden", "tags"]) {
+                delete good[key];
+            }
+
+            goods.push(good);
+        }
         return UtilService.toListRespone(goods, Object.assign({
             total: await this.goodsSvr.countByCids(cids)
         }, query));
