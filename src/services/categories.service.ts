@@ -99,8 +99,13 @@ export class CategoriesService extends BaseService<ICategory> {
         return Object.keys(map).sort();
     }
 
-    public async getObjectsByTags(tags: string[], opts = { recursive: true }) {
+    public async getObjectsByTags(
+        tags: string[] = [], opts = { recursive: true }
+    ) {
         let ids: ObjectId[] = [ ];
+        if (tags.length === 0) {
+            return [ ];
+        }
         const tagMap = await this.getTagMap();
         tags.forEach((tag) => {
             if (tagMap[tag]) {
