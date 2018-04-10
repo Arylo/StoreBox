@@ -104,7 +104,7 @@ export class CategoriesService extends BaseService<ICategory> {
     ) {
         let ids: ObjectId[] = [ ];
         if (tags.length === 0) {
-            return ids;
+            return [ ];
         }
         const tagMap = await this.getTagMap();
         tags.forEach((tag) => {
