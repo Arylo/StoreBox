@@ -6,18 +6,12 @@ interface IRegexp {
     name?: string;
     value?: string;
     link?: ObjectId;
+    hidden?: boolean;
 }
 
 export interface INewRegexp extends IRegexp {
     name: string;
     value: string;
-}
-
-export class EditRegexpRawDot implements IRegexp {
-    public name?: string;
-    public value?: string;
-    public link?: ObjectId;
-    public hidden?: boolean;
 }
 
 export class NewRegexp implements INewRegexp {
@@ -31,6 +25,10 @@ export class NewRegexp implements INewRegexp {
     @IsOptional()
     @IsMongoId()
     public readonly link: ObjectId;
+    @ApiModelPropertyOptional({ type: Boolean, default: false })
+    @IsOptional()
+    @IsBoolean()
+    public readonly hidden: boolean;
 }
 
 export class EditRegexpDot implements IRegexp {
