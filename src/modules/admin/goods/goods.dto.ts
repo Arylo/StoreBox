@@ -3,6 +3,7 @@ import { ApiModelProperty, ApiModelPropertyOptional } from "@nestjs/swagger";
 import { IsMongoId, IsString, IsOptional } from "class-validator";
 import { ObjectId } from "@models/common";
 import { IGoods } from "@models/Good";
+import { PerPageDto } from "@dtos/page";
 
 export class GoodAttributeParamDto implements IGidDto, IAidDto {
     @ApiModelProperty({ type: String, description: "Good ID" })
@@ -13,11 +14,11 @@ export class GoodAttributeParamDto implements IGidDto, IAidDto {
     public readonly aid: ObjectId;
 }
 
-export class GoodsDto {
-    @ApiModelProperty({ type: String, description: "Collection Name" })
-    public readonly name: string;
-    @ApiModelProperty({ type: Object, description: "Goods", isArray: true })
-    public readonly goods: IGoods[];
+export class GetGoodsDto extends PerPageDto {
+    @ApiModelPropertyOptional({type: String, description: "Category ID"})
+    @IsMongoId()
+    @IsOptional()
+    public readonly cid: ObjectId;
 }
 
 export class UploadQueryDto {

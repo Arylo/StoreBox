@@ -16,7 +16,7 @@ import { Roles } from "@decorators/roles";
 import { User } from "@decorators/route";
 import { GidDto } from "@dtos/ids";
 import { IReqUser } from "@dtos/req";
-import { PerPageDto, ListResponse } from "@dtos/page";
+import { ListResponse } from "@dtos/page";
 import { DefResDto } from "@dtos/res";
 import { CreateValueDto, EditValueDto } from "@dtos/values";
 import { ParseIntPipe } from "@pipes/parse-int";
@@ -33,7 +33,7 @@ import multer  = require("multer");
 import { isArray } from "util";
 
 import {
-    GoodAttributeParamDto, UploadQueryDto, EditBodyDto
+    GoodAttributeParamDto, UploadQueryDto, EditBodyDto, GetGoodsDto
 } from "./goods.dto";
 import { RegexpCountCheckInterceptor } from "@interceptors/regexp-count-check";
 import { LogsService } from "@services/logs";
@@ -72,13 +72,24 @@ export class GoodsAdminController {
         type: ListResponse
     })
     // endregion Swagger Docs
-    public async getGoods(@Query(new ParseIntPipe()) query: PerPageDto) {
-        const arr = await this.goodsSvr.getByUids(
-            [ ], query
-        );
-        return UtilService.toListRespone(arr, Object.assign({
-            total: await this.goodsSvr.countByUids([ ])
-        }, query));
+    public async getGoods(
+        @Query(new ParseIntPipe()) query: GetGoodsDto
+    ) {
+        let arr: any[], total: number;
+        if (query.cid) {
+            arr = await this.goodsSvr.listByCategoryId(query.cid, query);
+            total = await this.goodsSvr.countByCids(query.cid);
+        } else {
+            arr = await this.goodsSvr.getByUids([ ], query);
+            total = await this.goodsSvr.countByUids([ ]);
+        }
+        for (let i = 0; i < arr.length; i++) {
+            const good = arr[i];
+            good.downloaded =
+                await this.logsSvr.goodDownloadCount(good._id);
+            arr[i] = good;
+        }
+        return UtilService.toListRespone(arr, Object.assign({ total }, query));
     }
 
     private async getCategoriesIds(names: string[]) {

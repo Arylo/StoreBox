@@ -49,7 +49,7 @@ export class GoodsService extends BaseService<IGoods> {
             cids = [ cids ];
         }
         if (cids.length === 0) {
-            return [ ];
+            return Promise.resolve(0);
         }
         const conditions = this.getConditionsByCids(cids);
         return this.total(conditions);

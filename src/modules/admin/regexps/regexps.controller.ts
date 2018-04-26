@@ -6,9 +6,7 @@ import {
     ApiBearerAuth, ApiUseTags, ApiResponse, ApiOperation, ApiImplicitParam
 } from "@nestjs/swagger";
 import { RegexpDoc } from "@models/Regexp";
-import {
-    NewRegexp, EditRegexpDot, EditRegexpRawDot
-} from "./regexps.dto";
+import { NewRegexp, EditRegexpDot } from "./regexps.dto";
 import { Roles } from "@decorators/roles";
 import { RolesGuard } from "@guards/roles";
 import { PerPageDto, ListResponse } from "@dtos/page";
