@@ -1,5 +1,5 @@
 import { model, SchemaDefinition, Model as M, SchemaTypes } from "mongoose";
-import { Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS } from "@models/common";
+import { Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS, existsValidator } from "@models/common";
 import { IValues, Flag as ValueFlag } from "@models/Value";
 import { DEF_PER_COUNT } from "@dtos/page";
 import { isArray } from "util";
@@ -39,6 +39,18 @@ export interface ICategoryRaw extends ICategory {
 }
 
 const CategorySchema = new Base(Definition).createSchema();
+
+// region Validators
+CategorySchema.path("name").validate({
+    isAsync: true,
+    validator: async function nameExistValidator(value, respond) {
+        return respond(await existsValidator.bind(this)(
+            Model, "name", value
+        ));
+    },
+    message: "The name is exist"
+});
+// endregion Validators
 
 const getIdGroups = (obj): string[] => {
     const selfIdArr = [ obj._id.toString() ];
