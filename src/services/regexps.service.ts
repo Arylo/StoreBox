@@ -42,8 +42,12 @@ export class RegexpsService extends BaseService<IRegexp> {
      * 修改规则
      * @param id Regexp ID
      */
-    public async editById(id: ObjectId, obj: object) {
+    public async editById(id: ObjectId, obj: any) {
         try {
+            if (!obj.link || (obj.link as string).length === 0) {
+                obj.$unset = { link: "" };
+                delete obj.link;
+            }
             return await RegexpsModel
                 .update({ _id: id }, obj, this.DEF_UPDATE_OPTIONS)
                 .exec();

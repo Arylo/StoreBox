@@ -2,7 +2,7 @@ import {
     UseGuards, Controller, Get, Param, Session, HttpStatus, HttpCode, Delete,
     BadRequestException, ForbiddenException
 } from "@nestjs/common";
-import { ApiUseTags, ApiResponse, ApiOperation } from "@nestjs/swagger";
+import { ApiUseTags, ApiResponse, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
 import { Roles } from "@decorators/roles";
 import { RolesGuard } from "@guards/roles";
 import { TokensService } from "@services/tokens";
@@ -12,8 +12,11 @@ import { ListResponse } from "@dtos/page";
 import { TokenParamDto } from "./tokens.dto";
 
 @UseGuards(RolesGuard)
-@ApiUseTags("Tokens")
 @Controller("api/v1/tokens")
+// region Swagger Docs
+@ApiUseTags("Tokens")
+@ApiBearerAuth()
+// endregion Swagger Docs
 export class TokensAdminController {
 
     constructor(private readonly tokensSvr: TokensService) { }

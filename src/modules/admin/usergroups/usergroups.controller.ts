@@ -2,7 +2,7 @@ import {
     UseGuards, Controller, Get, Query, HttpStatus, HttpCode, Post, Body, Param,
     Delete
 } from "@nestjs/common";
-import { ApiUseTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
+import { ApiUseTags, ApiOperation, ApiResponse, ApiBearerAuth } from "@nestjs/swagger";
 import { RolesGuard } from "@guards/roles";
 import { UsergroupsService } from "@services/usergroups";
 import { Roles } from "@decorators/roles";
@@ -16,8 +16,11 @@ import {
 } from "./usergroups.dto";
 
 @UseGuards(RolesGuard)
-@ApiUseTags("User Groups")
 @Controller("api/v1/usergroups")
+// region Swagger Docs
+@ApiUseTags("User Groups")
+@ApiBearerAuth()
+// endregion Swagger Docs
 export class UsergroupsAdminController {
 
     constructor(private readonly ugSvr: UsergroupsService) { }
