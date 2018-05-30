@@ -1,7 +1,7 @@
-import { CollectionsService } from "@services/collections";
-import { UsersService } from "@services/users";
-import { SystemService } from "@services/system";
 import { Model as UsersModel } from "@models/User";
+import { CollectionsService } from "@services/collections";
+import { SystemService } from "@services/system";
+import { UsersService } from "@services/users";
 import db = require("../helpers/database");
 import { newName } from "../helpers/utils";
 

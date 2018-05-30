@@ -1,11 +1,11 @@
 import { NestFactory } from "@nestjs/core";
-import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import { ValidationPipe } from "@pipes/validation";
 import { config } from "@utils/config";
+import { isDevelopment } from "@utils/env";
+import { systemLogger } from "@utils/log";
 import { initExpress } from "./express";
 import { ApplicationModule } from "./modules/app.module";
-import { ValidationPipe } from "@pipes/validation";
-import { systemLogger } from "@utils/log";
-import { isDevelopment } from "@utils/env";
 
 const bootstrap = async () => {
     const server = initExpress();

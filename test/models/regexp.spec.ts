@@ -1,8 +1,8 @@
-import * as db from "../helpers/database";
-import * as md5 from "md5";
+import { ICategoryRaw, Model as CategoryModel } from "@models/Categroy";
 import { Model as RegexpsModel, RegexpDoc } from "@models/Regexp";
-import { Model as CategoryModel, ICategoryRaw } from "@models/Categroy";
-import { newName, newIds } from "../helpers/utils";
+import * as md5 from "md5";
+import * as db from "../helpers/database";
+import { newIds, newName } from "../helpers/utils";
 
 describe("RegExp Model", () => {
 

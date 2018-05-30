@@ -1,11 +1,11 @@
-import { model, SchemaDefinition, Model as M, SchemaTypes } from "mongoose";
-import {
-    Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS, existsValidator
-} from "@models/common";
-import { ICategory, FLAG as CF, Model as CM } from "@models/Categroy";
 import { DEF_PER_COUNT } from "@dtos/page";
+import { FLAG as CF, ICategory, Model as CM } from "@models/Categroy";
+import {
+    Base, existsValidator, IDoc, IDocRaw, MODIFY_MOTHODS, ObjectId
+} from "@models/common";
 import isRegExp = require("@utils/isRegExp");
 import newCache  = require("@utils/newCache");
+import { model, Model as M, SchemaDefinition, SchemaTypes } from "mongoose";
 
 import { INewRegexp } from "../modules/admin/regexps/regexps.dto";
 

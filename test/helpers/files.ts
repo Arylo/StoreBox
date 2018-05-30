@@ -1,8 +1,8 @@
-import supertest = require("supertest");
 import { config } from "@utils/config";
-import { isArray } from "util";
 import faker = require("faker");
 import fs = require("fs-extra");
+import supertest = require("supertest");
+import { isArray } from "util";
 import { sleep } from "./utils";
 
 export interface IUploadFileOptions {

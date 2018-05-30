@@ -3,10 +3,10 @@ import supertest = require("supertest");
 import { Model as RegexpsModel } from "@models/Regexp";
 import { RegexpsService } from "@services/regexps";
 import { connect, drop, newUser } from "../helpers/database";
-import { init } from "../helpers/server";
-import { sleep, newIds } from "../helpers/utils";
-import { newName } from "./../helpers/utils";
 import auth = require("../helpers/database/auth");
+import { init } from "../helpers/server";
+import { newIds, sleep } from "../helpers/utils";
+import { newName } from "./../helpers/utils";
 
 describe("Regexp E2E Api", () => {
 

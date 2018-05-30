@@ -1,11 +1,11 @@
 import supertest = require("supertest");
 
+import auth = require("@db/auth");
 import {
-    connect, drop, newUser, addCategoryAndRegexp
+    addCategoryAndRegexp, connect, drop, newUser
 } from "../helpers/database";
 import { init } from "../helpers/server";
-import auth = require("@db/auth");
-import { newName, newIds } from "../helpers/utils";
+import { newIds, newName } from "../helpers/utils";
 
 describe("User's Goods E2E Api", () => {
 

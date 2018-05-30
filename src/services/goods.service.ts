@@ -1,12 +1,12 @@
-import { Component, BadRequestException } from "@nestjs/common";
-import { ObjectId } from "@models/common";
-import { Model as GoodsModels, IGoods, IGoodsRaw } from "@models/Good";
 import { ICategory } from "@models/Categroy";
+import { ObjectId } from "@models/common";
+import { IGoods, IGoodsRaw, Model as GoodsModels } from "@models/Good";
 import { Model as ValuesModel } from "@models/Value";
+import { BadRequestException, Component } from "@nestjs/common";
 import { BaseService, IGetOptions } from "@services/base";
-import { isArray, isObject, isString } from "util";
 import { config } from "@utils/config";
 import fs = require("fs-extra");
+import { isArray, isObject, isString } from "util";
 
 @Component()
 export class GoodsService extends BaseService<IGoods> {

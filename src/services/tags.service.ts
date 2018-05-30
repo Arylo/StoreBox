@@ -1,7 +1,7 @@
-import { BaseService } from "@services/base";
-import { Component, BadRequestException } from "@nestjs/common";
 import { ObjectId } from "@models/common";
-import { Model as TagsModel, ITagRaw, ITag } from "@models/Tag";
+import { ITag, ITagRaw, Model as TagsModel } from "@models/Tag";
+import { BadRequestException, Component } from "@nestjs/common";
+import { BaseService } from "@services/base";
 
 @Component()
 export class TagsService extends BaseService<ITag> {

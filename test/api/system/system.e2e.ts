@@ -1,9 +1,9 @@
+import auth = require("@db/auth");
 import { Model as SystemModel } from "@models/System";
 import { connect, drop } from "../../helpers/database";
-import { init } from "../../helpers/server";
-import auth = require("@db/auth");
-import { newName, newIds } from "../../helpers/utils";
 import { AdminRequest, GuestRequest } from "../../helpers/request";
+import { init } from "../../helpers/server";
+import { newIds, newName } from "../../helpers/utils";
 
 describe("System E2E Api", () => {
 

@@ -1,9 +1,9 @@
-import { BaseService } from "@services/base";
-import { Component, BadRequestException } from "@nestjs/common";
-import { ObjectId } from "@models/common";
-import { Model as TokensModel, cache } from "@models/Token";
-import { IUser } from "@models/User";
 import { IUidDto } from "@dtos/ids";
+import { ObjectId } from "@models/common";
+import { cache, Model as TokensModel } from "@models/Token";
+import { IUser } from "@models/User";
+import { BadRequestException, Component } from "@nestjs/common";
+import { BaseService } from "@services/base";
 
 @Component()
 export class TokensService extends BaseService {

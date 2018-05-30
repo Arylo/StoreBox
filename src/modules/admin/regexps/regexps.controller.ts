@@ -1,20 +1,20 @@
+import { Roles } from "@decorators/roles";
+import { RidDto } from "@dtos/ids";
+import { ListResponse, PerPageDto } from "@dtos/page";
+import { DefResDto } from "@dtos/res";
+import { RolesGuard } from "@guards/roles";
+import { RegexpDoc } from "@models/Regexp";
 import {
-    Controller, Post, Res, Body, Get, HttpStatus, HttpCode, BadRequestException,
-    Param, Delete, UseGuards, Query
+    BadRequestException, Body, Controller, Delete, Get, HttpCode, HttpStatus, Param,
+    Post, Query, Res, UseGuards
 } from "@nestjs/common";
 import {
-    ApiBearerAuth, ApiUseTags, ApiResponse, ApiOperation, ApiImplicitParam
+    ApiBearerAuth, ApiImplicitParam, ApiOperation, ApiResponse, ApiUseTags
 } from "@nestjs/swagger";
-import { RegexpDoc } from "@models/Regexp";
-import { NewRegexp, EditRegexpDot } from "./regexps.dto";
-import { Roles } from "@decorators/roles";
-import { RolesGuard } from "@guards/roles";
-import { PerPageDto, ListResponse } from "@dtos/page";
-import { RidDto } from "@dtos/ids";
 import { ParseIntPipe } from "@pipes/parse-int";
 import { RegexpsService } from "@services/regexps";
 import { UtilService } from "@services/util";
-import { DefResDto } from "@dtos/res";
+import { EditRegexpDot, NewRegexp } from "./regexps.dto";
 
 @UseGuards(RolesGuard)
 @Controller("api/v1/regexps")

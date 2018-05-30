@@ -2,13 +2,13 @@ import fs = require("fs-extra");
 import { basename } from "path";
 
 import {
-    connect, drop, addCategoryAndRegexp
+    addCategoryAndRegexp, connect, drop
 } from "../../helpers/database";
-import { init } from "../../helpers/server";
 import * as files from "../../helpers/files";
+import { init } from "../../helpers/server";
 
-import { newIds } from "../../helpers/utils";
 import { AdminRequest, GuestRequest } from "../../helpers/request";
+import { newIds } from "../../helpers/utils";
 
 /**
  * Fix [Issue 31](https://github.com/BoxSystem/StoreBox-Api/issues/31)

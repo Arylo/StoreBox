@@ -1,8 +1,8 @@
-import { model, SchemaDefinition, Model as M, SchemaTypes } from "mongoose";
+import { existsValidator, ObjectId } from "@models/common";
 import { FLAG as UF, IUser } from "@models/User";
-import { ObjectId, existsValidator } from "@models/common";
-import { Base, IDoc, IDocRaw } from "./common";
 import newCache  = require("@utils/newCache");
+import { model, Model as M, SchemaDefinition, SchemaTypes } from "mongoose";
+import { Base, IDoc, IDocRaw } from "./common";
 
 const Definition: SchemaDefinition = {
     name: { type: String, required: true }

@@ -1,9 +1,9 @@
 import supertest = require("supertest");
 
+import { Model as TokensModel } from "@models/Token";
 import { connect, drop, newUser } from "../helpers/database";
 import { init } from "../helpers/server";
-import { Model as TokensModel } from "@models/Token";
-import { newName, newIds } from "../helpers/utils";
+import { newIds, newName } from "../helpers/utils";
 
 describe("Token E2E Api", () => {
 

@@ -1,11 +1,11 @@
-import { Component, BadRequestException } from "@nestjs/common";
 import { ObjectId } from "@models/common";
-import { Model as SystemModel, cache, ISystem } from "@models/System";
+import { cache, ISystem, Model as SystemModel } from "@models/System";
 import { Model as UsergroupsModel } from "@models/Usergroup";
+import { BadRequestException, Component } from "@nestjs/common";
 import { BaseService, IGetOptions } from "@services/base";
-import { isURL } from "validator";
-import * as typescript from "typescript";
 import readPkg = require("read-pkg");
+import * as typescript from "typescript";
+import { isURL } from "validator";
 
 import { systemLogger } from "@utils/log";
 

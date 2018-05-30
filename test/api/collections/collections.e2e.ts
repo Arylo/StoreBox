@@ -1,19 +1,18 @@
-import supertest = require("supertest");
+import auth = require("@db/auth");
+import goodsDb = require("@db/goods");
+import { Model as GoodsModels } from "@models/Good";
+import { config } from "@utils/config";
 import faker = require("faker");
 import fs = require("fs-extra");
 import { basename } from "path";
-import { config } from "@utils/config";
-import { Model as GoodsModels } from "@models/Good";
-
+import supertest = require("supertest");
 import {
-    connect, drop, newUser, addCategoryAndRegexp
+    addCategoryAndRegexp, connect, drop, newUser
 } from "../../helpers/database";
-import { init } from "../../helpers/server";
 import { uploadFiles } from "../../helpers/files";
-import { sleep, newName, newIds } from "../../helpers/utils";
-import auth = require("@db/auth");
-import goodsDb = require("@db/goods");
 import files = require("../../helpers/files");
+import { init } from "../../helpers/server";
+import { newIds, newName, sleep } from "../../helpers/utils";
 
 describe("Collections E2E Api", () => {
 

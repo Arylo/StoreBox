@@ -1,9 +1,9 @@
-import { model, SchemaDefinition, Model as M, SchemaTypes } from "mongoose";
 import {
-    Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS, existsValidator
+    Base, existsValidator, IDoc, IDocRaw, MODIFY_MOTHODS, ObjectId
 } from "@models/common";
-import { IUser, FLAG as UserFlag } from "@models/User";
+import { FLAG as UserFlag, IUser } from "@models/User";
 import newCache  = require("@utils/newCache");
+import { model, Model as M, SchemaDefinition, SchemaTypes } from "mongoose";
 
 export const FLAG = "tokens";
 

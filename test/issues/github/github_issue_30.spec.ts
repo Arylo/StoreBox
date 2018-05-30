@@ -1,6 +1,6 @@
+import { Model as RegexpsModel } from "@models/Regexp";
 import isRegExp = require("@utils/isRegExp");
 import { connect } from "../../helpers/database";
-import { Model as RegexpsModel } from "@models/Regexp";
 import { newName } from "../../helpers/utils";
 
 /**

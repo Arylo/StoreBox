@@ -1,27 +1,26 @@
+import { Roles } from "@decorators/roles";
+import { CidDto } from "@dtos/ids";
+import { ListResponse, PerPageDto } from "@dtos/page";
+import { DefResDto } from "@dtos/res";
+import { CreateValueDto, EditValueDto } from "@dtos/values";
+import { RolesGuard } from "@guards/roles";
+import { IValues, Model as ValuesModel, ValueDoc } from "@models/Value";
 import {
-    Controller, Post, Res, Body, Get, HttpStatus, HttpCode, Param,
-    BadRequestException, UseGuards, Delete, Query, BadGatewayException, Put
+    BadGatewayException, BadRequestException, Body, Controller, Delete, Get, HttpCode, HttpStatus,
+    Param, Post, Put, Query, Res, UseGuards
 } from "@nestjs/common";
 import {
-    ApiBearerAuth, ApiUseTags, ApiResponse, ApiImplicitParam, ApiOperation
+    ApiBearerAuth, ApiImplicitParam, ApiOperation, ApiResponse, ApiUseTags
 } from "@nestjs/swagger";
-import { Model as ValuesModel, ValueDoc, IValues } from "@models/Value";
-import { Roles } from "@decorators/roles";
-import { RolesGuard } from "@guards/roles";
 import { ParseIntPipe } from "@pipes/parse-int";
-import { PerPageDto, ListResponse } from "@dtos/page";
-import { CreateValueDto, EditValueDto } from "@dtos/values";
-import { CidDto } from "@dtos/ids";
-import { DefResDto } from "@dtos/res";
+import { ToArrayPipe } from "@pipes/to-array";
 import { CategoriesService } from "@services/categories";
 import { GoodsService } from "@services/goods";
 import { UtilService } from "@services/util";
 import md5 = require("md5");
-
 import {
-    NewCategoryDto, EditCategoryDto, CategoryAttributeParamDto
+    CategoryAttributeParamDto, EditCategoryDto, NewCategoryDto
 } from "./categroies.dto";
-import { ToArrayPipe } from "@pipes/to-array";
 
 @UseGuards(RolesGuard)
 @Controller("api/v1/categories")

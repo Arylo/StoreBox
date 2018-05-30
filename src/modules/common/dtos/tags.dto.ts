@@ -1,10 +1,10 @@
 import { ITidDto } from "@dtos/ids";
 import { ObjectId } from "@models/common";
-import {
-    IsMongoId, IsOptional, IsString, IsBoolean, IsArray
-} from "class-validator";
-import { ApiModelProperty, ApiModelPropertyOptional } from "@nestjs/swagger";
 import { ITagRaw } from "@models/Tag";
+import { ApiModelProperty, ApiModelPropertyOptional } from "@nestjs/swagger";
+import {
+    IsArray, IsBoolean, IsMongoId, IsOptional, IsString
+} from "class-validator";
 
 export class TidDto implements ITidDto {
     @ApiModelProperty({ type: String, description: "Tag Group ID" })

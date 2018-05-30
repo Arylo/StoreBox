@@ -1,6 +1,6 @@
-import { IsString, IsNumberString, IsOptional } from "class-validator";
-import { ApiModelPropertyOptional, ApiModelProperty } from "@nestjs/swagger";
 import { PerPageDto } from "@dtos/page";
+import { ApiModelProperty, ApiModelPropertyOptional } from "@nestjs/swagger";
+import { IsNumberString, IsOptional, IsString } from "class-validator";
 
 export class GoodsQueryDto extends PerPageDto {
     @ApiModelPropertyOptional({ type: String, isArray: true })

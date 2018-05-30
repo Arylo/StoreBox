@@ -1,8 +1,8 @@
-interface server {
+interface IServer {
     port: number;
 }
 
-interface db {
+interface IDb {
     type: string;
     host: string;
     database: string;
@@ -11,7 +11,7 @@ interface db {
     pass?: string;
 }
 
-interface paths {
+interface IPaths {
     tmp: string;
     upload: string;
     log: string;
@@ -19,7 +19,7 @@ interface paths {
     backup: string;
 }
 
-interface redis {
+interface IRedis {
     url: string;
 }
 
@@ -37,10 +37,10 @@ interface IDefaultUsergroup {
     name: string;
 }
 
-export interface ConfigObj {
-    redis: redis;
-    server: server;
-    db: db;
-    paths: paths;
+export interface IConfigObj {
+    redis: IRedis;
+    server: IServer;
+    db: IDb;
+    paths: IPaths;
     defaults: IDefaults;
 }

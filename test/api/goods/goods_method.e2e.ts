@@ -1,12 +1,12 @@
 import faker = require("faker");
 
 import {
-    connect, drop, addCategoryAndRegexp
+    addCategoryAndRegexp, connect, drop
 } from "../../helpers/database";
+import * as files from "../../helpers/files";
+import { AdminRequest, GuestRequest } from "../../helpers/request";
 import { init } from "../../helpers/server";
 import { newIds, newName } from "../../helpers/utils";
-import { GuestRequest, AdminRequest } from "../../helpers/request";
-import * as files from "../../helpers/files";
 
 describe("Check `/goods` methods", () => {
 

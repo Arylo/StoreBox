@@ -1,9 +1,9 @@
-import { UsersService } from "@services/users";
-import { SystemService } from "@services/system";
 import { Model as UsersModel } from "@models/User";
+import { SystemService } from "@services/system";
+import { UsersService } from "@services/users";
 import db = require("../helpers/database");
 import { newUser } from "../helpers/database";
-import { newName, newIds } from "../helpers/utils";
+import { newIds, newName } from "../helpers/utils";
 
 describe("Users Service Test Unit", () => {
 

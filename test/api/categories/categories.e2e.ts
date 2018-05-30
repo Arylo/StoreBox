@@ -1,9 +1,8 @@
-import { newIds } from "../../helpers/utils";
 import supertest = require("supertest");
-
 import { connect, drop, newUser } from "../../helpers/database";
-import { init } from "../../helpers/server";
 import { login } from "../../helpers/database/auth";
+import { init } from "../../helpers/server";
+import { newIds } from "../../helpers/utils";
 import { newName } from "../../helpers/utils";
 
 describe("Categories E2E Api", () => {

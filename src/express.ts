@@ -1,13 +1,12 @@
+import { config } from "@utils/config";
+import { isTest } from "@utils/env";
+import * as bodyParser from "body-parser";
+import connectRedis = require("connect-redis");
+import * as cookieParser from "cookie-parser";
 import * as express from "express";
 import session = require("express-session");
-import * as bodyParser from "body-parser";
-import * as cookieParser from "cookie-parser";
-import connectRedis = require("connect-redis");
-import { config } from "@utils/config";
 import helmet = require("helmet");
-
 import { error } from "./middlewares/logger.middleware";
-import { isTest } from "@utils/env";
 
 const RedisStore = connectRedis(session);
 

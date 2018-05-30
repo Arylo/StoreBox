@@ -1,16 +1,16 @@
+import { Roles } from "@decorators/roles";
+import { ListResponse, PerPageDto } from "@dtos/page";
 import { RolesGuard } from "@guards/roles";
 import {
-    Controller, Get, UseGuards, Query, HttpStatus, HttpCode
+    Controller, Get, HttpCode, HttpStatus, Query, UseGuards
 } from "@nestjs/common";
 import {
-    ApiUseTags, ApiBearerAuth, ApiOperation, ApiResponse
+    ApiBearerAuth, ApiOperation, ApiResponse, ApiUseTags
 } from "@nestjs/swagger";
-import { Roles } from "@decorators/roles";
-import { UtilService } from "@services/util";
-import { TagsService } from "@services/tags";
 import { ParseIntPipe } from "@pipes/parse-int";
-import { PerPageDto, ListResponse } from "@dtos/page";
 import { ToArrayPipe } from "@pipes/to-array";
+import { TagsService } from "@services/tags";
+import { UtilService } from "@services/util";
 
 @UseGuards(RolesGuard)
 @Controller("tags")

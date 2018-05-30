@@ -1,11 +1,11 @@
-import { model, SchemaDefinition, Model as M, SchemaTypes } from "mongoose";
+import { FLAG as CategoryFlag, ICategory } from "@models/Categroy";
 import {
-    Base, IDoc, IDocRaw, ObjectId, MODIFY_MOTHODS, existsValidator
+    Base, existsValidator, IDoc, IDocRaw, MODIFY_MOTHODS, ObjectId
 } from "@models/common";
-import { IValues, Flag as ValueFlag } from "@models/Value";
-import { IUser, FLAG as UserFlag } from "@models/User";
-import { ICategory, FLAG as CategoryFlag } from "@models/Categroy";
+import { FLAG as UserFlag, IUser } from "@models/User";
+import { Flag as ValueFlag, IValues } from "@models/Value";
 import newCache  = require("@utils/newCache");
+import { model, Model as M, SchemaDefinition, SchemaTypes } from "mongoose";
 
 export const FLAG = "goods";
 

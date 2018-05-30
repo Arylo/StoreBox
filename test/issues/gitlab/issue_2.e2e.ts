@@ -1,9 +1,9 @@
-import * as supertest from "supertest";
-import categories = require("@db/categories");
 import auth = require("@db/auth");
+import categories = require("@db/categories");
+import * as supertest from "supertest";
 import * as db from "../../helpers/database";
 import * as server from "../../helpers/server";
-import { newName, newIds } from "../../helpers/utils";
+import { newIds, newName } from "../../helpers/utils";
 
 /**
  * Fix [Issue 2](http://git.pbr.link/Arylo/StoreBox/issues/2)

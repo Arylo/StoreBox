@@ -1,9 +1,9 @@
-import { DefResDto } from "@dtos/res";
-import { Controller, Get, UseGuards, Put, Body } from "@nestjs/common";
-import { SystemService } from "@services/system";
-import { RolesGuard } from "@guards/roles";
-import { ApiUseTags, ApiBearerAuth } from "@nestjs/swagger";
 import { Roles } from "@decorators/roles";
+import { DefResDto } from "@dtos/res";
+import { RolesGuard } from "@guards/roles";
+import { Body, Controller, Get, Put, UseGuards } from "@nestjs/common";
+import { ApiBearerAuth, ApiUseTags } from "@nestjs/swagger";
+import { SystemService } from "@services/system";
 import { EditSystemVarDto } from "./system.dto";
 
 @UseGuards(RolesGuard)

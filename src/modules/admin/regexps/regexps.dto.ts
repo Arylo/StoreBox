@@ -1,6 +1,6 @@
-import { IsString, IsMongoId, IsOptional, IsBoolean } from "class-validator";
 import { ObjectId } from "@models/common";
 import { ApiModelProperty, ApiModelPropertyOptional } from "@nestjs/swagger";
+import { IsBoolean, IsMongoId, IsOptional, IsString } from "class-validator";
 
 interface IRegexp {
     name?: string;
