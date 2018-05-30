@@ -1,5 +1,5 @@
-import { IsOptional, IsNumberString, Matches } from "class-validator";
-import { ApiModelPropertyOptional, ApiModelProperty } from "@nestjs/swagger";
+import { ApiModelProperty, ApiModelPropertyOptional } from "@nestjs/swagger";
+import { IsNumberString, IsOptional, Matches } from "class-validator";
 
 export const DEF_PER_COUNT = 25;
 

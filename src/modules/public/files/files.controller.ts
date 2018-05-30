@@ -1,19 +1,19 @@
-import {
-    Controller, Get, Param, Req, Res, BadRequestException,
-    NotFoundException, UseGuards, Query, HttpStatus, HttpCode
-} from "@nestjs/common";
-import { ApiUseTags, ApiImplicitParam, ApiOperation } from "@nestjs/swagger";
-import { GoodDoc } from "@models/Good";
-import { config } from "@utils/config";
 import { Roles } from "@decorators/roles";
 import { RolesGuard } from "@guards/roles";
+import { GoodDoc } from "@models/Good";
+import {
+    BadRequestException, Controller, Get, HttpCode, HttpStatus, NotFoundException,
+    Param, Query, Req, Res, UseGuards
+} from "@nestjs/common";
+import { ApiImplicitParam, ApiOperation, ApiUseTags } from "@nestjs/swagger";
 import { ParseIntPipe } from "@pipes/parse-int";
 import { GoodsService } from "@services/goods";
 import { LogsService } from "@services/logs";
+import { config } from "@utils/config";
 
 import { Response } from "express";
-import pathExists = require("path-exists");
 import fs = require("fs-extra");
+import pathExists = require("path-exists");
 import { DownlaodDto } from "./files.dto";
 
 (async () => {

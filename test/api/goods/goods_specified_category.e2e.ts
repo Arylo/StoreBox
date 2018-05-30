@@ -1,12 +1,12 @@
-import db = require("../../helpers/database");
-import path = require("path");
-import files = require("../../helpers/files");
 import categories = require("@db/categories");
-import * as regexps from "@db/regexps";
 import * as goods from "@db/goods";
+import * as regexps from "@db/regexps";
+import path = require("path");
+import db = require("../../helpers/database");
+import files = require("../../helpers/files");
+import { AdminRequest, GuestRequest } from "../../helpers/request";
 import { init } from "../../helpers/server";
-import { newName, newIds } from "../../helpers/utils";
-import { GuestRequest, AdminRequest } from "../../helpers/request";
+import { newIds, newName } from "../../helpers/utils";
 
 describe("Upload Good with specified categories", () => {
 

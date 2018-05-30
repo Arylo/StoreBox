@@ -1,19 +1,19 @@
+import auth = require("@db/auth");
+import { addCategories } from "@db/categories";
+import { newUser } from "@db/user";
+import { Model as CategoriesModel } from "@models/Categroy";
+import { ObjectId } from "@models/common";
+import { Model as LogsModel } from "@models/Log";
+import { Model as TokensModel } from "@models/Token";
+import { LogsService } from "@services/logs";
 import path = require("path");
 import supertest = require("supertest");
-import auth = require("@db/auth");
-import { IIds, addCategoryAndRegexp } from "./database";
-import { newUser } from "@db/user";
-import { Model as TokensModel } from "@models/Token";
-import { Model as CategoriesModel } from "@models/Categroy";
 import { isNumber } from "util";
-import { newName, sleep } from "./utils";
+import { addCategoryAndRegexp, IIds } from "./database";
 import {
-    IUploadFileOptions, addQuery, IUploadFilesOptions, newFile
+    addQuery, IUploadFileOptions, IUploadFilesOptions, newFile
 } from "./files";
-import { ObjectId } from "@models/common";
-import { LogsService } from "@services/logs";
-import { Model as LogsModel } from "@models/Log";
-import { addCategories } from "@db/categories";
+import { newName, sleep } from "./utils";
 
 type ST = supertest.SuperTest<supertest.Test>;
 

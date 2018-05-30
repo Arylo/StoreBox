@@ -1,7 +1,7 @@
-import { Model as UsersModel } from "@models/User";
 import { ObjectId } from "@models/common";
-import { UsersService } from "@services/users";
+import { Model as UsersModel } from "@models/User";
 import { SystemService } from "@services/system";
+import { UsersService } from "@services/users";
 import { newName } from "../utils";
 
 let usersSvr: UsersService;

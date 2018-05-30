@@ -15,7 +15,8 @@
     "test-spec": "cross-env NODE_ENV=test TS_NODE_PROJECT=./test/tsconfig.json mocha",
     "test-cov": "nyc npm run test-spec && nyc report",
     "test": "npm run test-cov",
-    "report-coverage": "cat ./coverage/lcov.info | coveralls"
+    "report-coverage": "cat ./coverage/lcov.info | coveralls",
+    "lint": "tslint src/**/*.ts test/**/*.ts"
   },
   "keywords": [
     "PandoraBox",

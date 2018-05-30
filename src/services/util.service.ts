@@ -1,4 +1,4 @@
-import { IPerPage, DEF_PER_COUNT, ListResponse } from "@dtos/page";
+import { DEF_PER_COUNT, IPerPage, ListResponse } from "@dtos/page";
 
 interface IToListResponeOptions extends IPerPage {
     total?: number;

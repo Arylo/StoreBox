@@ -1,13 +1,13 @@
 
+import { Model as CollectionsModel } from "@models/Collection";
+import { Model as LogsModel } from "@models/Log";
 import {
-    connect, drop, addCategoryAndRegexp
+    addCategoryAndRegexp, connect, drop
 } from "../../helpers/database";
+import * as files from "../../helpers/files";
+import { AdminRequest, GuestRequest } from "../../helpers/request";
 import { init } from "../../helpers/server";
 import { newIds } from "../../helpers/utils";
-import { AdminRequest, GuestRequest } from "../../helpers/request";
-import * as files from "../../helpers/files";
-import { Model as LogsModel } from "@models/Log";
-import { Model as CollectionsModel } from "@models/Collection";
 
 describe("Good Downloaded Count Api e2e Test Unit", () => {
 

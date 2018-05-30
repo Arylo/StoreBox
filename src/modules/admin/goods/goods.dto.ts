@@ -1,9 +1,9 @@
-import { IGidDto, IAidDto } from "@dtos/ids";
-import { ApiModelProperty, ApiModelPropertyOptional } from "@nestjs/swagger";
-import { IsMongoId, IsString, IsOptional } from "class-validator";
+import { IAidDto, IGidDto } from "@dtos/ids";
+import { PerPageDto } from "@dtos/page";
 import { ObjectId } from "@models/common";
 import { IGoods } from "@models/Good";
-import { PerPageDto } from "@dtos/page";
+import { ApiModelProperty, ApiModelPropertyOptional } from "@nestjs/swagger";
+import { IsMongoId, IsOptional, IsString } from "class-validator";
 
 export class GoodAttributeParamDto implements IGidDto, IAidDto {
     @ApiModelProperty({ type: String, description: "Good ID" })

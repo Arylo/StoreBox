@@ -1,42 +1,41 @@
-import {
-    Controller, Req, Res, Body, Get, Post, Param, Session,
-    HttpStatus, BadRequestException, UseGuards, Delete, HttpCode, Query, Put,
-    UploadedFile, UploadedFiles, UsePipes, UseInterceptors
-} from "@nestjs/common";
-import {
-    ApiBearerAuth, ApiUseTags, ApiResponse, ApiOperation, ApiImplicitParam,
-    ApiImplicitBody, ApiConsumes
-} from "@nestjs/swagger";
-import { IValues, Model as ValuesModel } from "@models/Value";
-import { IGoods } from "@models/Good";
-import { ObjectId } from "@models/common";
-import { config } from "@utils/config";
-import { RolesGuard } from "@guards/roles";
 import { Roles } from "@decorators/roles";
 import { User } from "@decorators/route";
 import { GidDto } from "@dtos/ids";
-import { IReqUser } from "@dtos/req";
 import { ListResponse } from "@dtos/page";
+import { IReqUser } from "@dtos/req";
 import { DefResDto } from "@dtos/res";
 import { CreateValueDto, EditValueDto } from "@dtos/values";
+import { RolesGuard } from "@guards/roles";
+import { RegexpCountCheckInterceptor } from "@interceptors/regexp-count-check";
+import { ObjectId } from "@models/common";
+import { IGoods } from "@models/Good";
+import { IValues, Model as ValuesModel } from "@models/Value";
+import {
+    BadRequestException, Body, Controller, Delete, Get, HttpCode, HttpStatus, Param,
+    Post, Put, Query, Req, Res, Session, UploadedFile,
+    UploadedFiles, UseGuards, UseInterceptors, UsePipes
+} from "@nestjs/common";
+import {
+    ApiBearerAuth, ApiConsumes, ApiImplicitBody, ApiImplicitParam, ApiOperation,
+    ApiResponse, ApiUseTags
+} from "@nestjs/swagger";
 import { ParseIntPipe } from "@pipes/parse-int";
 import { ToArrayPipe } from "@pipes/to-array";
-import { TokensService } from "@services/tokens";
-import { CollectionsService } from "@services/collections";
-import { IGetRegexpsOptions, RegexpsService } from "@services/regexps";
 import { CategoriesService } from "@services/categories";
+import { CollectionsService } from "@services/collections";
 import { GoodsService } from "@services/goods";
+import { LogsService } from "@services/logs";
+import { IGetRegexpsOptions, RegexpsService } from "@services/regexps";
+import { TokensService } from "@services/tokens";
 import { UtilService } from "@services/util";
-import * as hasha from "hasha";
+import { config } from "@utils/config";
 import fs = require("fs-extra");
+import * as hasha from "hasha";
 import multer  = require("multer");
 import { isArray } from "util";
-
 import {
-    GoodAttributeParamDto, UploadQueryDto, EditBodyDto, GetGoodsDto
+    EditBodyDto, GetGoodsDto, GoodAttributeParamDto, UploadQueryDto
 } from "./goods.dto";
-import { RegexpCountCheckInterceptor } from "@interceptors/regexp-count-check";
-import { LogsService } from "@services/logs";
 
 @UseGuards(RolesGuard)
 @Controller("api/v1/goods")

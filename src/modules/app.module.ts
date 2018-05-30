@@ -1,8 +1,7 @@
-import { Module, MiddlewaresConsumer } from "@nestjs/common";
-// Modules
-import { DatabaseModule } from "./database/database.module";
-import {controllers, ControllersModule} from "./controllers.module";
+import { MiddlewaresConsumer, Module } from "@nestjs/common";
 import { NoCacheMiddleware } from "../middlewares/noCache.middleware";
+import { controllers, ControllersModule } from "./controllers.module";
+import { DatabaseModule } from "./database/database.module";
 
 @Module({
     modules: [ DatabaseModule, ControllersModule ]

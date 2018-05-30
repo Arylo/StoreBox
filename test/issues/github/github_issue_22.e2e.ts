@@ -1,11 +1,11 @@
 import supertest = require("supertest");
 
+import auth = require("@db/auth");
 import {
-    connect, drop, addCategoryAndRegexp
+    addCategoryAndRegexp, connect, drop
 } from "../../helpers/database";
 import { init } from "../../helpers/server";
-import auth = require("@db/auth");
-import { newName, newIds } from "../../helpers/utils";
+import { newIds, newName } from "../../helpers/utils";
 
 /**
  * Fix [Issue 22](https://github.com/BoxSystem/StoreBox-Api/issues/22)

@@ -1,11 +1,11 @@
+import { Model as TokensModel } from "@models/Token";
 import {
-    Middleware, NestMiddleware, ExpressMiddleware, HttpStatus,
+    ExpressMiddleware, HttpStatus, Middleware, NestMiddleware,
     UnauthorizedException
 } from "@nestjs/common";
-import { Request, Response } from "express";
-import basicAuth = require("basic-auth");
-import { Model as TokensModel } from "@models/Token";
 import { TokensService } from "@services/tokens";
+import basicAuth = require("basic-auth");
+import { Request, Response } from "express";
 
 @Middleware()
 export class RolesMiddleware implements NestMiddleware {

@@ -1,7 +1,7 @@
-import * as db from "../helpers/database";
-import * as md5 from "md5";
 import { Model as UsersModel } from "@models/User";
-import { Observer, Observable, Subject } from "rxjs";
+import * as md5 from "md5";
+import { Observable, Observer, Subject } from "rxjs";
+import * as db from "../helpers/database";
 import { newIds, newName } from "../helpers/utils";
 
 describe("User Model", () => {

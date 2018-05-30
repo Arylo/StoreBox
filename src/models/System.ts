@@ -1,6 +1,6 @@
-import { model, SchemaDefinition, Model as M } from "mongoose";
-import { Base, IDoc, IDocRaw, MODIFY_MOTHODS } from "./common";
 import newCache  = require("@utils/newCache");
+import { model, Model as M, SchemaDefinition } from "mongoose";
+import { Base, IDoc, IDocRaw, MODIFY_MOTHODS } from "./common";
 
 export const FLAG = "systems";
 

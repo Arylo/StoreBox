@@ -1,9 +1,9 @@
-import { connect, drop } from "../helpers/database";
-import { init } from "../helpers/server";
-import { UsersService } from "@services/users";
 import { SystemService } from "@services/system";
+import { UsersService } from "@services/users";
+import { connect, drop } from "../helpers/database";
+import { GuestRequest, TokenRequest } from "../helpers/request";
+import { init } from "../helpers/server";
 import { newIds } from "../helpers/utils";
-import { TokenRequest, GuestRequest } from "../helpers/request";
 
 describe("Fix Issues", () => {
 

@@ -1,4 +1,4 @@
-import { Guard, CanActivate, ExecutionContext } from "@nestjs/common";
+import { CanActivate, ExecutionContext, Guard } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 
 @Guard()

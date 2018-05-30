@@ -1,6 +1,6 @@
-import { IsString, IsOptional, IsIn } from "class-validator";
-import { ApiModelProperty, ApiModelPropertyOptional } from "@nestjs/swagger";
 import { ObjectId } from "@models/common";
+import { ApiModelProperty, ApiModelPropertyOptional } from "@nestjs/swagger";
+import { IsIn, IsOptional, IsString } from "class-validator";
 
 export class LoginBodyDto {
     @ApiModelProperty({ type: String })

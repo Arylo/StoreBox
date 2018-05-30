@@ -1,8 +1,8 @@
-import { ConfigObj } from "./config.d";
+import { IConfigObj } from "./config.d";
 
-import configModule = require("y-config");
-import * as ph from "path";
 import * as fs from "fs";
+import * as ph from "path";
+import configModule = require("y-config");
 
 const CONFIG_PATH = `${__dirname}/../../config`;
 
@@ -55,7 +55,7 @@ try {
 }
 // endregion Default Values Check
 
-export const config = configModule.getConfig() as ConfigObj;
+export const config = configModule.getConfig() as IConfigObj;
 
 import { systemLogger } from "./log";
 systemLogger.debug(config);

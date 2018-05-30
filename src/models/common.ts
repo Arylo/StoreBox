@@ -1,5 +1,5 @@
 import * as lodash from "lodash";
-import { Schema, Document as Doc, Model as M } from "mongoose";
+import { Document as Doc, Model as M, Schema } from "mongoose";
 
 export type ObjectId = Schema.Types.ObjectId | string;
 

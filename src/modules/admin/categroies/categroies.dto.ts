@@ -1,9 +1,9 @@
-import {
-    IsMongoId, IsString, IsArray, ArrayUnique, IsOptional, IsJSON
-} from "class-validator";
+import { IAidDto, ICidDto } from "@dtos/ids";
 import { ObjectId } from "@models/common";
 import { ApiModelProperty, ApiModelPropertyOptional } from "@nestjs/swagger";
-import { ICidDto, IAidDto } from "@dtos/ids";
+import {
+    ArrayUnique, IsArray, IsJSON, IsMongoId, IsOptional, IsString
+} from "class-validator";
 
 export class NewCategoryDto {
     @ApiModelProperty({ type: String })

@@ -1,7 +1,7 @@
 import { connect, drop } from "../../helpers/database";
-import { init } from "../../helpers/server";
-import { newName, newIds } from "../../helpers/utils";
 import { AdminRequest, GuestRequest } from "../../helpers/request";
+import { init } from "../../helpers/server";
+import { newIds, newName } from "../../helpers/utils";
 
 describe("Categories Tags E2E Api", () => {
 

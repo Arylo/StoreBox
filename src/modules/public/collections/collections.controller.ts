@@ -1,15 +1,15 @@
-import {
-    UseGuards, Controller, Get, HttpCode, HttpStatus, Param, Query
-} from "@nestjs/common";
-import { ApiUseTags, ApiOperation } from "@nestjs/swagger";
-import { CollectionsService } from "@services/collections";
-import { UtilService } from "@services/util";
-import { RolesGuard } from "@guards/roles";
 import { Roles } from "@decorators/roles";
 import { GetCollectionNameDto } from "@dtos/collections";
 import { PerPageDto } from "@dtos/page";
+import { RolesGuard } from "@guards/roles";
+import {
+    Controller, Get, HttpCode, HttpStatus, Param, Query, UseGuards
+} from "@nestjs/common";
+import { ApiOperation, ApiUseTags } from "@nestjs/swagger";
 import { ParseIntPipe } from "@pipes/parse-int";
+import { CollectionsService } from "@services/collections";
 import { LogsService } from "@services/logs";
+import { UtilService } from "@services/util";
 
 @UseGuards(RolesGuard)
 @Controller("/collections")

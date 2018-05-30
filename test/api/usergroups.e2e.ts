@@ -1,12 +1,12 @@
 import supertest = require("supertest");
 
+import auth = require("@db/auth");
+import { newUsergroup } from "@db/usergroups";
 import {
-    connect, drop, addCategoryAndRegexp
+    addCategoryAndRegexp, connect, drop
 } from "../helpers/database";
 import { init } from "../helpers/server";
-import { newUsergroup } from "@db/usergroups";
-import auth = require("@db/auth");
-import { newName, newIds } from "../helpers/utils";
+import { newIds, newName } from "../helpers/utils";
 
 describe("Usergroup E2E Api", () => {
 

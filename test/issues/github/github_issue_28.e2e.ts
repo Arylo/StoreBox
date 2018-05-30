@@ -1,10 +1,10 @@
 import supertest = require("supertest");
 
+import auth = require("@db/auth");
 import {
     connect, drop, newUser
 } from "../../helpers/database";
 import { init } from "../../helpers/server";
-import auth = require("@db/auth");
 import { newIds } from "../../helpers/utils";
 
 /**

@@ -1,5 +1,5 @@
-import { Pipe, PipeTransform, ArgumentMetadata } from "@nestjs/common";
-import { isObject, isArray } from "util";
+import { ArgumentMetadata, Pipe, PipeTransform } from "@nestjs/common";
+import { isArray, isObject } from "util";
 
 @Pipe()
 export class ToArrayPipe implements PipeTransform<any> {

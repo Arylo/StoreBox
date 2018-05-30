@@ -1,8 +1,8 @@
 import {
-    Middleware, NestMiddleware, ExpressMiddleware, HttpStatus
+    ExpressMiddleware, HttpStatus, Middleware, NestMiddleware
 } from "@nestjs/common";
-import multer  = require("multer");
 import { config } from "@utils/config";
+import multer  = require("multer");
 
 @Middleware()
 export class UploadFileMiddleware implements NestMiddleware {

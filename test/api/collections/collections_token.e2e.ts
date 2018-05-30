@@ -1,12 +1,12 @@
 import faker = require("faker");
 
 import {
-    connect, drop, addCategoryAndRegexp
+    addCategoryAndRegexp, connect, drop
 } from "../../helpers/database";
+import * as files from "../../helpers/files";
+import { GuestRequest, TokenRequest } from "../../helpers/request";
 import { init } from "../../helpers/server";
 import { newIds } from "../../helpers/utils";
-import { TokenRequest, GuestRequest } from "../../helpers/request";
-import * as files from "../../helpers/files";
 
 describe("Token to Upload Files Api", () => {
 

@@ -1,26 +1,26 @@
-import { config } from "@utils/config";
 import { ObjectId } from "@models/common";
+import { config } from "@utils/config";
 
 // region import Models
-import { Model as ValuesModel } from "@models/Value";
-import { Model as GoodsModels } from "@models/Good";
-import { Model as RegexpsModel } from "@models/Regexp";
-import { Model as UsersModel } from "@models/User";
-import { Model as TokensModel } from "@models/Token";
+import { CategoryDoc, Model as CategoriesModel } from "@models/Categroy";
 import { Model as CollectionsModel } from "@models/Collection";
-import { Model as CategoriesModel, CategoryDoc } from "@models/Categroy";
-import { Model as UsergroupsModel } from "@models/Usergroup";
-import { Model as UserUsergroupsModel } from "@models/User-Usergroup";
+import { Model as GoodsModels } from "@models/Good";
 import { Model as LogsModel } from "@models/Log";
+import { Model as RegexpsModel } from "@models/Regexp";
 import { Model as TagsModel } from "@models/Tag";
+import { Model as TokensModel } from "@models/Token";
+import { Model as UsersModel } from "@models/User";
+import { Model as UserUsergroupsModel } from "@models/User-Usergroup";
+import { Model as UsergroupsModel } from "@models/Usergroup";
+import { Model as ValuesModel } from "@models/Value";
 // endregion import Models
 
 import { connectDatabase } from "../../src/modules/database/database.providers";
-import { newUser as newUserFn } from "./database/user";
-import * as regexps from "./database/regexps";
 import * as categories from "./database/categories";
-import { newName, sleep } from "./utils";
+import * as regexps from "./database/regexps";
+import { newUser as newUserFn } from "./database/user";
 import { remove } from "./files";
+import { newName, sleep } from "./utils";
 
 config.db.database = "storebox-test";
 

@@ -1,6 +1,6 @@
 import { ApiModelProperty } from "@nestjs/swagger";
-import { IsString } from "class-validator";
 import { DEFAULTS } from "@services/system";
+import { IsString } from "class-validator";
 
 export class EditSystemVarDto {
     @ApiModelProperty({ type: String })

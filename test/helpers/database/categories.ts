@@ -1,5 +1,5 @@
+import { CategoryDoc, Model as CategoriesModel } from "@models/Categroy";
 import { ObjectId } from "@models/common";
-import { Model as CategoriesModel, CategoryDoc } from "@models/Categroy";
 import { newName, sleep } from "../utils";
 
 export const newCategory = (obj: object) => {

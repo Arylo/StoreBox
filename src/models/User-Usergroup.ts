@@ -1,7 +1,7 @@
-import { model, SchemaDefinition, Model as M, SchemaTypes } from "mongoose";
+import { ObjectId } from "@models/common";
 import { FLAG as UF, IUser } from "@models/User";
 import { FLAG as GF, IUsergroups } from "@models/Usergroup";
-import { ObjectId } from "@models/common";
+import { model, Model as M, SchemaDefinition, SchemaTypes } from "mongoose";
 import { Base, IDoc, IDocRaw } from "./common";
 
 const Definition: SchemaDefinition = {

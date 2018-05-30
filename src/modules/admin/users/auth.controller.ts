@@ -1,15 +1,15 @@
+import { RolesGuard } from "@guards/roles";
 import {
-    Controller, Post, Res, Body, HttpStatus, Session, Get, BadRequestException,
-    GatewayTimeoutException, Query, UseGuards, Req
+    BadRequestException, Body, Controller, GatewayTimeoutException, Get, HttpStatus, Post, Query,
+    Req, Res, Session, UseGuards
 } from "@nestjs/common";
 import {
-    ApiUseTags, ApiBearerAuth, ApiResponse, ApiOperation
+    ApiBearerAuth, ApiOperation, ApiResponse, ApiUseTags
 } from "@nestjs/swagger";
-import uuid = require("uuid");
-import basicAuth = require("basic-auth");
-import { RolesGuard } from "@guards/roles";
 import { TokensService } from "@services/tokens";
 import { UsersService } from "@services/users";
+import basicAuth = require("basic-auth");
+import uuid = require("uuid");
 import { LoginBodyDto, LoginQueryDto, LoginRespone } from "./auth.dto";
 
 @UseGuards(RolesGuard)

@@ -1,7 +1,7 @@
+import { ObjectId } from "@models/common";
+import { cache, Model as LogsModel } from "@models/Log";
 import { Component } from "@nestjs/common";
 import { BaseService } from "@services/base";
-import { Model as LogsModel, cache } from "@models/Log";
-import { ObjectId } from "@models/common";
 import { getMeta } from "@utils/log";
 
 @Component()

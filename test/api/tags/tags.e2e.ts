@@ -1,8 +1,8 @@
 import { connect, drop } from "../../helpers/database";
-import { init } from "../../helpers/server";
-import { newName, newIds } from "../../helpers/utils";
-import { AdminRequest, GuestRequest } from "../../helpers/request";
 import files = require("../../helpers/files");
+import { AdminRequest, GuestRequest } from "../../helpers/request";
+import { init } from "../../helpers/server";
+import { newIds, newName } from "../../helpers/utils";
 
 describe("Tags E2E Api", () => {
 

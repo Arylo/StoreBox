@@ -1,7 +1,7 @@
-import { Interceptor, NestInterceptor, BadRequestException } from "@nestjs/common";
-import { Observable } from "rxjs/Observable";
+import { BadRequestException, Interceptor, NestInterceptor } from "@nestjs/common";
 import { RegexpsService } from "@services/regexps";
 import * as fs from "fs-extra";
+import { Observable } from "rxjs/Observable";
 
 @Interceptor()
 export class RegexpCountCheckInterceptor implements NestInterceptor {

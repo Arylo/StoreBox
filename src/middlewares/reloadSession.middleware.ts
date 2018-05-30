@@ -1,5 +1,5 @@
 import { ExpressMiddleware, Middleware, NestMiddleware } from "@nestjs/common";
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 
 /**
  * 延长Session过期时间

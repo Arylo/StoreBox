@@ -1,5 +1,5 @@
-import { IsMongoId } from "class-validator";
 import { ApiModelProperty } from "@nestjs/swagger";
+import { IsMongoId } from "class-validator";
 
 export class DownlaodDto {
     @ApiModelProperty({ type: String })

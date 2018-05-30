@@ -1,13 +1,13 @@
-import supertest = require("supertest");
 import path = require("path");
+import supertest = require("supertest");
 
-import { connect, drop, addCategoryAndRegexp } from "../../helpers/database";
-import { uploadFile } from "../../helpers/files";
-import { init } from "../../helpers/server";
 import auth = require("@db/auth");
-import { newName, newIds } from "../../helpers/utils";
-import { GuestRequest, AdminRequest } from "../../helpers/request";
+import { addCategoryAndRegexp, connect, drop } from "../../helpers/database";
+import { uploadFile } from "../../helpers/files";
 import * as files from "../../helpers/files";
+import { AdminRequest, GuestRequest } from "../../helpers/request";
+import { init } from "../../helpers/server";
+import { newIds, newName } from "../../helpers/utils";
 
 describe("Goods E2E Api", () => {
 

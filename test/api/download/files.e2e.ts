@@ -1,11 +1,11 @@
-import path = require("path");
 import { HttpStatus } from "@nestjs/common";
+import path = require("path");
 
 import { connect, drop } from "../../helpers/database";
 import * as files from "../../helpers/files";
-import { sleep, newIds } from "../../helpers/utils";
-import { init } from "../../helpers/server";
 import { AdminRequest, GuestRequest } from "../../helpers/request";
+import { init } from "../../helpers/server";
+import { newIds, sleep } from "../../helpers/utils";
 
 describe("Files E2E Api", () => {
 

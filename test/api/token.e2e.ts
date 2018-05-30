@@ -1,9 +1,9 @@
-import supertest = require("supertest");
 import { TokensService } from "@services/tokens";
+import supertest = require("supertest");
 
 import { connect, drop, newUser } from "../helpers/database";
 import { init } from "../helpers/server";
-import { newName, newIds } from "../helpers/utils";
+import { newIds, newName } from "../helpers/utils";
 
 describe("Token E2E Test", () => {
 

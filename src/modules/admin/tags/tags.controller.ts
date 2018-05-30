@@ -1,20 +1,20 @@
+import { Roles } from "@decorators/roles";
+import { CCidDto } from "@dtos/ids";
+import { ListResponse, PerPageDto } from "@dtos/page";
 import { DefResDto } from "@dtos/res";
+import { AddDto, EditDto, TidDto } from "@dtos/tags";
 import { RolesGuard } from "@guards/roles";
 import {
-    Controller, Get, UseGuards, Query, Delete, Param, Post, Put, Body, HttpStatus, HttpCode
+    Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put, Query, UseGuards
 } from "@nestjs/common";
 import {
-    ApiUseTags, ApiBearerAuth, ApiOperation, ApiResponse
+    ApiBearerAuth, ApiOperation, ApiResponse, ApiUseTags
 } from "@nestjs/swagger";
-import { Roles } from "@decorators/roles";
-import { CategoriesService } from "@services/categories";
-import { UtilService } from "@services/util";
-import { TagsService } from "@services/tags";
 import { ParseIntPipe } from "@pipes/parse-int";
-import { PerPageDto, ListResponse } from "@dtos/page";
-import { CCidDto } from "@dtos/ids";
-import { TidDto, AddDto, EditDto } from "@dtos/tags";
 import { ToArrayPipe } from "@pipes/to-array";
+import { CategoriesService } from "@services/categories";
+import { TagsService } from "@services/tags";
+import { UtilService } from "@services/util";
 
 @UseGuards(RolesGuard)
 @Controller("api/v1/tags")

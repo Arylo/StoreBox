@@ -1,10 +1,10 @@
+import auth = require("@db/auth");
 import supertest = require("supertest");
 import {
-    connect, drop, newUser, newRegexp, newCategory
+    connect, drop, newCategory, newRegexp, newUser
 } from "../helpers/database";
 import { init } from "../helpers/server";
-import auth = require("@db/auth");
-import { newName, newIds } from "../helpers/utils";
+import { newIds, newName } from "../helpers/utils";
 
 describe("the E2E Api of display item count Per page", () => {
 

@@ -1,10 +1,10 @@
-import { Component, BadRequestException } from "@nestjs/common";
-import { Model as UsersModel } from "@models/User";
-import {
-    Model as UsergroupsModel, IUsergroups, cache
-} from "@models/Usergroup";
-import { Model as UserUsergroupsModel } from "@models/User-Usergroup";
 import { ObjectId } from "@models/common";
+import { Model as UsersModel } from "@models/User";
+import { Model as UserUsergroupsModel } from "@models/User-Usergroup";
+import {
+    cache, IUsergroups, Model as UsergroupsModel
+} from "@models/Usergroup";
+import { BadRequestException, Component } from "@nestjs/common";
 import { BaseService } from "@services/base";
 
 @Component()

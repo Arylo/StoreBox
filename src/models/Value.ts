@@ -1,4 +1,4 @@
-import { model, SchemaDefinition, Model as M } from "mongoose";
+import { model, Model as M, SchemaDefinition } from "mongoose";
 import { Base, IDoc, IDocRaw } from "./common";
 
 const Definition: SchemaDefinition = {

@@ -1,7 +1,7 @@
-import { ApiModelProperty, ApiModelPropertyOptional } from "@nestjs/swagger";
 import { ObjectId } from "@models/common";
+import { ApiModelProperty, ApiModelPropertyOptional } from "@nestjs/swagger";
 import {
-    IsMongoId, Matches, ArrayUnique, IsOptional, IsArray
+    ArrayUnique, IsArray, IsMongoId, IsOptional, Matches
 } from "class-validator";
 
 export interface ICollection {

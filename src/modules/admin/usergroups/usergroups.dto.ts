@@ -1,7 +1,7 @@
-import { ApiModelProperty } from "@nestjs/swagger";
-import { IsString, IsMongoId } from "class-validator";
-import { ObjectId } from "@models/common";
 import { IGidDto, IUidDto } from "@dtos/ids";
+import { ObjectId } from "@models/common";
+import { ApiModelProperty } from "@nestjs/swagger";
+import { IsMongoId, IsString } from "class-validator";
 
 export class AddUsergroupDto {
     @ApiModelProperty({ type: String, description: "Usergroup Name" })
